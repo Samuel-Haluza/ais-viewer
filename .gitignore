@@ -1,0 +1,14 @@
+target/
+*.class
+*.jar
+!**/src/main/**/*.jar
+dependency-reduced-pom.xml
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+*.log
