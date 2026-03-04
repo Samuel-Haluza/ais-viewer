@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.GridPane?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -138,14 +139,28 @@
             <Tab text="🗓  Rozvrh">
                 <VBox spacing="12" styleClass="tab-content">
                     <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
-                    <Label text="Rozvrh" styleClass="group-title"/>
-                    <Label fx:id="scheduleStatusLabel" text="" styleClass="status-label" visible="false"/>
-                    <TextArea fx:id="scheduleTextArea"
-                              VBox.vgrow="ALWAYS"
-                              editable="false"
-                              wrapText="true"
-                              styleClass="schedule-area"
-                              text="Načítavam rozvrh..."/>
+                    <HBox alignment="CENTER_LEFT" spacing="16">
+                        <Label text="Rozvrh" styleClass="group-title"/>
+                        <Label fx:id="scheduleStatusLabel" text="" styleClass="status-label" visible="false"/>
+                    </HBox>
+                    <!-- Legend -->
+                    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="schedule-legend">
+                        <HBox spacing="4" alignment="CENTER_LEFT">
+                            <Label styleClass="legend-dot legend-lecture"/>
+                            <Label text="Prednáška" styleClass="legend-text"/>
+                        </HBox>
+                        <HBox spacing="4" alignment="CENTER_LEFT">
+                            <Label styleClass="legend-dot legend-seminar"/>
+                            <Label text="Cvičenie / Seminár" styleClass="legend-text"/>
+                        </HBox>
+                        <HBox spacing="4" alignment="CENTER_LEFT">
+                            <Label styleClass="legend-dot legend-other"/>
+                            <Label text="Ostatné" styleClass="legend-text"/>
+                        </HBox>
+                    </HBox>
+                    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="schedule-scroll">
+                        <VBox fx:id="scheduleContainer" styleClass="schedule-container"/>
+                    </ScrollPane>
                 </VBox>
             </Tab>
 

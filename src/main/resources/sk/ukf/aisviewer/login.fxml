@@ -16,7 +16,7 @@
     </VBox>
 
     <!-- Login Card -->
-    <VBox alignment="CENTER_LEFT" maxWidth="600" spacing="16" styleClass="login-card">
+    <VBox alignment="CENTER_LEFT" maxWidth="600" maxHeight="600" spacing="16" styleClass="login-card">
         <padding><Insets bottom="28" left="32" right="32" top="24" /></padding>
 
         <Label styleClass="login-card-title" text="Prihlásiť sa" />

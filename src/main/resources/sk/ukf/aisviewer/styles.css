@@ -230,7 +230,7 @@
     -fx-font-weight: bold;
 }
 
-.main-tabs .tab:hover:!selected .tab-label {
+.main-tabs .tab:hover:selected .tab-label {
     -fx-text-fill: #c8d0e0;
 }
 
@@ -412,21 +412,161 @@
     -fx-font-weight: bold;
 }
 
-/* ---- Schedule Tab ---- */
-.schedule-area {
+/* ---- Schedule Tab – Visual Timetable Grid ---- */
+.schedule-container {
+    -fx-background-color: #1a1d23;
+    -fx-padding: 0;
+}
+
+.schedule-scroll {
+    -fx-background-color: #1a1d23;
+    -fx-background: #1a1d23;
+}
+
+.schedule-scroll .viewport {
+    -fx-background-color: #1a1d23;
+}
+
+.schedule-grid {
     -fx-background-color: #23272f;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
     -fx-border-color: #2d3340;
     -fx-border-width: 1px;
-    -fx-text-fill: #c8d0e0;
-    -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-font-size: 12px;
-    -fx-control-inner-background: #23272f;
+    -fx-padding: 0;
 }
 
-.schedule-area .content {
-    -fx-background-color: #23272f;
+/* Day headers */
+.schedule-header {
+    -fx-background-color: #2d3340;
+    -fx-text-fill: #c8d0e0;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 8 12 8 12;
+    -fx-alignment: center;
+    -fx-border-color: transparent #3d4555 #3d4555 transparent;
+    -fx-border-width: 0 1 1 0;
+}
+
+.schedule-corner {
+    -fx-background-color: #2d3340;
+    -fx-background-radius: 8 0 0 0;
+    -fx-border-color: transparent #3d4555 #3d4555 transparent;
+    -fx-border-width: 0 1 1 0;
+}
+
+/* Time labels */
+.schedule-time-label {
+    -fx-text-fill: #6b7488;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent #3d4555 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+/* Background cells */
+.schedule-cell {
+    -fx-border-color: transparent #2d3340 #252930 transparent;
+    -fx-border-width: 0 1 1 0;
+    -fx-background-color: transparent;
+}
+
+.schedule-cell-hour-border {
+    -fx-border-color: transparent #2d3340 #3d4555 transparent;
+    -fx-border-width: 0 1 1 0;
+}
+
+/* Schedule entry cards */
+.schedule-entry-card {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-width: 0 0 0 3px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 4, 0, 0, 1);
+}
+
+.schedule-entry-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,105,200,0.4), 8, 0, 0, 2);
+    -fx-opacity: 0.95;
+}
+
+/* Lecture style – blue */
+.schedule-entry-lecture {
+    -fx-background-color: rgba(0,105,200,0.25);
+    -fx-border-color: #0069c8;
+}
+
+/* Seminar/exercise style – green */
+.schedule-entry-seminar {
+    -fx-background-color: rgba(102,187,106,0.2);
+    -fx-border-color: #66bb6a;
+}
+
+/* Other style – orange */
+.schedule-entry-other {
+    -fx-background-color: rgba(255,167,38,0.2);
+    -fx-border-color: #ffa726;
+}
+
+/* Entry labels */
+.schedule-entry-name {
+    -fx-text-fill: #e8eaf0;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.schedule-entry-time {
+    -fx-text-fill: #9ba8bc;
+    -fx-font-size: 10px;
+}
+
+.schedule-entry-detail {
+    -fx-text-fill: #8892a4;
+    -fx-font-size: 10px;
+}
+
+/* Legend */
+.schedule-legend {
+    -fx-padding: 0 0 4 0;
+}
+
+.legend-dot {
+    -fx-min-width: 12;
+    -fx-min-height: 12;
+    -fx-max-width: 12;
+    -fx-max-height: 12;
+    -fx-background-radius: 3px;
+}
+
+.legend-lecture {
+    -fx-background-color: #0069c8;
+}
+
+.legend-seminar {
+    -fx-background-color: #66bb6a;
+}
+
+.legend-other {
+    -fx-background-color: #ffa726;
+}
+
+.legend-text {
+    -fx-text-fill: #8892a4;
+    -fx-font-size: 11px;
+}
+
+/* No data / loading labels */
+.schedule-no-data {
+    -fx-text-fill: #5a637a;
+    -fx-font-size: 14px;
+    -fx-padding: 40 20 40 20;
+    -fx-alignment: center;
+}
+
+.schedule-loading-label {
+    -fx-text-fill: #64b5f6;
+    -fx-font-size: 13px;
+    -fx-padding: 20;
 }
 
 /* ---- ScrollBar ---- */

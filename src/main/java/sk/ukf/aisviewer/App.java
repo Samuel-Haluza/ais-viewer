@@ -30,7 +30,6 @@ public class App extends Application {
         FXMLLoader loader = new FXMLLoader(App.class.getResource("login.fxml"));
         Scene scene = new Scene(loader.load(), 420, 340);
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
         primaryStage.centerOnScreen();
         primaryStage.show();
     }

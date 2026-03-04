@@ -7,6 +7,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import sk.ukf.aisviewer.model.Exam;
+import sk.ukf.aisviewer.model.ScheduleEntry;
 import sk.ukf.aisviewer.model.StudentInfo;
 import sk.ukf.aisviewer.model.Subject;
 
@@ -23,13 +24,11 @@ public class AisClient {
 
     private WebDriver driver;
     private WebDriverWait wait;
-    private final AisParser parser;
 
     private StudentInfo currentStudent;
     private boolean loggedIn = false;
 
     public AisClient() {
-        this.parser = new AisParser();
     }
 
     public boolean login(String username, String password) throws Exception {
@@ -487,59 +486,276 @@ public class AisClient {
         return exams;
     }
 
-    public String fetchScheduleHtml(String enrollmentListId) {
-        if (driver == null || enrollmentListId == null) return "Rozvrh nie je dostupný.";
-        try {
-            System.out.println("[AIS] Načítavam rozvrh...");
+    /**
+     * Parses schedule entries from AIS2 timetable page.
+     * Tries multiple strategies to extract structured schedule data.
+     */
+    public List<ScheduleEntry> fetchScheduleEntries(String enrollmentListId) {
+        List<ScheduleEntry> entries = new ArrayList<>();
+        if (driver == null || enrollmentListId == null) return entries;
 
+        try {
+            System.out.println("[AIS] Načítavam rozvrh (štruktúrovane)...");
+
+            // Navigate to student home first to find the schedule link
             driver.get(STUDENT_HOME_URL);
             Thread.sleep(3000);
 
+            // Try clicking the schedule link
+            boolean navigated = false;
             List<WebElement> allLinks = driver.findElements(By.tagName("a"));
-            WebElement rozvrhLink = null;
             for (WebElement link : allLinks) {
                 try {
                     String text = link.getText().trim().toLowerCase();
                     if (text.contains("rozvrh")) {
-                        rozvrhLink = link;
-                        System.out.println("[AIS] Našiel rozvrh link: " + link.getText().trim());
+                        link.click();
+                        Thread.sleep(5000);
+                        navigated = true;
+                        System.out.println("[AIS] Rozvrh URL: " + driver.getCurrentUrl());
                         break;
                     }
                 } catch (StaleElementReferenceException ignored) {}
             }
 
-            if (rozvrhLink != null) {
-                rozvrhLink.click();
-                Thread.sleep(5000);
-                System.out.println("[AIS] Rozvrh URL: " + driver.getCurrentUrl());
-                return driver.getPageSource();
+            if (!navigated) {
+                // Try direct URLs
+                String[] rozvrhUrls = {
+                        BASE_URL + "/ais/apps/student-rozvrh/?zl=" + enrollmentListId,
+                        BASE_URL + "/ais/apps/rozvrh/sk/?zl=" + enrollmentListId,
+                        BASE_URL + "/ais/apps/student/sk/rozvrh?zl=" + enrollmentListId
+                };
+                for (String tryUrl : rozvrhUrls) {
+                    try {
+                        driver.get(tryUrl);
+                        Thread.sleep(4000);
+                        String src = driver.getPageSource();
+                        if (!src.contains("404") && src.length() > 500) {
+                            navigated = true;
+                            break;
+                        }
+                    } catch (Exception ignored) {}
+                }
             }
 
-            String[] rozvrhUrls = {
-                    BASE_URL + "/ais/apps/student-rozvrh/?zl=" + enrollmentListId,
-                    BASE_URL + "/ais/apps/rozvrh/sk/?zl=" + enrollmentListId,
-                    BASE_URL + "/ais/apps/student/sk/rozvrh?zl=" + enrollmentListId
-            };
-
-            for (String tryUrl : rozvrhUrls) {
-                try {
-                    driver.get(tryUrl);
-                    Thread.sleep(3000);
-                    String pageSource = driver.getPageSource();
-                    if (!pageSource.contains("404") && !pageSource.contains("Nenalezeno")
-                            && !pageSource.contains("not available") && pageSource.length() > 500) {
-                        System.out.println("[AIS] Rozvrh nájdený na: " + tryUrl);
-                        return pageSource;
-                    }
-                } catch (Exception ignored) {}
+            if (!navigated) {
+                System.out.println("[AIS] Rozvrh stránku sa nepodarilo nájsť.");
+                return entries;
             }
 
-            return "Rozvrh nie je dostupný. AIS2 neposkytuje rozvrh cez tento endpoint.";
+            // Strategy 1: JavaScript DOM parsing - look for schedule table/grid
+            entries = parseScheduleViaJS();
+            if (!entries.isEmpty()) {
+                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (JS)");
+                return entries;
+            }
+
+            // Strategy 2: Parse from page source text using regex patterns
+            entries = parseScheduleFromPageSource();
+            if (!entries.isEmpty()) {
+                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (text)");
+                return entries;
+            }
+
+            System.out.println("[AIS] Rozvrh sa nepodarilo rozparsovať.");
 
         } catch (Exception e) {
-            return "Chyba pri načítaní rozvrhu: " + e.getMessage();
+            System.out.println("[AIS] Chyba pri načítaní rozvrhu: " + e.getMessage());
+            e.printStackTrace();
         }
+        return entries;
     }
+
+    @SuppressWarnings("unchecked")
+    private List<ScheduleEntry> parseScheduleViaJS() {
+        List<ScheduleEntry> entries = new ArrayList<>();
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            Object result = js.executeScript(
+                "var results = [];" +
+                "var dayMap = {'Po':0,'Ut':1,'St':2,'Št':3,'Pi':4,'So':5," +
+                "  'Pondelok':0,'Utorok':1,'Streda':2,'Štvrtok':3,'Piatok':4,'Sobota':5," +
+                "  'Mon':0,'Tue':1,'Wed':2,'Thu':3,'Fri':4,'Sat':5," +
+                "  'po':0,'ut':1,'st':2,'št':3,'pi':4,'so':5};" +
+                "var dayNames = ['Pondelok','Utorok','Streda','Štvrtok','Piatok','Sobota'];" +
+
+                // Strategy A: look for table rows with schedule data
+                "var tables = document.querySelectorAll('table');" +
+                "for (var t = 0; t < tables.length; t++) {" +
+                "  var rows = tables[t].querySelectorAll('tr');" +
+                "  for (var r = 0; r < rows.length; r++) {" +
+                "    var cells = rows[r].querySelectorAll('td');" +
+                "    if (cells.length >= 4) {" +
+                "      var rowText = rows[r].textContent;" +
+                "      var timeMatch = rowText.match(/(\\d{1,2})[:.](\\d{2})\\s*[-–]\\s*(\\d{1,2})[:.](\\d{2})/);" +
+                "      if (!timeMatch) continue;" +
+                "      var dayText = '';" +
+                "      for (var c = 0; c < cells.length; c++) {" +
+                "        var ct = cells[c].textContent.trim();" +
+                "        for (var dk in dayMap) {" +
+                "          if (ct === dk || ct.indexOf(dk) === 0) { dayText = dk; break; }" +
+                "        }" +
+                "        if (dayText) break;" +
+                "      }" +
+                "      if (!dayText) continue;" +
+                "      var di = dayMap[dayText]; if (di === undefined) continue;" +
+                "      var tf = timeMatch[1].padStart(2,'0') + ':' + timeMatch[2];" +
+                "      var tt = timeMatch[3].padStart(2,'0') + ':' + timeMatch[4];" +
+                "      var name = '', code = '', room = '', teacher = '', type = '';" +
+                "      for (var c = 0; c < cells.length; c++) {" +
+                "        var ct = cells[c].textContent.trim();" +
+                "        if (ct.length > 5 && ct !== dayText && !ct.match(/^\\d/) && !name) {" +
+                "          name = ct;" +
+                "        }" +
+                "      }" +
+                "      results.push(dayNames[di]+'|||'+di+'|||'+tf+'|||'+tt+'|||'+name+'|||'+code+'|||'+room+'|||'+teacher+'|||'+type);" +
+                "    }" +
+                "  }" +
+                "}" +
+
+                // Strategy B: look for Angular-style event elements positioned in a grid
+                "if (results.length === 0) {" +
+                "  var events = document.querySelectorAll('[class*=event], [class*=rozvrh], [class*=schedule], [class*=lesson], mat-card, .cal-event');" +
+                "  for (var i = 0; i < events.length; i++) {" +
+                "    var el = events[i];" +
+                "    var text = el.textContent.trim();" +
+                "    if (text.length < 5) continue;" +
+                "    var tm = text.match(/(\\d{1,2})[:.](\\d{2})\\s*[-–]\\s*(\\d{1,2})[:.](\\d{2})/);" +
+                "    if (!tm) continue;" +
+                "    var tf = tm[1].padStart(2,'0') + ':' + tm[2];" +
+                "    var tt = tm[3].padStart(2,'0') + ':' + tm[4];" +
+                "    var dayText = '';" +
+                "    for (var dk in dayMap) {" +
+                "      if (text.indexOf(dk) >= 0) { dayText = dk; break; }" +
+                "    }" +
+                "    var di = dayMap[dayText];" +
+                "    if (di === undefined) di = 0;" +
+                "    if (!dayText) dayText = dayNames[0];" +
+                "    var lines = text.split('\\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});" +
+                "    var name = lines.length > 0 ? lines[0] : text.substring(0, 50);" +
+                "    var room = '', teacher = '', type = '';" +
+                "    for (var li = 0; li < lines.length; li++) {" +
+                "      if (lines[li].match(/^[A-Z]{1,3}\\d/)) room = lines[li];" +
+                "      if (lines[li].match(/^(P|C|S|Pr|Cv|Se)$/i)) type = lines[li];" +
+                "    }" +
+                "    name = name.replace(tm[0], '').replace(dayText, '').trim();" +
+                "    if (name.length < 2) name = text.substring(0, Math.min(text.length, 60));" +
+                "    results.push((dayText in dayMap ? dayNames[dayMap[dayText]] : dayText)+'|||'+di+'|||'+tf+'|||'+tt+'|||'+name+'|||'+'|||'+room+'|||'+teacher+'|||'+type);" +
+                "  }" +
+                "}" +
+
+                // Strategy C: generic - find any text containing time patterns and day names
+                "if (results.length === 0) {" +
+                "  var allEls = document.querySelectorAll('div, span, td, li, p');" +
+                "  var seen = {};" +
+                "  for (var i = 0; i < allEls.length; i++) {" +
+                "    var el = allEls[i];" +
+                "    if (el.children.length > 3) continue;" + // skip container elements
+                "    var text = el.textContent.trim();" +
+                "    if (text.length < 10 || text.length > 300) continue;" +
+                "    var tm = text.match(/(\\d{1,2})[:.](\\d{2})\\s*[-–]\\s*(\\d{1,2})[:.](\\d{2})/);" +
+                "    if (!tm) continue;" +
+                "    var key = tm[0] + text.substring(0, 30);" +
+                "    if (seen[key]) continue; seen[key] = true;" +
+                "    var dayText = '', di = -1;" +
+                "    for (var dk in dayMap) {" +
+                "      if (text.indexOf(dk) >= 0) { dayText = dk; di = dayMap[dk]; break; }" +
+                "    }" +
+                "    if (di < 0) continue;" +
+                "    var tf = tm[1].padStart(2,'0') + ':' + tm[2];" +
+                "    var tt = tm[3].padStart(2,'0') + ':' + tm[4];" +
+                "    var name = text.replace(tm[0], '').replace(dayText, '').trim();" +
+                "    if (name.length > 80) name = name.substring(0, 80);" +
+                "    results.push(dayNames[di]+'|||'+di+'|||'+tf+'|||'+tt+'|||'+name+'|||'+'|||'+'|||'+'|||');" +
+                "  }" +
+                "}" +
+
+                "return results;"
+            );
+
+            if (result instanceof List) {
+                List<String> rows = (List<String>) result;
+                for (String row : rows) {
+                    String[] parts = row.split("\\|\\|\\|", -1);
+                    if (parts.length >= 5) {
+                        ScheduleEntry entry = new ScheduleEntry();
+                        entry.setDay(parts[0].trim());
+                        try { entry.setDayIndex(Integer.parseInt(parts[1].trim())); } catch (Exception e) { entry.setDayIndex(0); }
+                        entry.setTimeFrom(parts[2].trim());
+                        entry.setTimeTo(parts[3].trim());
+                        entry.setSubjectName(parts[4].trim());
+                        entry.setSubjectCode(parts.length > 5 ? parts[5].trim() : "");
+                        entry.setRoom(parts.length > 6 ? parts[6].trim() : "");
+                        entry.setTeacher(parts.length > 7 ? parts[7].trim() : "");
+                        entry.setType(parts.length > 8 ? parts[8].trim() : "");
+
+                        if (!entry.getSubjectName().isBlank()) {
+                            entries.add(entry);
+                            System.out.println("[AIS]   " + entry);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[AIS] JS rozvrh parsing chyba: " + e.getMessage());
+        }
+        return entries;
+    }
+
+    private List<ScheduleEntry> parseScheduleFromPageSource() {
+        List<ScheduleEntry> entries = new ArrayList<>();
+        try {
+            String src = driver.getPageSource();
+            // Clean HTML tags
+            String text = src
+                    .replaceAll("<script[^>]*>[\\s\\S]*?</script>", "")
+                    .replaceAll("<style[^>]*>[\\s\\S]*?</style>", "")
+                    .replaceAll("<[^>]+>", " ")
+                    .replaceAll("&nbsp;", " ")
+                    .replaceAll("\\s{2,}", " ");
+
+            String[] dayNames = {"Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota"};
+            String[] dayShort = {"Po", "Ut", "St", "Št", "Pi", "So"};
+
+            // Look for patterns like: "Po 08:00-09:30 Názov predmetu"
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                    "(Po(?:ndelok)?|Ut(?:orok)?|St(?:reda)?|Št(?:vrtok)?|Pi(?:atok)?|So(?:bota)?)\\s+" +
+                    "(\\d{1,2})[:.](\\d{2})\\s*[-–]\\s*(\\d{1,2})[:.](\\d{2})\\s+" +
+                    "([^\\d][^\\n]{3,80})"
+            );
+            java.util.regex.Matcher matcher = pattern.matcher(text);
+
+            while (matcher.find()) {
+                String dayStr = matcher.group(1);
+                String hFrom = matcher.group(2);
+                String mFrom = matcher.group(3);
+                String hTo = matcher.group(4);
+                String mTo = matcher.group(5);
+                String rest = matcher.group(6).trim();
+
+                int dayIdx = 0;
+                for (int d = 0; d < dayNames.length; d++) {
+                    if (dayStr.startsWith(dayShort[d]) || dayStr.equals(dayNames[d])) {
+                        dayIdx = d;
+                        break;
+                    }
+                }
+
+                ScheduleEntry entry = new ScheduleEntry();
+                entry.setDay(dayNames[dayIdx]);
+                entry.setDayIndex(dayIdx);
+                entry.setTimeFrom(String.format("%02d:%s", Integer.parseInt(hFrom), mFrom));
+                entry.setTimeTo(String.format("%02d:%s", Integer.parseInt(hTo), mTo));
+                entry.setSubjectName(rest.length() > 60 ? rest.substring(0, 60) : rest);
+                entries.add(entry);
+            }
+
+        } catch (Exception e) {
+            System.out.println("[AIS] Text schedule parsing error: " + e.getMessage());
+        }
+        return entries;
+    }
+
+
 
     private String safeGetText(WebElement parent, String cssSelector) {
         try {
@@ -568,7 +784,6 @@ public class AisClient {
 
     public StudentInfo getCurrentStudent() { return currentStudent; }
     public boolean isLoggedIn() { return loggedIn; }
-    public AisParser getParser() { return parser; }
 
     public void logout() {
         closeDriver();
