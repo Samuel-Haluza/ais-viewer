@@ -53,13 +53,13 @@ public class LoginController {
                             enableControls();
                         }
                     } else {
-                        showError("Nesprávne meno alebo heslo.");
+                        showError("Nesprávne používateľské meno alebo heslo.");
                         enableControls();
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    showError("Chyba: " + e.getMessage());
+                    showError("Nepodarilo sa pripojiť k AIS. Skúste to znova.");
                     enableControls();
                 });
             }

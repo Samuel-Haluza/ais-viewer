@@ -2,7 +2,6 @@ package sk.ukf.aisviewer.controller;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -17,7 +16,11 @@ import sk.ukf.aisviewer.model.ScheduleEntry;
 import sk.ukf.aisviewer.model.StudentInfo;
 import sk.ukf.aisviewer.model.Subject;
 import sk.ukf.aisviewer.service.AisClient;
+import sk.ukf.aisviewer.service.LocalCacheService;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,14 +33,17 @@ public class MainController {
     @FXML private Label studentNameLabel;
     @FXML private Label studentProgramLabel;
     @FXML private ComboBox<String> enrollmentListCombo;
+    @FXML private Label dataStatusLabel;
+    @FXML private Label lastUpdatedLabel;
+    @FXML private ProgressIndicator syncProgressIndicator;
+    @FXML private Button refreshButton;
 
     // --- Subjects Tab ---
     @FXML private TableView<Subject> mandatoryTable;
     @FXML private TableView<Subject> optionalTable;
-    @FXML private TableView<Subject> electiveTable;
     @FXML private Label mandatoryCreditsLabel;
     @FXML private Label optionalCreditsLabel;
-    @FXML private Label electiveCreditsLabel;
+    @FXML private ComboBox<String> semesterFilterCombo;
 
     // --- Exams Tab ---
     @FXML private TableView<Exam> examsTable;
@@ -47,7 +53,6 @@ public class MainController {
     @FXML private Label totalCreditsLabel;
     @FXML private Label mandatoryCreditsTotal;
     @FXML private Label optionalCreditsTotal;
-    @FXML private Label electiveCreditsTotal;
     @FXML private Label avgGradeLabel;
 
     // --- Schedule Tab ---
@@ -56,6 +61,11 @@ public class MainController {
 
     private static AisClient aisClient;
     private StudentInfo studentInfo;
+    private final LocalCacheService cacheService = new LocalCacheService();
+    private LocalCacheService.CacheSnapshot cacheSnapshot;
+    private boolean dataDisplayed;
+    private boolean syncInProgress;
+    private List<Subject> allSubjects = List.of();
 
     public static void setAisClient(AisClient client) {
         aisClient = client;
@@ -66,10 +76,13 @@ public class MainController {
         if (aisClient == null) return;
 
         studentInfo = aisClient.getCurrentStudent();
+        cacheSnapshot = cacheService.load().orElse(null);
+        restoreCachedEnrollmentLists();
         updateStudentInfoBar();
         setupSubjectTables();
+        setupSemesterFilter();
         setupExamTable();
-        loadData();
+        loadInitialData();
     }
 
     private void updateStudentInfoBar() {
@@ -94,7 +107,13 @@ public class MainController {
     private void setupSubjectTables() {
         setupSubjectTable(mandatoryTable);
         setupSubjectTable(optionalTable);
-        setupSubjectTable(electiveTable);
+    }
+
+    private void setupSemesterFilter() {
+        semesterFilterCombo.setItems(FXCollections.observableArrayList(
+                "Zimný semester", "Letný semester", "Oba semestre"));
+        semesterFilterCombo.getSelectionModel().select("Oba semestre");
+        semesterFilterCombo.setOnAction(event -> refreshSubjectTables());
     }
 
     @SuppressWarnings("unchecked")
@@ -172,69 +191,273 @@ public class MainController {
         examsTable.setPlaceholder(new Label("Žiadne skúškové termíny"));
     }
 
-    private void loadData() {
-        if (studentInfo == null || aisClient == null) return;
+    private void loadInitialData() {
+        if (isCacheForCurrentStudent(cacheSnapshot)) {
+            displaySelectedEnrollmentFromCache();
+            showLastUpdated(cacheSnapshot.getUpdatedAt());
+            if (!dataDisplayed) {
+                showSelectionUnavailable();
+            }
+        } else {
+            cacheSnapshot = null;
+            setLoadingState("Načítavam údaje z AIS…");
+            startSynchronization(true);
+        }
+    }
+
+    private void restoreCachedEnrollmentLists() {
+        if (!isCacheForCurrentStudent(cacheSnapshot)
+                || studentInfo.getEnrollmentListIds() == null
+                || !studentInfo.getEnrollmentListIds().isEmpty()) {
+            return;
+        }
+
+        StudentInfo cachedStudent = cacheSnapshot.getStudentInfo();
+        studentInfo.setEnrollmentListId(cachedStudent.getEnrollmentListId());
+        if (cachedStudent.getEnrollmentListIds() == null
+                || cachedStudent.getEnrollmentListNames() == null) {
+            return;
+        }
+        studentInfo.setEnrollmentListIds(
+                new java.util.ArrayList<>(cachedStudent.getEnrollmentListIds()));
+        studentInfo.setEnrollmentListNames(
+                new java.util.ArrayList<>(cachedStudent.getEnrollmentListNames()));
+    }
+
+    private void displaySelectedEnrollmentFromCache() {
+        if (cacheSnapshot == null) {
+            showSelectionUnavailable();
+            return;
+        }
 
         String zl = getSelectedEnrollmentId();
-        if (zl == null || zl.isBlank()) {
+        LocalCacheService.EnrollmentData cachedData =
+                cacheSnapshot.getEnrollmentData().get(zl);
+        if (cachedData == null) {
+            dataDisplayed = false;
+            showSelectionUnavailable();
+            return;
+        }
+
+        applyData(cachedData.getSubjects(), cachedData.getExams(),
+                cachedData.getScheduleEntries());
+        dataDisplayed = true;
+    }
+
+    private void startSynchronization(boolean initialLoad) {
+        if (syncInProgress || studentInfo == null || aisClient == null) return;
+
+        List<String> enrollmentIds = studentInfo.getEnrollmentListIds();
+        if (enrollmentIds == null || enrollmentIds.isEmpty()) {
             showNoDataMessage();
             return;
         }
 
-        setLoadingState("Načítavam dáta...");
+        syncInProgress = true;
+        refreshButton.setDisable(true);
+        if (!initialLoad) {
+            enrollmentListCombo.getSelectionModel().selectFirst();
+            enrollmentListCombo.setDisable(true);
+            showSyncStatus("Aktualizujem údaje z AIS…", true);
+        } else {
+            showSyncStatus("Načítavam údaje z AIS…", true);
+        }
 
         Thread loadThread = new Thread(() -> {
-            try {
-                List<Subject> subjects = aisClient.fetchSubjects(zl);
-                List<Exam> exams = aisClient.fetchExams(zl);
-                List<ScheduleEntry> scheduleEntries = aisClient.fetchScheduleEntries(zl);
+            boolean currentLoaded = false;
+            boolean olderLoadFailed = false;
+            for (int i = 0; i < enrollmentIds.size(); i++) {
+                String enrollmentListId = enrollmentIds.get(i);
+                try {
+                    LoadedData loadedData = loadEnrollmentData(enrollmentListId);
+                    if (loadedData.isEmpty()) {
+                        throw new IllegalStateException("AIS nevrátil žiadne údaje");
+                    }
+                    boolean isCurrent = i == 0;
+                    if (isCurrent) currentLoaded = true;
 
-                Platform.runLater(() -> {
-                    populateSubjectTables(subjects);
-                    populateExamTable(exams);
-                    updateCreditsTab(subjects);
-                    buildScheduleGrid(scheduleEntries);
-                    scheduleStatusLabel.setVisible(false);
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    showNoDataMessage();
-                    scheduleStatusLabel.setText("Chyba načítania: " + e.getMessage());
-                    scheduleStatusLabel.setVisible(true);
-                });
+                    Platform.runLater(() -> {
+                        saveCache(enrollmentListId, loadedData.subjects,
+                                loadedData.exams, loadedData.scheduleEntries);
+                        if (enrollmentListId.equals(getSelectedEnrollmentId())) {
+                            applyData(loadedData.subjects, loadedData.exams,
+                                    loadedData.scheduleEntries);
+                            dataDisplayed = true;
+                        }
+                    });
+                } catch (Exception e) {
+                    boolean isCurrent = i == 0;
+                    Platform.runLater(() -> {
+                        if (isCurrent && !dataDisplayed) {
+                            showNoDataMessage();
+                            showSyncStatus("Údaje sa nepodarilo načítať z AIS.", false);
+                        } else if (!isCurrent) {
+                            showSyncStatus("Niektoré staršie údaje sa nepodarilo načítať.", false);
+                        }
+                    });
+                    if (isCurrent) break;
+                    olderLoadFailed = true;
+                }
             }
+
+            boolean synchronizationLoadedCurrent = currentLoaded;
+            boolean synchronizationOlderLoadFailed = olderLoadFailed;
+            Platform.runLater(() -> {
+                syncInProgress = false;
+                refreshButton.setDisable(false);
+                enrollmentListCombo.setDisable(false);
+                if (synchronizationLoadedCurrent && synchronizationOlderLoadFailed) {
+                    showSyncStatus("Niektoré staršie údaje sa nepodarilo načítať.", false);
+                } else if (synchronizationLoadedCurrent) {
+                    showSyncStatus("Údaje boli aktualizované.", false);
+                }
+            });
         });
         loadThread.setDaemon(true);
         loadThread.start();
     }
 
+    private LoadedData loadEnrollmentData(String enrollmentListId) {
+        List<Subject> subjects = aisClient.fetchSubjects(enrollmentListId);
+        List<Exam> exams = aisClient.fetchExams(enrollmentListId);
+        List<ScheduleEntry> scheduleEntries = aisClient.fetchScheduleEntries(enrollmentListId);
+        return new LoadedData(subjects, exams, scheduleEntries);
+    }
+
+    private void showSelectionUnavailable() {
+        mandatoryTable.setItems(FXCollections.observableArrayList());
+        optionalTable.setItems(FXCollections.observableArrayList());
+        examsTable.setItems(FXCollections.observableArrayList());
+        scheduleContainer.getChildren().clear();
+        showNoDataMessage();
+        showSyncStatus("Údaje pre tento zápisný list ešte nie sú dostupné.", syncInProgress);
+    }
+
+    private static class LoadedData {
+        private final List<Subject> subjects;
+        private final List<Exam> exams;
+        private final List<ScheduleEntry> scheduleEntries;
+
+        private LoadedData(List<Subject> subjects, List<Exam> exams,
+                           List<ScheduleEntry> scheduleEntries) {
+            this.subjects = subjects;
+            this.exams = exams;
+            this.scheduleEntries = scheduleEntries;
+        }
+
+        private boolean isEmpty() {
+            return subjects.isEmpty() && exams.isEmpty() && scheduleEntries.isEmpty();
+        }
+    }
+
+    private boolean isCacheForCurrentStudent(LocalCacheService.CacheSnapshot snapshot) {
+        if (snapshot == null || snapshot.getStudentInfo() == null || studentInfo == null) {
+            return false;
+        }
+        String cachedName = snapshot.getStudentInfo().getFullName();
+        String currentName = studentInfo.getFullName();
+        return cachedName != null && currentName != null
+                && cachedName.equalsIgnoreCase(currentName);
+    }
+
+    private void applyData(List<Subject> subjects, List<Exam> exams,
+                           List<ScheduleEntry> scheduleEntries) {
+        populateSubjectTables(subjects);
+        populateExamTable(exams);
+        updateCreditsTab(subjects);
+        buildScheduleGrid(scheduleEntries);
+        scheduleStatusLabel.setVisible(false);
+    }
+
+    private void saveCache(String enrollmentListId, List<Subject> subjects,
+                           List<Exam> exams, List<ScheduleEntry> scheduleEntries) {
+        if (cacheSnapshot == null) {
+            cacheSnapshot = LocalCacheService.createSnapshot(studentInfo);
+        } else {
+            cacheSnapshot.setStudentInfo(studentInfo);
+        }
+        cacheSnapshot.getEnrollmentData().put(enrollmentListId,
+                LocalCacheService.EnrollmentData.of(subjects, exams, scheduleEntries));
+        String updatedAt = LocalDateTime.now()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        cacheSnapshot.setUpdatedAt(updatedAt);
+        showLastUpdated(updatedAt);
+        try {
+            cacheService.save(cacheSnapshot);
+        } catch (IOException e) {
+            System.out.println("[CACHE] Cache sa nepodarilo uložiť: " + e.getMessage());
+        }
+    }
+
+    private void showLastUpdated(String timestamp) {
+        if (timestamp == null || timestamp.isBlank()) {
+            lastUpdatedLabel.setText("");
+            lastUpdatedLabel.setVisible(false);
+            lastUpdatedLabel.setManaged(false);
+            return;
+        }
+        try {
+            LocalDateTime dateTime = LocalDateTime.parse(timestamp,
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            lastUpdatedLabel.setText("Naposledy aktualizované: "
+                    + dateTime.format(DateTimeFormatter.ofPattern("d. M. uuuu, HH:mm")));
+        } catch (Exception e) {
+            lastUpdatedLabel.setText("Naposledy aktualizované: " + timestamp);
+        }
+        lastUpdatedLabel.setVisible(true);
+        lastUpdatedLabel.setManaged(true);
+    }
+
+    private void showSyncStatus(String message, boolean running) {
+        dataStatusLabel.setText(message);
+        dataStatusLabel.setVisible(true);
+        syncProgressIndicator.setVisible(running);
+        syncProgressIndicator.setManaged(running);
+    }
+
     private void populateSubjectTables(List<Subject> subjects) {
-        List<Subject> mandatory = subjects.stream()
+        allSubjects = subjects;
+        refreshSubjectTables();
+    }
+
+    private void refreshSubjectTables() {
+        String selectedSemester = semesterFilterCombo.getValue();
+        List<Subject> filteredSubjects = allSubjects.stream()
+                .filter(subject -> matchesSemester(subject, selectedSemester))
+                .collect(Collectors.toList());
+
+        List<Subject> mandatory = filteredSubjects.stream()
                 .filter(s -> "Povinné predmety".equals(s.getCategory()))
                 .collect(Collectors.toList());
-        List<Subject> optional = subjects.stream()
+        List<Subject> optional = filteredSubjects.stream()
                 .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
-                .collect(Collectors.toList());
-        List<Subject> elective = subjects.stream()
-                .filter(s -> s.getCategory() != null && s.getCategory().toLowerCase().contains("výber"))
                 .collect(Collectors.toList());
 
         // If categories are not set, put everything in mandatory
-        if (mandatory.isEmpty() && optional.isEmpty() && elective.isEmpty()) {
-            mandatory = subjects;
+        if (mandatory.isEmpty() && optional.isEmpty()) {
+            mandatory = filteredSubjects;
         }
 
         mandatoryTable.setItems(FXCollections.observableArrayList(mandatory));
         optionalTable.setItems(FXCollections.observableArrayList(optional));
-        electiveTable.setItems(FXCollections.observableArrayList(elective));
 
         int mandCredits = mandatory.stream().mapToInt(Subject::getCreditsValue).sum();
         int optCredits = optional.stream().mapToInt(Subject::getCreditsValue).sum();
-        int elecCredits = elective.stream().mapToInt(Subject::getCreditsValue).sum();
 
         mandatoryCreditsLabel.setText("Kredity: " + mandCredits);
         optionalCreditsLabel.setText("Kredity: " + optCredits);
-        electiveCreditsLabel.setText("Kredity: " + elecCredits);
+    }
+
+    private boolean matchesSemester(Subject subject, String selectedSemester) {
+        if (selectedSemester == null || "Oba semestre".equals(selectedSemester)) {
+            return true;
+        }
+        String semester = subject.getSemester();
+        if (semester == null) return false;
+        if ("Zimný semester".equals(selectedSemester)) {
+            return "ZS".equalsIgnoreCase(semester.trim());
+        }
+        return "LS".equalsIgnoreCase(semester.trim());
     }
 
     private void populateExamTable(List<Exam> exams) {
@@ -254,16 +477,11 @@ public class MainController {
         int optional = subjects.stream()
                 .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
                 .mapToInt(Subject::getCreditsValue).sum();
-        int elective = subjects.stream()
-                .filter(s -> s.getCategory() != null && s.getCategory().toLowerCase().contains("výber"))
-                .mapToInt(Subject::getCreditsValue).sum();
         int total = subjects.stream().mapToInt(Subject::getCreditsValue).sum();
 
         totalCreditsLabel.setText(String.valueOf(total));
         mandatoryCreditsTotal.setText(String.valueOf(mandatory));
         optionalCreditsTotal.setText(String.valueOf(optional));
-        electiveCreditsTotal.setText(String.valueOf(elective));
-
         // Calculate average grade
         List<Subject> graded = subjects.stream()
                 .filter(s -> s.getGradeNumeric() > 0)
@@ -285,14 +503,19 @@ public class MainController {
         Label loadingLabel = new Label(message);
         loadingLabel.getStyleClass().add("schedule-loading-label");
         scheduleContainer.getChildren().add(loadingLabel);
+        showSyncStatus(message, true);
+        lastUpdatedLabel.setText("Prvé načítanie môže trvať dlhšie.");
+        lastUpdatedLabel.setVisible(true);
+        lastUpdatedLabel.setManaged(true);
     }
 
     private void showNoDataMessage() {
         mandatoryTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
         optionalTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
-        electiveTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
         examsStatusLabel.setText("Dáta sa nepodarilo načítať.");
         examsStatusLabel.setVisible(true);
+        scheduleStatusLabel.setText("Dáta sa nepodarilo načítať.");
+        scheduleStatusLabel.setVisible(true);
     }
 
     private String getSelectedEnrollmentId() {
@@ -305,7 +528,7 @@ public class MainController {
     }
 
     private void onEnrollmentListChanged() {
-        loadData();
+        displaySelectedEnrollmentFromCache();
     }
 
     @FXML
@@ -323,7 +546,9 @@ public class MainController {
 
     @FXML
     private void handleRefresh() {
-        loadData();
+        if (!syncInProgress) {
+            startSynchronization(false);
+        }
     }
 
     // ==================== SCHEDULE GRID ====================

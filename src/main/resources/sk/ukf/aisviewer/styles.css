@@ -145,6 +145,20 @@
     -fx-font-size: 11px;
 }
 
+.top-sync-status {
+    -fx-text-fill: rgba(255,255,255,0.9);
+    -fx-font-size: 11px;
+}
+
+.top-last-updated {
+    -fx-text-fill: rgba(255,255,255,0.7);
+    -fx-font-size: 10px;
+}
+
+.sync-progress {
+    -fx-progress-color: #64b5f6;
+}
+
 .top-label {
     -fx-text-fill: rgba(255,255,255,0.85);
     -fx-font-size: 12px;
@@ -291,13 +305,6 @@
     -fx-border-width: 1px;
 }
 
-.elective-badge {
-    -fx-background-color: rgba(255,167,38,0.2);
-    -fx-text-fill: #ffb74d;
-    -fx-border-color: rgba(255,167,38,0.4);
-    -fx-border-radius: 20px;
-    -fx-border-width: 1px;
-}
 
 /* ---- Tables ---- */
 .subject-table {
@@ -382,10 +389,6 @@
 
 .optional-card {
     -fx-border-color: rgba(129,199,132,0.4);
-}
-
-.elective-card {
-    -fx-border-color: rgba(255,183,77,0.4);
 }
 
 .avg-card {

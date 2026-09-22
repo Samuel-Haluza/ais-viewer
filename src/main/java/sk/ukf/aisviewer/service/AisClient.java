@@ -50,7 +50,6 @@ public class AisClient {
         try {
             System.out.println("[AIS] Prihlasovanie...");
             driver.get(START_URL);
-            Thread.sleep(2000);
 
             WebElement loginField = wait.until(
                     ExpectedConditions.presenceOfElementLocated(By.id("login"))
@@ -67,9 +66,11 @@ public class AisClient {
 
             Thread.sleep(4000);
             String currentUrl = driver.getCurrentUrl();
+            System.out.println("[AIS] URL po login-e: " + currentUrl);
+            System.out.println("[AIS] Title po login-e: " + driver.getTitle());
 
-            if (currentUrl.contains("login.do")) {
-                System.out.println("[AIS] Login neúspešný!");
+            if (isInvalidCredentialsPage()) {
+                System.out.println("[AIS] Login neúspešný – nesprávne prihlasovacie údaje.");
                 closeDriver();
                 return false;
             }
@@ -77,6 +78,8 @@ public class AisClient {
             System.out.println("[AIS] Prihlásený, načítavam údaje...");
             driver.get(STUDENT_HOME_URL);
             Thread.sleep(4000);
+            System.out.println("[AIS] Študentská stránka URL: " + driver.getCurrentUrl());
+            System.out.println("[AIS] Študentská stránka title: " + driver.getTitle());
 
             currentStudent = new StudentInfo();
             currentStudent.setFullName(username);
@@ -97,6 +100,24 @@ public class AisClient {
                 }
             } catch (Exception ignored) {}
 
+            LocalCacheService.CacheSnapshot cachedSnapshot =
+                    new LocalCacheService().load().orElse(null);
+            if (isCacheForCurrentStudent(cachedSnapshot)) {
+                StudentInfo cachedStudent = cachedSnapshot.getStudentInfo();
+                currentStudent.setEnrollmentListId(cachedStudent.getEnrollmentListId());
+                currentStudent.setEnrollmentListIds(
+                        new ArrayList<>(cachedStudent.getEnrollmentListIds()));
+                currentStudent.setEnrollmentListNames(
+                        new ArrayList<>(cachedStudent.getEnrollmentListNames()));
+                System.out.println("[AIS] Login úspešný.");
+                System.out.println("[AIS] Študent: " + currentStudent.getFullName());
+                System.out.println("[CACHE] Platná cache nájdená.");
+                System.out.println("[CACHE] Používam zápisné listy z cache.");
+                System.out.println("[CACHE] Selenium discovery zápisných listov preskočený.");
+                loggedIn = true;
+                return true;
+            }
+
             System.out.println("[AIS] Hľadám zápisné listy...");
             Thread.sleep(3000);
 
@@ -108,11 +129,13 @@ public class AisClient {
                     String text = link.getText().trim();
                     if (text.contains("Moje predmety v")) {
                         predmetyLinks.add(link);
+                        System.out.println("[AIS] Zápisný list element: text=\""
+                                + text + "\", href=\"" + link.getAttribute("href") + "\"");
                     }
                 } catch (StaleElementReferenceException ignored) {}
             }
 
-            System.out.println("[AIS] Počet zápisných listov: " + predmetyLinks.size());
+            System.out.println("[AIS] Relevantných odkazov: " + predmetyLinks.size());
 
             for (int i = 0; i < predmetyLinks.size(); i++) {
                 try {
@@ -123,25 +146,22 @@ public class AisClient {
                         predmetyLinks.clear();
                         for (WebElement link : allLinks) {
                             try {
-                                String text = link.getText().trim();
-                                if (text.contains("Moje predmety v")) {
+                                if (link.getText().trim().contains("Moje predmety v")) {
                                     predmetyLinks.add(link);
                                 }
                             } catch (StaleElementReferenceException ignored) {}
                         }
-                        if (i >= predmetyLinks.size()) break;
+                        if (i >= predmetyLinks.size()) {
+                            break;
+                        }
                     }
 
                     WebElement link = predmetyLinks.get(i);
                     String linkText = link.getText().trim();
                     link.click();
                     Thread.sleep(4000);
-
                     String newUrl = driver.getCurrentUrl();
-                    if (!newUrl.contains("zl=")) {
-                        Thread.sleep(2000);
-                        newUrl = driver.getCurrentUrl();
-                    }
+                    System.out.println("[AIS] URL po otvorení zápisného listu: " + newUrl);
 
                     if (newUrl.contains("zl=")) {
                         String zl = extractParam(newUrl, "zl");
@@ -170,10 +190,35 @@ public class AisClient {
 
         } catch (Exception e) {
             System.out.println("[AIS] CHYBA: " + e.getMessage());
-            e.printStackTrace();
             closeDriver();
+            throw e;
+        }
+    }
+
+    private boolean isInvalidCredentialsPage() {
+        List<WebElement> errorElements = driver.findElements(By.cssSelector(".login-error"));
+        return !errorElements.isEmpty()
+                && !errorElements.get(0).getText().trim().isEmpty();
+    }
+
+    private boolean isCacheForCurrentStudent(LocalCacheService.CacheSnapshot snapshot) {
+        if (snapshot == null || snapshot.getStudentInfo() == null
+                || currentStudent == null) {
             return false;
         }
+
+        StudentInfo cachedStudent = snapshot.getStudentInfo();
+        String cachedName = cachedStudent.getFullName();
+        String currentName = currentStudent.getFullName();
+        return cachedName != null && currentName != null
+                && cachedName.equalsIgnoreCase(currentName)
+                && cachedStudent.getEnrollmentListIds() != null
+                && cachedStudent.getEnrollmentListNames() != null
+                && !cachedStudent.getEnrollmentListIds().isEmpty()
+                && cachedStudent.getEnrollmentListIds().size()
+                        == cachedStudent.getEnrollmentListNames().size()
+                && snapshot.getEnrollmentData() != null
+                && !snapshot.getEnrollmentData().isEmpty();
     }
 
     public List<Subject> fetchSubjects(String enrollmentListId) {
@@ -246,7 +291,7 @@ public class AisClient {
                             "  var el = allElements[i];" +
                             "  var text = (el.textContent || '').trim();" +
                             "  var tag = el.tagName.toLowerCase();" +
-                            "  var cls = el.className || '';" +
+                            "  var cls = el.getAttribute('class') || '';" +
                             // Detekcia kategórie – hľadaj h2, h3, h4, alebo div s textom kategórie
                             "  if ((tag === 'h2' || tag === 'h3' || tag === 'h4' || tag === 'h5'" +
                             "       || cls.indexOf('typ-vyucby') >= 0 || cls.indexOf('studijna-cast') >= 0" +
@@ -260,8 +305,6 @@ public class AisClient {
                             "      if (lower.indexOf('voliteľ') < 0 && lower.indexOf('volitel') < 0) {" +
                             "        category = 'Povinné predmety';" +
                             "      }" +
-                            "    } else if (lower.indexOf('výber') >= 0 || lower.indexOf('vyber') >= 0) {" +
-                            "      category = 'Výberové predmety';" +
                             "    }" +
                             "  }" +
                             // Detekcia predmetu – mat-card elementy
@@ -272,8 +315,7 @@ public class AisClient {
                             "    if (!name || name.length < 3) continue;" +
                             // Preskočí ak to vyzerá ako kategória
                             "    var nameLower = name.toLowerCase();" +
-                            "    if (nameLower.indexOf('povinné') >= 0 || nameLower.indexOf('povinne') >= 0" +
-                            "        || nameLower.indexOf('výberové') >= 0 || nameLower.indexOf('vyberove') >= 0) continue;" +
+                            "    if (nameLower.indexOf('povinné') >= 0 || nameLower.indexOf('povinne') >= 0) continue;" +
                             // Kód predmetu
                             "    var codeEl = el.querySelector('.grey, .text-muted');" +
                             "    var code = codeEl ? codeEl.textContent.trim().split(' ')[0] : '-';" +
@@ -390,8 +432,6 @@ public class AisClient {
                             currentCategory = "Povinne voliteľné predmety";
                         } else if (text.contains("povinné") || text.contains("povinne")) {
                             currentCategory = "Povinné predmety";
-                        } else if (text.contains("výber") || text.contains("vyber")) {
-                            currentCategory = "Výberové predmety";
                         }
                         continue;
                     }
@@ -783,7 +823,6 @@ public class AisClient {
     }
 
     public StudentInfo getCurrentStudent() { return currentStudent; }
-    public boolean isLoggedIn() { return loggedIn; }
 
     public void logout() {
         closeDriver();

@@ -21,10 +21,22 @@
                 <Label fx:id="studentProgramLabel" text="" styleClass="top-program"/>
             </VBox>
 
+            <VBox spacing="1" alignment="CENTER_RIGHT">
+                <HBox spacing="6" alignment="CENTER_RIGHT">
+                    <ProgressIndicator fx:id="syncProgressIndicator" prefWidth="18" prefHeight="18"
+                                       visible="false" managed="false" styleClass="sync-progress"/>
+                    <Label fx:id="dataStatusLabel" text="" styleClass="top-sync-status"
+                           visible="false" managed="false"/>
+                </HBox>
+                <Label fx:id="lastUpdatedLabel" text="" styleClass="top-last-updated"
+                       visible="false" managed="false"/>
+            </VBox>
+
             <Label text="Zápisný list:" styleClass="top-label"/>
             <ComboBox fx:id="enrollmentListCombo" styleClass="enrollment-combo" prefWidth="180"/>
 
-            <Button text="Obnoviť" styleClass="refresh-button" onAction="#handleRefresh"/>
+            <Button fx:id="refreshButton" text="Obnoviť údaje"
+                    styleClass="refresh-button" onAction="#handleRefresh"/>
             <Button text="Odhlásiť" styleClass="logout-button" onAction="#handleLogout"/>
         </HBox>
     </top>
@@ -38,6 +50,11 @@
                 <ScrollPane fitToWidth="true" styleClass="tab-scroll">
                     <VBox spacing="16" styleClass="tab-content">
                         <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Semester:" styleClass="top-label"/>
+                            <ComboBox fx:id="semesterFilterCombo" prefWidth="180"/>
+                        </HBox>
 
                         <!-- Povinné predmety -->
                         <VBox spacing="6" styleClass="subject-group">
@@ -58,17 +75,6 @@
                             </HBox>
                             <TableView fx:id="optionalTable" prefHeight="200" styleClass="subject-table">
                                 <placeholder><Label text="Žiadne povinne voliteľné predmety"/></placeholder>
-                            </TableView>
-                        </VBox>
-
-                        <!-- Výberové predmety -->
-                        <VBox spacing="6" styleClass="subject-group">
-                            <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label text="Výberové predmety" styleClass="group-title"/>
-                                <Label fx:id="electiveCreditsLabel" text="Kredity: 0" styleClass="credits-badge elective-badge"/>
-                            </HBox>
-                            <TableView fx:id="electiveTable" prefHeight="150" styleClass="subject-table">
-                                <placeholder><Label text="Žiadne výberové predmety"/></placeholder>
                             </TableView>
                         </VBox>
 
@@ -115,12 +121,6 @@
                                 <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
                                 <Label text="Povinne voliteľné" styleClass="credit-card-label"/>
                                 <Label fx:id="optionalCreditsTotal" text="-" styleClass="credit-card-value"/>
-                            </VBox>
-                            <!-- Elective -->
-                            <VBox styleClass="credit-card elective-card" spacing="4" alignment="CENTER" minWidth="140">
-                                <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
-                                <Label text="Výberové" styleClass="credit-card-label"/>
-                                <Label fx:id="electiveCreditsTotal" text="-" styleClass="credit-card-value"/>
                             </VBox>
                         </HBox>
 
