@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import sk.ukf.aisviewer.controller.MainController;
+import sk.ukf.aisviewer.service.LocalCacheService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -23,12 +25,30 @@ public class App extends Application {
             stage.getIcons().add(new Image(iconUrl.toExternalForm()));
         }
 
-        showLoginScreen();
+        System.out.println("[STARTUP] Začínam načítanie cache.");
+        try {
+            LocalCacheService.CacheSnapshot cachedSnapshot =
+                    new LocalCacheService().load().orElse(null);
+            if (cachedSnapshot != null && cachedSnapshot.getStudentInfo() != null
+                    && cachedSnapshot.getEnrollmentData() != null
+                    && !cachedSnapshot.getEnrollmentData().isEmpty()) {
+                System.out.println("[STARTUP] Platná cache nájdená, otváram hlavné okno.");
+                MainController.setAisClient(null);
+                showMainScreen();
+            } else {
+                System.out.println("[STARTUP] Použiteľná cache nebola nájdená, otváram login.");
+                showLoginScreen();
+            }
+        } catch (Exception e) {
+            System.err.println("[STARTUP] Chyba pri otváraní UI s cache, prechádzam na login.");
+            e.printStackTrace();
+            showLoginScreen();
+        }
     }
 
     public static void showLoginScreen() throws IOException {
         FXMLLoader loader = new FXMLLoader(App.class.getResource("login.fxml"));
-        Scene scene = new Scene(loader.load(), 420, 340);
+        Scene scene = new Scene(loader.load(), 600, 600);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
         primaryStage.show();
@@ -42,6 +62,7 @@ public class App extends Application {
         primaryStage.setMinWidth(800);
         primaryStage.setMinHeight(600);
         primaryStage.centerOnScreen();
+        primaryStage.show();
     }
 
     public static Stage getPrimaryStage() {

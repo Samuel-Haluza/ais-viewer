@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.chart.PieChart;
 import javafx.scene.layout.*;
 import sk.ukf.aisviewer.App;
 import sk.ukf.aisviewer.model.Exam;
@@ -21,7 +22,11 @@ import sk.ukf.aisviewer.service.LocalCacheService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -54,12 +59,19 @@ public class MainController {
     @FXML private Label mandatoryCreditsTotal;
     @FXML private Label optionalCreditsTotal;
     @FXML private Label avgGradeLabel;
+    @FXML private Label yearAvgGradeLabel;
+    @FXML private Label graduationCreditsLabel;
+    @FXML private ProgressBar graduationProgressBar;
+    @FXML private Label graduationProgressLabel;
+    @FXML private Label graduationRemainingLabel;
+    @FXML private PieChart creditsByCategoryChart;
 
     // --- Schedule Tab ---
     @FXML private VBox scheduleContainer;
     @FXML private Label scheduleStatusLabel;
 
     private static AisClient aisClient;
+    private static String runtimePassword;
     private StudentInfo studentInfo;
     private final LocalCacheService cacheService = new LocalCacheService();
     private LocalCacheService.CacheSnapshot cacheSnapshot;
@@ -71,12 +83,19 @@ public class MainController {
         aisClient = client;
     }
 
+    public static void setRuntimePassword(String password) {
+        runtimePassword = password;
+    }
+
     @FXML
     public void initialize() {
-        if (aisClient == null) return;
-
-        studentInfo = aisClient.getCurrentStudent();
         cacheSnapshot = cacheService.load().orElse(null);
+        studentInfo = aisClient != null ? aisClient.getCurrentStudent() : null;
+        if (studentInfo == null && cacheSnapshot != null) {
+            studentInfo = cacheSnapshot.getStudentInfo();
+        }
+        if (studentInfo == null) return;
+
         restoreCachedEnrollmentLists();
         updateStudentInfoBar();
         setupSubjectTables();
@@ -169,39 +188,37 @@ public class MainController {
         roomCol.setCellValueFactory(new PropertyValueFactory<>("room"));
         roomCol.setPrefWidth(100);
 
-        TableColumn<Exam, String> teacherCol = new TableColumn<>("Skúšajúci");
-        teacherCol.setCellValueFactory(new PropertyValueFactory<>("teacher"));
-        teacherCol.setPrefWidth(180);
-
-        TableColumn<Exam, String> capCol = new TableColumn<>("Kapacita");
-        capCol.setCellValueFactory(new PropertyValueFactory<>("capacity"));
-        capCol.setPrefWidth(75);
-
-        TableColumn<Exam, String> enrolledCol = new TableColumn<>("Prihlásení");
-        enrolledCol.setCellValueFactory(new PropertyValueFactory<>("enrolled"));
-        enrolledCol.setPrefWidth(85);
-
         TableColumn<Exam, String> statusCol = new TableColumn<>("Stav");
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         statusCol.setPrefWidth(100);
 
+        TableColumn<Exam, String> typeCol = new TableColumn<>("Typ");
+        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeCol.setPrefWidth(120);
+
         examsTable.getColumns().setAll(subjectCol, dateCol, timeCol, roomCol,
-                teacherCol, capCol, enrolledCol, statusCol);
+                statusCol, typeCol);
         examsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         examsTable.setPlaceholder(new Label("Žiadne skúškové termíny"));
     }
 
     private void loadInitialData() {
-        if (isCacheForCurrentStudent(cacheSnapshot)) {
+        boolean usableCache = cacheSnapshot != null
+                && cacheSnapshot.getStudentInfo() != null
+                && (aisClient == null || isCacheForCurrentStudent(cacheSnapshot));
+        if (usableCache) {
             displaySelectedEnrollmentFromCache();
             showLastUpdated(cacheSnapshot.getUpdatedAt());
             if (!dataDisplayed) {
                 showSelectionUnavailable();
             }
         } else {
-            cacheSnapshot = null;
-            setLoadingState("Načítavam údaje z AIS…");
-            startSynchronization(true);
+            if (aisClient != null) {
+                setLoadingState("Načítavam údaje z AIS…");
+                startSynchronization(true);
+            } else {
+                showSelectionUnavailable();
+            }
         }
     }
 
@@ -471,27 +488,110 @@ public class MainController {
     }
 
     private void updateCreditsTab(List<Subject> subjects) {
-        int mandatory = subjects.stream()
+        final int requiredCredits = 180;
+        List<Subject> completedSubjects = getCompletedSubjectsFromAllEnrollments(subjects);
+        int mandatory = completedSubjects.stream()
                 .filter(s -> "Povinné predmety".equals(s.getCategory()))
                 .mapToInt(Subject::getCreditsValue).sum();
-        int optional = subjects.stream()
+        int optional = completedSubjects.stream()
                 .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
                 .mapToInt(Subject::getCreditsValue).sum();
-        int total = subjects.stream().mapToInt(Subject::getCreditsValue).sum();
+        int total = completedSubjects.stream().mapToInt(Subject::getCreditsValue).sum();
 
         totalCreditsLabel.setText(String.valueOf(total));
         mandatoryCreditsTotal.setText(String.valueOf(mandatory));
         optionalCreditsTotal.setText(String.valueOf(optional));
-        // Calculate average grade
-        List<Subject> graded = subjects.stream()
-                .filter(s -> s.getGradeNumeric() > 0)
-                .collect(Collectors.toList());
-        if (!graded.isEmpty()) {
-            double avg = graded.stream().mapToDouble(Subject::getGradeNumeric).average().orElse(0);
-            avgGradeLabel.setText(String.format("%.2f", avg));
-        } else {
-            avgGradeLabel.setText("-");
+
+        double progress = (double) total / requiredCredits;
+        int remaining = Math.max(0, requiredCredits - total);
+        double percentage = Math.min(100, progress * 100);
+        graduationCreditsLabel.setText(total + " / " + requiredCredits + " kreditov");
+        graduationProgressBar.setProgress(Math.min(1.0, progress));
+        graduationProgressLabel.setText(String.format("%.0f %%", percentage));
+        graduationRemainingLabel.setText("Zostáva " + remaining + " kreditov");
+
+        creditsByCategoryChart.setData(FXCollections.observableArrayList(
+                new PieChart.Data("Povinné predmety", mandatory),
+                new PieChart.Data("Povinne voliteľné predmety", optional)));
+
+        setWeightedAverageLabel(avgGradeLabel, completedSubjects);
+        setWeightedAverageLabel(yearAvgGradeLabel, subjects);
+    }
+
+    private void setWeightedAverageLabel(Label label, List<Subject> subjects) {
+        if (label == null || subjects == null) {
+            return;
         }
+        double weightedGradeSum = 0;
+        int gradedCredits = 0;
+        for (Subject subject : subjects) {
+            if (!isCompletedSubject(subject)) {
+                continue;
+            }
+            double grade = subject.getGradeNumeric();
+            int credits = subject.getCreditsValue();
+            if (grade > 0 && credits > 0) {
+                weightedGradeSum += grade * credits;
+                gradedCredits += credits;
+            }
+        }
+
+        label.setText(gradedCredits > 0
+                ? String.format("%.2f", weightedGradeSum / gradedCredits)
+                : "-");
+    }
+
+    private List<Subject> getCompletedSubjectsFromAllEnrollments(List<Subject> currentSubjects) {
+        Map<String, Subject> uniqueSubjects = new LinkedHashMap<>();
+        if (cacheSnapshot != null && cacheSnapshot.getEnrollmentData() != null) {
+            for (LocalCacheService.EnrollmentData enrollmentData
+                    : cacheSnapshot.getEnrollmentData().values()) {
+                if (enrollmentData == null || enrollmentData.getSubjects() == null) {
+                    continue;
+                }
+                for (Subject subject : enrollmentData.getSubjects()) {
+                    addCompletedSubject(uniqueSubjects, subject);
+                }
+            }
+        }
+        if (currentSubjects != null) {
+            for (Subject subject : currentSubjects) {
+                addCompletedSubject(uniqueSubjects, subject);
+            }
+        }
+        return new ArrayList<>(uniqueSubjects.values());
+    }
+
+    private void addCompletedSubject(Map<String, Subject> uniqueSubjects, Subject subject) {
+        if (!isCompletedSubject(subject)) {
+            return;
+        }
+        String abbreviation = subject.getAbbreviation() == null
+                ? "" : subject.getAbbreviation().trim();
+        String name = subject.getName() == null ? "" : subject.getName().trim();
+        String key = (abbreviation + "|" + name).toLowerCase();
+        uniqueSubjects.putIfAbsent(key, subject);
+    }
+
+    private boolean isCompletedSubject(Subject subject) {
+        if (subject == null || subject.getGrade() == null) {
+            return false;
+        }
+        String grade = subject.getGrade().trim();
+        if (grade.isBlank() || "-".equals(grade)) {
+            return false;
+        }
+
+        if (subject.getGradeNumeric() > 0) {
+            return true;
+        }
+
+        String normalizedGrade = grade.toLowerCase(Locale.ROOT);
+        if (normalizedGrade.contains("abs") || normalizedGrade.contains("absolv")) {
+            return true;
+        }
+
+        return normalizedGrade.matches("^[a-e](?:\\b|\\s|-|\\().*");
     }
 
     private void setLoadingState(String message) {
@@ -537,6 +637,7 @@ public class MainController {
             aisClient.logout();
             aisClient = null;
         }
+        runtimePassword = null;
         try {
             App.showLoginScreen();
         } catch (Exception e) {
@@ -547,8 +648,68 @@ public class MainController {
     @FXML
     private void handleRefresh() {
         if (!syncInProgress) {
-            startSynchronization(false);
+            if (UiDialogs.showRefreshNotice(refreshButton.getScene().getWindow())) {
+                if (runtimePassword != null && !runtimePassword.isBlank()
+                        && studentInfo != null && studentInfo.getIdo() != null
+                        && !studentInfo.getIdo().isBlank()) {
+                    refreshWithCredentials(studentInfo.getIdo(), runtimePassword);
+                } else {
+                    synchronizeAfterPasswordPrompt();
+                }
+            }
         }
+    }
+
+    private void synchronizeAfterPasswordPrompt() {
+        if (studentInfo == null || studentInfo.getIdo() == null
+                || studentInfo.getIdo().isBlank()) {
+            showSyncStatus("AIS ID nie je dostupné v cache.", false);
+            return;
+        }
+
+        UiDialogs.showPasswordPrompt(refreshButton.getScene().getWindow()).ifPresent(password -> {
+            if (password.isBlank()) {
+                showSyncStatus("Heslo nesmie byť prázdne.", false);
+                return;
+            }
+            refreshWithCredentials(studentInfo.getIdo(), password);
+        });
+    }
+
+    private void refreshWithCredentials(String aisId, String password) {
+        refreshButton.setDisable(true);
+        showSyncStatus("Prihlasovanie a aktualizácia údajov z AIS…", true);
+        Thread loginThread = new Thread(() -> {
+            try {
+                AisClient client = new AisClient();
+                if (!client.login(aisId, password)) {
+                    Platform.runLater(() -> {
+                        refreshButton.setDisable(false);
+                        showSyncStatus("Nesprávne heslo alebo AIS ID.", false);
+                        UiDialogs.showInvalidPassword(refreshButton.getScene().getWindow());
+                        synchronizeAfterPasswordPrompt();
+                    });
+                    return;
+                }
+                Platform.runLater(() -> {
+                    AisClient previousClient = aisClient;
+                    aisClient = client;
+                    studentInfo = client.getCurrentStudent();
+                    runtimePassword = password;
+                    if (previousClient != null) {
+                        previousClient.logout();
+                    }
+                    startSynchronization(false);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    refreshButton.setDisable(false);
+                    showSyncStatus("Údaje sa nepodarilo načítať z AIS.", false);
+                });
+            }
+        });
+        loginThread.setDaemon(true);
+        loginThread.start();
     }
 
     // ==================== SCHEDULE GRID ====================

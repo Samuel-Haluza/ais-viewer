@@ -98,6 +98,23 @@
     -fx-text-fill: #6b7488;
 }
 
+.dialog-secondary-button {
+    -fx-background-color: #2d3340;
+    -fx-background-radius: 6px;
+    -fx-border-color: #3d4555;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #c8d0e0;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 11 14 11 14;
+    -fx-cursor: hand;
+}
+
+.dialog-secondary-button:hover {
+    -fx-background-color: #3d4555;
+}
+
 .error-label {
     -fx-text-fill: #ff6b6b;
     -fx-font-size: 12px;

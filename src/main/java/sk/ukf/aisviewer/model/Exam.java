@@ -11,6 +11,7 @@ public class Exam {
     private String capacity;
     private String enrolled;
     private String status;
+    private String type;
     private String termId;
 
     public Exam() {}
@@ -55,6 +56,9 @@ public class Exam {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
     public String getTermId() { return termId; }
     public void setTermId(String termId) { this.termId = termId; }

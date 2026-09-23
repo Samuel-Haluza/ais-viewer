@@ -55,7 +55,12 @@ public class LocalCacheService {
             }
             return Optional.of(snapshot);
         } catch (IOException | JsonSyntaxException e) {
-            System.out.println("[CACHE] Cache sa nepodarilo načítať: " + e.getMessage());
+            System.err.println("[CACHE] Cache sa nepodarilo načítať: " + e.getMessage());
+            e.printStackTrace();
+            return Optional.empty();
+        } catch (RuntimeException e) {
+            System.err.println("[CACHE] Neočakávaná chyba pri načítaní cache.");
+            e.printStackTrace();
             return Optional.empty();
         }
     }

@@ -8,6 +8,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import sk.ukf.aisviewer.App;
 import sk.ukf.aisviewer.service.AisClient;
+import sk.ukf.aisviewer.service.LocalCacheService;
 
 public class LoginController {
 
@@ -33,6 +34,15 @@ public class LoginController {
             return;
         }
 
+        LocalCacheService.CacheSnapshot snapshot =
+                new LocalCacheService().load().orElse(null);
+        boolean usableCache = snapshot != null && snapshot.getStudentInfo() != null
+                && snapshot.getEnrollmentData() != null
+                && !snapshot.getEnrollmentData().isEmpty();
+        if (!usableCache && !UiDialogs.showFirstLoginNotice(loginButton.getScene().getWindow())) {
+            return;
+        }
+
         loginButton.setDisable(true);
         usernameField.setDisable(true);
         passwordField.setDisable(true);
@@ -47,6 +57,7 @@ public class LoginController {
                     if (success) {
                         try {
                             MainController.setAisClient(client);
+                            MainController.setRuntimePassword(password);
                             App.showMainScreen();
                         } catch (Exception e) {
                             showError("Chyba pri otváraní hlavného okna: " + e.getMessage());

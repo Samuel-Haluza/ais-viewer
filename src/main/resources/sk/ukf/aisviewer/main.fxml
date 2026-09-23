@@ -1,43 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.chart.PieChart?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="sk.ukf.aisviewer.controller.MainController"
-            stylesheets="@styles.css"
-            styleClass="main-root">
+<BorderPane styleClass="main-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.MainController">
 
     <!-- Top Bar -->
     <top>
-        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="12">
-            <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="top-bar">
+            <padding><Insets bottom="10" left="16" right="16" top="10" /></padding>
 
             <VBox spacing="2" HBox.hgrow="ALWAYS">
-                <Label fx:id="studentNameLabel" text="Načítavam..." styleClass="top-name"/>
-                <Label fx:id="studentProgramLabel" text="" styleClass="top-program"/>
+                <Label fx:id="studentNameLabel" styleClass="top-name" text="Načítavam..." />
+                <Label fx:id="studentProgramLabel" styleClass="top-program" text="" />
             </VBox>
 
-            <VBox spacing="1" alignment="CENTER_RIGHT">
-                <HBox spacing="6" alignment="CENTER_RIGHT">
-                    <ProgressIndicator fx:id="syncProgressIndicator" prefWidth="18" prefHeight="18"
-                                       visible="false" managed="false" styleClass="sync-progress"/>
-                    <Label fx:id="dataStatusLabel" text="" styleClass="top-sync-status"
-                           visible="false" managed="false"/>
+            <VBox alignment="CENTER_RIGHT" spacing="1">
+                <HBox alignment="CENTER_RIGHT" spacing="6">
+                    <ProgressIndicator fx:id="syncProgressIndicator" managed="false" prefHeight="18" prefWidth="18" styleClass="sync-progress" visible="false" />
+                    <Label fx:id="dataStatusLabel" managed="false" styleClass="top-sync-status" text="" visible="false" />
                 </HBox>
-                <Label fx:id="lastUpdatedLabel" text="" styleClass="top-last-updated"
-                       visible="false" managed="false"/>
+                <Label fx:id="lastUpdatedLabel" managed="false" styleClass="top-last-updated" text="" visible="false" />
             </VBox>
 
-            <Label text="Zápisný list:" styleClass="top-label"/>
-            <ComboBox fx:id="enrollmentListCombo" styleClass="enrollment-combo" prefWidth="180"/>
+            <Label styleClass="top-label" text="Zápisný list:" />
+            <ComboBox fx:id="enrollmentListCombo" prefWidth="180" styleClass="enrollment-combo" />
 
-            <Button fx:id="refreshButton" text="Obnoviť údaje"
-                    styleClass="refresh-button" onAction="#handleRefresh"/>
-            <Button text="Odhlásiť" styleClass="logout-button" onAction="#handleLogout"/>
+            <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="refresh-button" text="Obnoviť údaje" />
+            <Button onAction="#handleLogout" styleClass="logout-button" text="Odhlásiť" />
         </HBox>
     </top>
 
@@ -49,32 +51,32 @@
             <Tab text="📚  Predmety">
                 <ScrollPane fitToWidth="true" styleClass="tab-scroll">
                     <VBox spacing="16" styleClass="tab-content">
-                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
 
                         <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Label text="Semester:" styleClass="top-label"/>
-                            <ComboBox fx:id="semesterFilterCombo" prefWidth="180"/>
+                            <Label styleClass="top-label" text="Semester:" />
+                            <ComboBox fx:id="semesterFilterCombo" prefWidth="180" />
                         </HBox>
 
                         <!-- Povinné predmety -->
                         <VBox spacing="6" styleClass="subject-group">
                             <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label text="Povinné predmety" styleClass="group-title"/>
-                                <Label fx:id="mandatoryCreditsLabel" text="Kredity: 0" styleClass="credits-badge mandatory-badge"/>
+                                <Label styleClass="group-title" text="Povinné predmety" />
+                                <Label fx:id="mandatoryCreditsLabel" styleClass="credits-badge mandatory-badge" text="Kredity: 0" />
                             </HBox>
                             <TableView fx:id="mandatoryTable" prefHeight="200" styleClass="subject-table">
-                                <placeholder><Label text="Žiadne povinné predmety"/></placeholder>
+                                <placeholder><Label text="Žiadne povinné predmety" /></placeholder>
                             </TableView>
                         </VBox>
 
                         <!-- Povinne voliteľné predmety -->
                         <VBox spacing="6" styleClass="subject-group">
                             <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label text="Povinne voliteľné predmety" styleClass="group-title"/>
-                                <Label fx:id="optionalCreditsLabel" text="Kredity: 0" styleClass="credits-badge optional-badge"/>
+                                <Label styleClass="group-title" text="Povinne voliteľné predmety" />
+                                <Label fx:id="optionalCreditsLabel" styleClass="credits-badge optional-badge" text="Kredity: 0" />
                             </HBox>
                             <TableView fx:id="optionalTable" prefHeight="200" styleClass="subject-table">
-                                <placeholder><Label text="Žiadne povinne voliteľné predmety"/></placeholder>
+                                <placeholder><Label text="Žiadne povinne voliteľné predmety" /></placeholder>
                             </TableView>
                         </VBox>
 
@@ -85,11 +87,11 @@
             <!-- Tab 2: Skúšky -->
             <Tab text="📝  Skúšky">
                 <VBox spacing="12" styleClass="tab-content">
-                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
-                    <Label text="Skúškové termíny" styleClass="group-title"/>
-                    <Label fx:id="examsStatusLabel" text="" styleClass="status-label" visible="false"/>
-                    <TableView fx:id="examsTable" VBox.vgrow="ALWAYS" styleClass="subject-table">
-                        <placeholder><Label text="Žiadne skúškové termíny"/></placeholder>
+                    <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
+                    <Label styleClass="group-title" text="Skúškové termíny" />
+                    <Label fx:id="examsStatusLabel" styleClass="status-label" text="" visible="false" />
+                    <TableView fx:id="examsTable" styleClass="subject-table" VBox.vgrow="ALWAYS">
+                        <placeholder><Label text="Žiadne skúškové termíny" /></placeholder>
                     </TableView>
                 </VBox>
             </Tab>
@@ -98,37 +100,63 @@
             <Tab text="📊  Kredity">
                 <ScrollPane fitToWidth="true" styleClass="tab-scroll">
                     <VBox spacing="20" styleClass="tab-content">
-                        <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+                        <padding><Insets bottom="24" left="24" right="24" top="24" /></padding>
 
-                        <Label text="Prehľad kreditov" styleClass="group-title"/>
+                        <Label styleClass="group-title" text="Prehľad kreditov" />
 
                         <!-- Credit summary cards -->
-                        <HBox spacing="16" alignment="CENTER_LEFT">
+                        <HBox alignment="CENTER_LEFT" spacing="16">
                             <!-- Total -->
-                            <VBox styleClass="credit-card total-card" spacing="4" alignment="CENTER" minWidth="140">
-                                <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
-                                <Label text="Celkové kredity" styleClass="credit-card-label"/>
-                                <Label fx:id="totalCreditsLabel" text="-" styleClass="credit-card-value"/>
+                            <VBox alignment="CENTER" minWidth="140" spacing="4" styleClass="credit-card total-card">
+                                <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                                <Label styleClass="credit-card-label" text="Celkové kredity" />
+                                <Label fx:id="totalCreditsLabel" styleClass="credit-card-value" text="-" />
                             </VBox>
                             <!-- Mandatory -->
-                            <VBox styleClass="credit-card mandatory-card" spacing="4" alignment="CENTER" minWidth="140">
-                                <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
-                                <Label text="Povinné" styleClass="credit-card-label"/>
-                                <Label fx:id="mandatoryCreditsTotal" text="-" styleClass="credit-card-value"/>
+                            <VBox alignment="CENTER" minWidth="140" spacing="4" styleClass="credit-card mandatory-card">
+                                <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                                <Label styleClass="credit-card-label" text="Povinné" />
+                                <Label fx:id="mandatoryCreditsTotal" styleClass="credit-card-value" text="-" />
                             </VBox>
                             <!-- Optional -->
-                            <VBox styleClass="credit-card optional-card" spacing="4" alignment="CENTER" minWidth="140">
-                                <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
-                                <Label text="Povinne voliteľné" styleClass="credit-card-label"/>
-                                <Label fx:id="optionalCreditsTotal" text="-" styleClass="credit-card-value"/>
+                            <VBox alignment="CENTER" minWidth="140" spacing="4" styleClass="credit-card optional-card">
+                                <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                                <Label styleClass="credit-card-label" text="Povinne voliteľné" />
+                                <Label fx:id="optionalCreditsTotal" styleClass="credit-card-value" text="-" />
                             </VBox>
+
+                           <!-- Grade average -->
+                           <VBox alignment="CENTER_LEFT" maxWidth="300" spacing="4" styleClass="credit-card avg-card">
+                               <padding>
+                           <Insets bottom="16" left="20" right="20" top="16" />
+                        </padding>
+                               <Label styleClass="credit-card-label" text="Vážený priemer známok" />
+                               <Label fx:id="avgGradeLabel" styleClass="credit-card-value-large" text="-" />
+                               <Label styleClass="credit-card-label" text="Za celé štúdium" />
+                           </VBox>
+                           <VBox alignment="CENTER_LEFT" maxWidth="300" spacing="4" styleClass="credit-card avg-card">
+                               <padding>
+                           <Insets bottom="16" left="20" right="20" top="16" />
+                        </padding>
+                               <Label styleClass="credit-card-label" text="Vážený priemer podľa ročníka" />
+                               <Label fx:id="yearAvgGradeLabel" styleClass="credit-card-value-large" text="-" />
+                               <Label styleClass="credit-card-label" text="Podľa vybraného ročníka" />
+                           </VBox>
                         </HBox>
 
-                        <!-- Grade average -->
-                        <VBox styleClass="credit-card avg-card" spacing="4" alignment="CENTER_LEFT" maxWidth="300">
-                            <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
-                            <Label text="Vážený priemer známok" styleClass="credit-card-label"/>
-                            <Label fx:id="avgGradeLabel" text="-" styleClass="credit-card-value-large"/>
+                        <VBox spacing="12" styleClass="credit-card">
+                            <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+                            <Label styleClass="group-title" text="🎓 Postup k ukončeniu štúdia" />
+                            <Label fx:id="graduationCreditsLabel" styleClass="credit-card-value" text="-" />
+                            <ProgressBar fx:id="graduationProgressBar" maxWidth="Infinity" progress="0.0" />
+                            <Label fx:id="graduationProgressLabel" styleClass="credit-card-label" text="-" />
+                            <Label fx:id="graduationRemainingLabel" styleClass="status-label" text="-" />
+                        </VBox>
+
+                        <VBox spacing="12">
+                            <Label styleClass="group-title" text="📈 Kredity podľa kategórie" />
+                            <PieChart fx:id="creditsByCategoryChart" legendVisible="true"
+                                      prefHeight="300.0" prefWidth="600.0" />
                         </VBox>
 
                     </VBox>
@@ -138,28 +166,28 @@
             <!-- Tab 4: Rozvrh -->
             <Tab text="🗓  Rozvrh">
                 <VBox spacing="12" styleClass="tab-content">
-                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
                     <HBox alignment="CENTER_LEFT" spacing="16">
-                        <Label text="Rozvrh" styleClass="group-title"/>
-                        <Label fx:id="scheduleStatusLabel" text="" styleClass="status-label" visible="false"/>
+                        <Label styleClass="group-title" text="Rozvrh" />
+                        <Label fx:id="scheduleStatusLabel" styleClass="status-label" text="" visible="false" />
                     </HBox>
                     <!-- Legend -->
-                    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="schedule-legend">
-                        <HBox spacing="4" alignment="CENTER_LEFT">
-                            <Label styleClass="legend-dot legend-lecture"/>
-                            <Label text="Prednáška" styleClass="legend-text"/>
+                    <HBox alignment="CENTER_LEFT" spacing="16" styleClass="schedule-legend">
+                        <HBox alignment="CENTER_LEFT" spacing="4">
+                            <Label styleClass="legend-dot legend-lecture" />
+                            <Label styleClass="legend-text" text="Prednáška" />
                         </HBox>
-                        <HBox spacing="4" alignment="CENTER_LEFT">
-                            <Label styleClass="legend-dot legend-seminar"/>
-                            <Label text="Cvičenie / Seminár" styleClass="legend-text"/>
+                        <HBox alignment="CENTER_LEFT" spacing="4">
+                            <Label styleClass="legend-dot legend-seminar" />
+                            <Label styleClass="legend-text" text="Cvičenie / Seminár" />
                         </HBox>
-                        <HBox spacing="4" alignment="CENTER_LEFT">
-                            <Label styleClass="legend-dot legend-other"/>
-                            <Label text="Ostatné" styleClass="legend-text"/>
+                        <HBox alignment="CENTER_LEFT" spacing="4">
+                            <Label styleClass="legend-dot legend-other" />
+                            <Label styleClass="legend-text" text="Ostatné" />
                         </HBox>
                     </HBox>
-                    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="schedule-scroll">
-                        <VBox fx:id="scheduleContainer" styleClass="schedule-container"/>
+                    <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="schedule-scroll" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="scheduleContainer" styleClass="schedule-container" />
                     </ScrollPane>
                 </VBox>
             </Tab>

@@ -13,7 +13,9 @@ import sk.ukf.aisviewer.model.Subject;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AisClient {
 
@@ -64,7 +66,7 @@ public class AisClient {
             WebElement submitBtn = driver.findElement(By.id("login-form-submit-btn"));
             submitBtn.click();
 
-            Thread.sleep(4000);
+            Thread.sleep(1500);
             String currentUrl = driver.getCurrentUrl();
             System.out.println("[AIS] URL po login-e: " + currentUrl);
             System.out.println("[AIS] Title po login-e: " + driver.getTitle());
@@ -77,12 +79,13 @@ public class AisClient {
 
             System.out.println("[AIS] Prihlásený, načítavam údaje...");
             driver.get(STUDENT_HOME_URL);
-            Thread.sleep(4000);
+            Thread.sleep(1500);
             System.out.println("[AIS] Študentská stránka URL: " + driver.getCurrentUrl());
             System.out.println("[AIS] Študentská stránka title: " + driver.getTitle());
 
             currentStudent = new StudentInfo();
             currentStudent.setFullName(username);
+            currentStudent.setIdo(username);
 
             try {
                 String src = driver.getPageSource();
@@ -119,7 +122,7 @@ public class AisClient {
             }
 
             System.out.println("[AIS] Hľadám zápisné listy...");
-            Thread.sleep(3000);
+            Thread.sleep(1500);
 
             List<WebElement> allLinks = driver.findElements(By.tagName("a"));
             List<WebElement> predmetyLinks = new ArrayList<>();
@@ -141,7 +144,7 @@ public class AisClient {
                 try {
                     if (i > 0) {
                         driver.get(STUDENT_HOME_URL);
-                        Thread.sleep(3000);
+                        Thread.sleep(1500);
                         allLinks = driver.findElements(By.tagName("a"));
                         predmetyLinks.clear();
                         for (WebElement link : allLinks) {
@@ -159,7 +162,7 @@ public class AisClient {
                     WebElement link = predmetyLinks.get(i);
                     String linkText = link.getText().trim();
                     link.click();
-                    Thread.sleep(4000);
+                    Thread.sleep(2500);
                     String newUrl = driver.getCurrentUrl();
                     System.out.println("[AIS] URL po otvorení zápisného listu: " + newUrl);
 
@@ -232,14 +235,14 @@ public class AisClient {
             String url = PREDMETY_URL + "?zl=" + enrollmentListId;
             System.out.println("[AIS] Načítavam predmety (zl=" + enrollmentListId + ")...");
             driver.get(url);
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
             try {
                 wait.until(ExpectedConditions.presenceOfElementLocated(
                         By.cssSelector("table, mat-card, .card, div.typ-vyucby, div.studijna-cast")
                 ));
             } catch (TimeoutException e) {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
             }
 
             // Stratégia 1: Tabuľka
@@ -477,45 +480,42 @@ public class AisClient {
             String url = PREDMETY_URL + "skusky?zl=" + enrollmentListId;
             System.out.println("[AIS] Načítavam skúšky...");
             driver.get(url);
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
-            List<WebElement> tables = driver.findElements(By.tagName("table"));
-            for (WebElement table : tables) {
-                List<WebElement> rows = table.findElements(By.cssSelector("tbody tr, tr"));
-                for (WebElement row : rows) {
-                    try {
-                        List<WebElement> cells = row.findElements(By.tagName("td"));
-                        if (cells.size() >= 3) {
-                            String subjectName = cells.get(0).getText().trim();
-                            String date = cells.size() > 1 ? cells.get(1).getText().trim() : "-";
-                            String time = cells.size() > 2 ? cells.get(2).getText().trim() : "-";
-                            String room = cells.size() > 3 ? cells.get(3).getText().trim() : "-";
-                            String teacher = cells.size() > 4 ? cells.get(4).getText().trim() : "-";
-                            String capacity = cells.size() > 5 ? cells.get(5).getText().trim() : "-";
-                            String enrolled = cells.size() > 6 ? cells.get(6).getText().trim() : "-";
-                            String status = cells.size() > 7 ? cells.get(7).getText().trim() : "-";
-
-                            if (!subjectName.isBlank() && !subjectName.equalsIgnoreCase("predmet")) {
-                                exams.add(new Exam(subjectName, "-", date, time, room,
-                                        teacher, capacity, enrolled, status));
-                            }
-                        }
-                    } catch (StaleElementReferenceException ignored) {}
-                }
+            Set<WebElement> termRows = new LinkedHashSet<>();
+            for (WebElement badge : driver.findElements(By.cssSelector(".card-body .badge"))) {
+                try {
+                    String time = badge.getText().trim();
+                    if (time.matches("\\d{1,2}:\\d{2}")) {
+                        termRows.add(badge.findElement(By.xpath(
+                                "./ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' row ')][1]")));
+                    }
+                } catch (NoSuchElementException | StaleElementReferenceException ignored) {}
             }
 
-            if (exams.isEmpty()) {
-                List<WebElement> panels = driver.findElements(
-                        By.cssSelector("mat-expansion-panel, [class*=skuska], [class*=termin], [class*=exam]")
-                );
-                for (WebElement panel : panels) {
-                    try {
-                        String text = panel.getText().trim();
-                        if (text.length() > 5) {
-                            exams.add(new Exam(text, "-", "-", "-", "-", "-", "-", "-", "-"));
+            for (WebElement termRow : termRows) {
+                try {
+                    String subjectText = safeGetText(termRow, ".fw-bold.ms-2.black");
+                    if (subjectText.isBlank()) {
+                        subjectText = safeGetText(termRow, ".col-12.col-md .fw-bold");
+                    }
+                    if (!subjectText.isBlank() && !subjectText.equalsIgnoreCase("predmet")) {
+                        String[] subject = splitExamSubject(subjectText);
+                        String time = safeGetText(termRow, ".badge");
+                        String date = findExamDate(termRow);
+                        String status = findExamStatus(termRow);
+                        String room = fetchExamRoomFromDetail(termRow);
+                        String type = safeGetText(termRow, ".small.font-italic");
+                        if (type.contains(",")) {
+                            type = type.substring(0, type.indexOf(',')).trim();
                         }
-                    } catch (StaleElementReferenceException ignored) {}
-                }
+
+                        Exam exam = new Exam(subject[1], subject[0], date, time, room,
+                                "", "", "", status);
+                        exam.setType(type);
+                        exams.add(exam);
+                    }
+                } catch (StaleElementReferenceException ignored) {}
             }
 
             System.out.println("[AIS] Načítaných " + exams.size() + " skúšok");
@@ -524,6 +524,110 @@ public class AisClient {
             e.printStackTrace();
         }
         return exams;
+    }
+
+    private String findExamDate(WebElement termRow) {
+        try {
+            WebElement dateContainer = termRow.findElement(By.xpath(
+                    "./ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' row ')"
+                            + " and .//div[contains(concat(' ', normalize-space(@class), ' '), ' col-lg-2 ')]]"
+                            + "//div[contains(concat(' ', normalize-space(@class), ' '), ' col-lg-2 ')]"));
+            return dateContainer.getText().trim()
+                    .replaceFirst("(?i)^(Po|Ut|St|Št|Pi|So|Ne)\\s+", "");
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            return "";
+        }
+    }
+
+    private String[] splitExamSubject(String subjectText) {
+        int separator = subjectText.indexOf(" - ");
+        if (separator < 0) {
+            return new String[]{"", subjectText};
+        }
+        return new String[]{
+                subjectText.substring(0, separator).trim(),
+                subjectText.substring(separator + 3).trim()
+        };
+    }
+
+    private String findExamStatus(WebElement termRow) {
+        for (WebElement span : termRow.findElements(By.cssSelector("button span"))) {
+            String text = span.getText().trim();
+            if (!text.isBlank()) {
+                return text;
+            }
+        }
+        return "";
+    }
+
+    private String fetchExamRoomFromDetail(WebElement termRow) {
+        By detailIcon = By.cssSelector("mat-icon[title='Detail termínu']");
+        By dialogLocator = By.cssSelector("mat-dialog-container");
+        By dialogContentLocator = By.cssSelector("mat-dialog-content");
+
+        WebElement dialog = null;
+        try {
+            WebElement icon = termRow.findElement(detailIcon);
+            ((JavascriptExecutor) driver).executeScript(
+                    "arguments[0].scrollIntoView({block: 'center'});", icon);
+            icon.click();
+
+            dialog = wait.until(driver -> {
+                List<WebElement> dialogs = driver.findElements(dialogLocator);
+                for (int i = dialogs.size() - 1; i >= 0; i--) {
+                    WebElement candidate = dialogs.get(i);
+                    try {
+                        if (candidate.isDisplayed()
+                                && !candidate.findElements(dialogContentLocator).isEmpty()) {
+                            return candidate;
+                        }
+                    } catch (StaleElementReferenceException ignored) {
+                    }
+                }
+                return null;
+            });
+            Thread.sleep(2000);
+            return extractRoomFromExamDialog(dialog, dialogContentLocator);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("[AIS] Čakanie na detail skúšky bolo prerušené.");
+            return "";
+        } catch (NoSuchElementException | StaleElementReferenceException | TimeoutException e) {
+            System.out.println("[AIS] Detail skúšky sa nepodarilo načítať: " + e.getMessage());
+            return "";
+        } finally {
+            if (dialog == null) {
+                for (WebElement candidate : driver.findElements(dialogLocator)) {
+                    try {
+                        if (candidate.isDisplayed()) {
+                            dialog = candidate;
+                            break;
+                        }
+                    } catch (StaleElementReferenceException ignored) {
+                    }
+                }
+            }
+            if (dialog != null) {
+                try {
+                    driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                    wait.until(ExpectedConditions.invisibilityOf(dialog));
+                } catch (NoSuchElementException | StaleElementReferenceException | TimeoutException ignored) {
+                    // The dialog may already have been closed by AIS.
+                }
+            }
+        }
+    }
+
+    private String extractRoomFromExamDialog(WebElement dialog, By dialogContentLocator) {
+        for (WebElement content : dialog.findElements(dialogContentLocator)) {
+            for (WebElement item : content.findElements(By.tagName("li"))) {
+                String value = item.getText().trim().replaceAll("\\s+", "");
+                if (value.matches("[A-Z]{2,4}\\d{5}")) {
+                    return value;
+                }
+            }
+        }
+        return "";
     }
 
     /**
@@ -539,7 +643,7 @@ public class AisClient {
 
             // Navigate to student home first to find the schedule link
             driver.get(STUDENT_HOME_URL);
-            Thread.sleep(3000);
+            Thread.sleep(2000);
 
             // Try clicking the schedule link
             boolean navigated = false;
@@ -549,7 +653,7 @@ public class AisClient {
                     String text = link.getText().trim().toLowerCase();
                     if (text.contains("rozvrh")) {
                         link.click();
-                        Thread.sleep(5000);
+                        Thread.sleep(2000);
                         navigated = true;
                         System.out.println("[AIS] Rozvrh URL: " + driver.getCurrentUrl());
                         break;
@@ -567,7 +671,7 @@ public class AisClient {
                 for (String tryUrl : rozvrhUrls) {
                     try {
                         driver.get(tryUrl);
-                        Thread.sleep(4000);
+                        Thread.sleep(2000);
                         String src = driver.getPageSource();
                         if (!src.contains("404") && src.length() > 500) {
                             navigated = true;
@@ -582,28 +686,102 @@ public class AisClient {
                 return entries;
             }
 
-            // Strategy 1: JavaScript DOM parsing - look for schedule table/grid
+            // Parse the AIS day columns and lesson components directly from the DOM.
+            entries = parseScheduleFromAisDom();
+            if (!entries.isEmpty()) {
+                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (AIS DOM)");
+                return entries;
+            }
+
+            // Keep the older parsers as a fallback for older AIS layouts.
             entries = parseScheduleViaJS();
             if (!entries.isEmpty()) {
-                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (JS)");
+                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (JS fallback)");
                 return entries;
             }
 
-            // Strategy 2: Parse from page source text using regex patterns
             entries = parseScheduleFromPageSource();
             if (!entries.isEmpty()) {
-                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (text)");
+                System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (text fallback)");
                 return entries;
             }
 
-            System.out.println("[AIS] Rozvrh sa nepodarilo rozparsovať.");
+                    System.out.println("[AIS] Rozvrh sa nepodarilo rozparsovať.");
 
-        } catch (Exception e) {
-            System.out.println("[AIS] Chyba pri načítaní rozvrhu: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return entries;
-    }
+                } catch (Exception e) {
+                    System.out.println("[AIS] Chyba pri načítaní rozvrhu: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                return entries;
+            }
+
+            @SuppressWarnings("unchecked")
+            private List<ScheduleEntry> parseScheduleFromAisDom() {
+                List<ScheduleEntry> entries = new ArrayList<>();
+                try {
+                    JavascriptExecutor js = (JavascriptExecutor) driver;
+                    Object result = js.executeScript(
+                            "var result = [];"
+                                    + "var dayMap = {'Pondelok':0,'Utorok':1,'Streda':2,'Štvrtok':3,'Piatok':4};"
+                                    + "var columns = document.querySelectorAll('div.row.h-100 > div.col');"
+                                    + "for (var d = 0; d < columns.length; d++) {"
+                                    + "  var column = columns[d];"
+                                    + "  var header = column.querySelector('.rozvrh-day-header');"
+                                    + "  if (!header) continue;"
+                                    + "  var day = header.textContent.trim();"
+                                    + "  var dayIndex = dayMap[day];"
+                                    + "  if (dayIndex === undefined) continue;"
+                                    + "  var windows = column.querySelectorAll('app-rozvrh-okienko');"
+                                    + "  for (var i = 0; i < windows.length; i++) {"
+                                    + "    var window = windows[i];"
+                                    + "    var timeNode = window.querySelector('.rozvrh-okienko > div:first-child');"
+                                    + "    var time = timeNode ? timeNode.textContent.trim() : '';"
+                                    + "    var match = time.match(/(\\d{1,2})[:.](\\d{2})\\s*[-–]\\s*(\\d{1,2})[:.](\\d{2})/);"
+                                    + "    if (!match) continue;"
+                                    + "    var shorthand = window.querySelector('.predmet-skratka');"
+                                    + "    var shorthandText = shorthand ? shorthand.textContent.trim() : '';"
+                                    + "    var split = shorthandText.split(/\\s+-\\s+/);"
+                                    + "    var code = split.length > 0 ? split[0].trim() : '';"
+                                    + "    var type = split.length > 1 ? split[1].trim() : '';"
+                                    + "    var text = function(selector) {"
+                                    + "      var node = window.querySelector(selector);"
+                                    + "      return node ? node.textContent.trim() : '';"
+                                    + "    };"
+                                    + "    result.push(day + '|||' + dayIndex + '|||'"
+                                    + "      + match[1].padStart(2,'0') + ':' + match[2] + '|||'"
+                                    + "      + match[3].padStart(2,'0') + ':' + match[4] + '|||'"
+                                    + "      + code + '|||' + text('.predmet-nazov') + '|||'"
+                                    + "      + text('.predmet-miestnosti') + '|||'"
+                                    + "      + text('.predmet-vyucujuci') + '|||' + type);"
+                                    + "  }"
+                                    + "}"
+                                    + "return result;");
+
+                    if (result instanceof List) {
+                        for (String row : (List<String>) result) {
+                            String[] parts = row.split("\\|\\|\\|", -1);
+                            if (parts.length < 9) {
+                                continue;
+                            }
+                            ScheduleEntry entry = new ScheduleEntry(
+                                    parts[0].trim(),
+                                    Integer.parseInt(parts[1].trim()),
+                                    parts[2].trim(),
+                                    parts[3].trim(),
+                                    parts[5].trim(),
+                                    parts[4].trim(),
+                                    parts[6].trim(),
+                                    parts[7].trim(),
+                                    parts[8].trim());
+                            entries.add(entry);
+                            System.out.println("[AIS]   " + entry);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("[AIS] AIS DOM rozvrh parsing chyba: " + e.getMessage());
+                }
+                return entries;
+            }
 
     @SuppressWarnings("unchecked")
     private List<ScheduleEntry> parseScheduleViaJS() {
