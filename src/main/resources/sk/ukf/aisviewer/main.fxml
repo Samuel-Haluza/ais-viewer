@@ -12,8 +12,10 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.image.ImageView?>
 
 <BorderPane styleClass="main-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.MainController">
 
@@ -163,7 +165,35 @@
                 </ScrollPane>
             </Tab>
 
-            <!-- Tab 4: Rozvrh -->
+            <!-- Tab 4: Study Tree -->
+            <Tab text="🌳  Môj študijný strom">
+                <ScrollPane fitToWidth="true" styleClass="tab-scroll">
+                    <VBox alignment="TOP_CENTER" spacing="16" styleClass="tab-content">
+                        <padding><Insets bottom="24" left="24" right="24" top="24" /></padding>
+                        <Label styleClass="group-title" text="🌳 Môj študijný strom" />
+                        <Label fx:id="treePhaseLabel" styleClass="credit-card-value-large"
+                               text="🌱 Semienko" />
+                        <StackPane maxHeight="520" maxWidth="520" minHeight="420" minWidth="420">
+                            <ImageView fx:id="treeBaseLayer" preserveRatio="true"
+                                       fitWidth="500" fitHeight="500" smooth="true" />
+                            <ImageView fx:id="treeBranchesLayer" opacity="0.15"
+                                       preserveRatio="true" fitWidth="500" fitHeight="500"
+                                       smooth="true" />
+                            <ImageView fx:id="treeLeavesLayer" opacity="0"
+                                       preserveRatio="true" fitWidth="500" fitHeight="500"
+                                       smooth="true" />
+                            <ImageView fx:id="treeFlowersLayer" opacity="0"
+                                       preserveRatio="true" fitWidth="500" fitHeight="500"
+                                       smooth="true" />
+                            <ImageView fx:id="treeEffectsLayer" opacity="0"
+                                       preserveRatio="true" fitWidth="500" fitHeight="500"
+                                       smooth="true" />
+                        </StackPane>
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <!-- Tab 5: Rozvrh -->
             <Tab text="🗓  Rozvrh">
                 <VBox spacing="12" styleClass="tab-content">
                     <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
