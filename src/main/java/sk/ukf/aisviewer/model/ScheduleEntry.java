@@ -102,16 +102,8 @@ public class ScheduleEntry {
         }
     }
 
-    /**
-     * Duration in minutes.
-     */
-    public int getDurationMinutes() {
-        return (getEndHour() * 60 + getEndMinute()) - (getStartHour() * 60 + getStartMinute());
-    }
-
     @Override
     public String toString() {
         return day + " " + timeFrom + "-" + timeTo + " " + subjectName + " (" + room + ")";
     }
 }
-

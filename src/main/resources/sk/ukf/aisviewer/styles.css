@@ -30,11 +30,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,105,200,0.4), 8, 0, 0, 0);
 }
 
-.login-subtitle {
-    -fx-font-size: 12px;
-    -fx-text-fill: #8892a4;
-}
-
 .login-card {
     -fx-background-color: #23272f;
     -fx-background-radius: 12px;
@@ -130,11 +125,6 @@
     -fx-background-color: rgba(100, 181, 246, 0.1);
     -fx-background-radius: 4px;
     -fx-padding: 6 8 6 8;
-}
-
-.login-footer {
-    -fx-text-fill: #4a5568;
-    -fx-font-size: 11px;
 }
 
 /* ===================================================
@@ -430,6 +420,58 @@
     -fx-text-fill: #a78bfa;
     -fx-font-size: 36px;
     -fx-font-weight: bold;
+}
+
+/* ---- Study Tree dashboard ---- */
+.tree-level-label {
+    -fx-text-fill: #c8d0e0;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.tree-phase-card {
+    -fx-background-color: #1f232b;
+    -fx-background-radius: 8px;
+    -fx-border-color: #343b49;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-spacing: 3px;
+    -fx-alignment: CENTER;
+}
+
+.tree-phase-current {
+    -fx-background-color: rgba(0,105,200,0.20);
+    -fx-border-color: #64b5f6;
+    -fx-border-width: 2px;
+}
+
+.tree-phase-icon, .tree-achievement-icon {
+    -fx-font-size: 24px;
+}
+
+.tree-phase-title, .tree-achievement-title {
+    -fx-text-fill: #e8eaf0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.tree-phase-description, .tree-achievement-description {
+    -fx-text-fill: #8892a4;
+    -fx-font-size: 11px;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+
+.tree-achievement-card {
+    -fx-background-color: #1f232b;
+    -fx-background-radius: 8px;
+    -fx-border-color: #343b49;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 6px 8px 6px;
+    -fx-spacing: 3px;
+    -fx-alignment: CENTER;
 }
 
 /* ---- Schedule Tab – Visual Timetable Grid ---- */

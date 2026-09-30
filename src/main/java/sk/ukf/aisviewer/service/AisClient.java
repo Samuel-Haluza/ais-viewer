@@ -28,8 +28,6 @@ public class AisClient {
     private WebDriverWait wait;
 
     private StudentInfo currentStudent;
-    private boolean loggedIn = false;
-
     public AisClient() {
     }
 
@@ -117,7 +115,6 @@ public class AisClient {
                 System.out.println("[CACHE] Platná cache nájdená.");
                 System.out.println("[CACHE] Používam zápisné listy z cache.");
                 System.out.println("[CACHE] Selenium discovery zápisných listov preskočený.");
-                loggedIn = true;
                 return true;
             }
 
@@ -188,7 +185,6 @@ public class AisClient {
             }
 
             System.out.println("[AIS] Zápisné listy: " + currentStudent.getEnrollmentListIds());
-            loggedIn = true;
             return true;
 
         } catch (Exception e) {
@@ -247,20 +243,29 @@ public class AisClient {
 
             // Stratégia 1: Tabuľka
             subjects = parseSubjectsFromTableSelenium();
+            System.out.println("[AIS] Subjects parser 1: parseSubjectsFromTableSelenium() -> "
+                    + subjects.size() + " položiek");
             if (!subjects.isEmpty()) {
+                System.out.println("[AIS] Subjects parser 2: SKIPPED");
+                System.out.println("[AIS] Subjects parser 3: SKIPPED");
                 System.out.println("[AIS] Načítaných " + subjects.size() + " predmetov (tabuľka)");
                 return subjects;
             }
 
             // Stratégia 2: Sekvenčné parsovanie – kategórie + karty
             subjects = parseSubjectsSequential();
+            System.out.println("[AIS] Subjects parser 2: parseSubjectsSequential() -> "
+                    + subjects.size() + " položiek");
             if (!subjects.isEmpty()) {
+                System.out.println("[AIS] Subjects parser 3: SKIPPED");
                 System.out.println("[AIS] Načítaných " + subjects.size() + " predmetov (sekvenčne)");
                 return subjects;
             }
 
             // Stratégia 3: Desktop rows
             subjects = parseSubjectsFromDesktopRows();
+            System.out.println("[AIS] Subjects parser 3: parseSubjectsFromDesktopRows() -> "
+                    + subjects.size() + " položiek");
             if (!subjects.isEmpty()) {
                 System.out.println("[AIS] Načítaných " + subjects.size() + " predmetov (desktop rows)");
                 return subjects;
@@ -688,19 +693,28 @@ public class AisClient {
 
             // Parse the AIS day columns and lesson components directly from the DOM.
             entries = parseScheduleFromAisDom();
+            System.out.println("[AIS] Schedule parser 1: parseScheduleFromAisDom() -> "
+                    + entries.size() + " položiek");
             if (!entries.isEmpty()) {
+                System.out.println("[AIS] Schedule parser 2: SKIPPED");
+                System.out.println("[AIS] Schedule parser 3: SKIPPED");
                 System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (AIS DOM)");
                 return entries;
             }
 
             // Keep the older parsers as a fallback for older AIS layouts.
             entries = parseScheduleViaJS();
+            System.out.println("[AIS] Schedule parser 2: parseScheduleViaJS() -> "
+                    + entries.size() + " položiek");
             if (!entries.isEmpty()) {
+                System.out.println("[AIS] Schedule parser 3: SKIPPED");
                 System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (JS fallback)");
                 return entries;
             }
 
             entries = parseScheduleFromPageSource();
+            System.out.println("[AIS] Schedule parser 3: parseScheduleFromPageSource() -> "
+                    + entries.size() + " položiek");
             if (!entries.isEmpty()) {
                 System.out.println("[AIS] Rozvrh: " + entries.size() + " položiek (text fallback)");
                 return entries;
@@ -1004,7 +1018,7 @@ public class AisClient {
 
     public void logout() {
         closeDriver();
-        loggedIn = false;
+
         currentStudent = null;
     }
 }

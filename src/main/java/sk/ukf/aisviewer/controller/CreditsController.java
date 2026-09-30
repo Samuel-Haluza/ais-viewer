@@ -27,6 +27,7 @@ public class CreditsController {
     private final PieChart creditsByCategoryChart;
 
     private LocalCacheService.CacheSnapshot cacheSnapshot;
+    private int acquiredCredits;
 
     public CreditsController(Label totalCreditsLabel,
                              Label mandatoryCreditsTotal,
@@ -62,6 +63,7 @@ public class CreditsController {
                 .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
                 .mapToInt(Subject::getCreditsValue).sum();
         int total = completedSubjects.stream().mapToInt(Subject::getCreditsValue).sum();
+        acquiredCredits = total;
 
         totalCreditsLabel.setText(String.valueOf(total));
         mandatoryCreditsTotal.setText(String.valueOf(mandatory));
@@ -81,6 +83,10 @@ public class CreditsController {
 
         setWeightedAverageLabel(avgGradeLabel, completedSubjects);
         setWeightedAverageLabel(yearAvgGradeLabel, subjects);
+    }
+
+    public int getAcquiredCredits() {
+        return acquiredCredits;
     }
 
     private void setWeightedAverageLabel(Label label, List<Subject> subjects) {
@@ -138,7 +144,7 @@ public class CreditsController {
         uniqueSubjects.putIfAbsent(key, subject);
     }
 
-    private boolean isCompletedSubject(Subject subject) {
+    public static boolean isCompletedSubject(Subject subject) {
         if (subject == null || subject.getGrade() == null) {
             return false;
         }

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -28,7 +27,6 @@ def add_base_tree(img):
     trunk_top = 210
     trunk_bottom = 880
     trunk_w = 130
-    trunk_h = 620
     draw.ellipse((trunk_x - 70, trunk_top - 30, trunk_x + 70, trunk_top + 70), fill=alpha_color((112, 76, 48,)))
     draw.rounded_rectangle((trunk_x - trunk_w // 2, trunk_top, trunk_x + trunk_w // 2, trunk_bottom), radius=55, fill=alpha_color((120, 82, 53)))
 

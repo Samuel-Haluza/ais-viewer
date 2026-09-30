@@ -64,6 +64,30 @@ public class MainController {
     @FXML private ImageView treeFlowersLayer;
     @FXML private ImageView treeEffectsLayer;
     @FXML private Label treePhaseLabel;
+    @FXML private Label treeSubtitleLabel;
+    @FXML private Label treeCreditsLabel;
+    @FXML private Label treePercentageLabel;
+    @FXML private Label treeLevelLabel;
+    @FXML private Label treeNextLevelLabel;
+    @FXML private Label treeMilestoneLabel;
+    @FXML private Label treeMilestoneRemainingLabel;
+    @FXML private Label treeMilestoneYear1Label;
+    @FXML private Label treeMilestoneYear2Label;
+    @FXML private Label treeMilestoneFirstALabel;
+    @FXML private Label treeMilestoneTenSubjectsLabel;
+    @FXML private Label treeMilestoneMandatoryLabel;
+    @FXML private ProgressBar treeProgressBar;
+    @FXML private VBox treePhaseCard1;
+    @FXML private VBox treePhaseCard2;
+    @FXML private VBox treePhaseCard3;
+    @FXML private VBox treePhaseCard4;
+    @FXML private VBox treePhaseCard5;
+    @FXML private VBox treePhaseCard6;
+    @FXML private VBox treeMilestoneCardYear1;
+    @FXML private VBox treeMilestoneCardYear2;
+    @FXML private VBox treeMilestoneCardFirstA;
+    @FXML private VBox treeMilestoneCardTenSubjects;
+    @FXML private VBox treeMilestoneCardMandatory;
 
     // --- Schedule Tab ---
     @FXML private VBox scheduleContainer;
@@ -101,7 +125,17 @@ public class MainController {
                 graduationRemainingLabel, creditsByCategoryChart);
         scheduleController = new ScheduleController(scheduleContainer, scheduleStatusLabel);
         studyTreeController = new StudyTreeController(treeBaseLayer, treeBranchesLayer, treeLeavesLayer,
-                treeFlowersLayer, treeEffectsLayer, treePhaseLabel);
+                treeFlowersLayer, treeEffectsLayer, treePhaseLabel, treeSubtitleLabel,
+                treeCreditsLabel, treePercentageLabel, treeLevelLabel, treeNextLevelLabel,
+                treeMilestoneLabel, treeMilestoneRemainingLabel,
+                new Label[]{treeMilestoneYear1Label, treeMilestoneYear2Label,
+                treeMilestoneFirstALabel, treeMilestoneTenSubjectsLabel,
+                treeMilestoneMandatoryLabel}, treeProgressBar,
+                new VBox[]{treePhaseCard1, treePhaseCard2, treePhaseCard3,
+                treePhaseCard4, treePhaseCard5, treePhaseCard6},
+                new VBox[]{treeMilestoneCardYear1, treeMilestoneCardYear2,
+                treeMilestoneCardFirstA, treeMilestoneCardTenSubjects,
+                treeMilestoneCardMandatory});
 
         cacheSnapshot = cacheService.load().orElse(null);
         studentInfo = aisClient != null ? aisClient.getCurrentStudent() : null;
@@ -315,7 +349,8 @@ public class MainController {
         subjectsController.displaySubjects(subjects);
         examsController.displayExams(exams);
         creditsController.updateCredits(subjects, cacheSnapshot);
-        studyTreeController.update(subjects, cacheSnapshot);
+        studyTreeController.update(creditsController.getAcquiredCredits(), subjects,
+                cacheSnapshot, studentInfo);
         scheduleController.displaySchedule(scheduleEntries);
     }
 

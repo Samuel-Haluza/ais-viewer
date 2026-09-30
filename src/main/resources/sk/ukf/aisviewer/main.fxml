@@ -11,13 +11,14 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.image.ImageView?>
 
-<BorderPane styleClass="main-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.MainController">
+<BorderPane styleClass="main-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.MainController">
 
     <!-- Top Bar -->
     <top>
@@ -171,8 +172,11 @@
                     <VBox alignment="TOP_CENTER" spacing="16" styleClass="tab-content">
                         <padding><Insets bottom="24" left="24" right="24" top="24" /></padding>
                         <Label styleClass="group-title" text="🌳 Môj študijný strom" />
+                        <Label fx:id="treeSubtitleLabel" styleClass="credit-card-label"
+                               text="Rastie spolu s tvojím štúdiom" />
                         <Label fx:id="treePhaseLabel" styleClass="credit-card-value-large"
                                text="🌱 Semienko" />
+                        <Label fx:id="treeLevelLabel" styleClass="tree-level-label" text="Úroveň 1 / 20" />
                         <StackPane maxHeight="520" maxWidth="520" minHeight="420" minWidth="420">
                             <ImageView fx:id="treeBaseLayer" preserveRatio="true"
                                        fitWidth="500" fitHeight="500" smooth="true" />
@@ -189,6 +193,100 @@
                                        preserveRatio="true" fitWidth="500" fitHeight="500"
                                        smooth="true" />
                         </StackPane>
+                        <HBox maxWidth="760" spacing="12">
+                        <VBox HBox.hgrow="ALWAYS" spacing="10" styleClass="credit-card">
+                            <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                            <Label styleClass="group-title" text="🌳 Tvoj aktuálny stav" />
+                            <Label fx:id="treeCreditsLabel" styleClass="credit-card-value" text="0 / 180" />
+                            <ProgressBar fx:id="treeProgressBar" maxWidth="Infinity" progress="0.0" />
+                            <Label fx:id="treePercentageLabel" styleClass="credit-card-label" text="0 %" />
+                            <Label styleClass="credit-card-label" text="kreditov" />
+                        </VBox>
+                            <VBox HBox.hgrow="ALWAYS" spacing="6" styleClass="credit-card">
+                                <padding><Insets bottom="14" left="18" right="18" top="14" /></padding>
+                                <Label styleClass="group-title" text="🎯 Ďalší krok" />
+                                <Label fx:id="treeNextLevelLabel" styleClass="credit-card-label"
+                                       text="Do úrovne 2:&#10;10 kreditov" />
+                                <Label fx:id="treeMilestoneLabel" styleClass="credit-card-label"
+                                       text="Ďalší míľnik&#10;30 kreditov" />
+                                <Label fx:id="treeMilestoneRemainingLabel" styleClass="status-label"
+                                       text="Zostáva: 30 kreditov" />
+                            </VBox>
+                        </HBox>
+                        <VBox maxWidth="760" spacing="8" styleClass="credit-card">
+                            <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                            <Label styleClass="group-title" text="🌱 Ako rastie môj strom?" />
+                            <Label wrapText="true" styleClass="credit-card-label"
+                                   text="Strom rastie podľa získaných kreditov. Každá ďalšia úroveň predstavuje ďalší krok v štúdiu." />
+                            <GridPane hgap="10" vgap="10">
+                                <VBox fx:id="treePhaseCard1" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <Label styleClass="tree-phase-icon" text="🌱" />
+                                    <Label styleClass="tree-phase-title" text="Úroveň 1–4" />
+                                    <Label styleClass="tree-phase-description" text="Začiatok štúdia" />
+                                </VBox>
+                                <VBox fx:id="treePhaseCard2" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <Label styleClass="tree-phase-icon" text="🌿" />
+                                    <Label styleClass="tree-phase-title" text="Úroveň 5–8" />
+                                    <Label styleClass="tree-phase-description" text="30–70 kreditov" />
+                                </VBox>
+                                <VBox fx:id="treePhaseCard3" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                    <Label styleClass="tree-phase-icon" text="🌳" />
+                                    <Label styleClass="tree-phase-title" text="Úroveň 9–12" />
+                                    <Label styleClass="tree-phase-description" text="71–110 kreditov" />
+                                </VBox>
+                                <VBox fx:id="treePhaseCard4" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <Label styleClass="tree-phase-icon" text="🌸" />
+                                    <Label styleClass="tree-phase-title" text="Úroveň 13–16" />
+                                    <Label styleClass="tree-phase-description" text="111–150 kreditov" />
+                                </VBox>
+                                <VBox fx:id="treePhaseCard5" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <Label styleClass="tree-phase-icon" text="🌺" />
+                                    <Label styleClass="tree-phase-title" text="Úroveň 17–19" />
+                                    <Label styleClass="tree-phase-description" text="151–179 kreditov" />
+                                </VBox>
+                                <VBox fx:id="treePhaseCard6" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <Label styleClass="tree-phase-icon" text="🎓" />
+                                    <Label styleClass="tree-phase-title" text="Úroveň 20" />
+                                    <Label styleClass="tree-phase-description" text="180 kreditov&#10;Štúdium splnené" />
+                                </VBox>
+                            </GridPane>
+                        </VBox>
+                        <VBox maxWidth="760" spacing="8" styleClass="credit-card">
+                            <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                            <Label styleClass="group-title" text="🏆 Študijné míľniky" />
+                            <GridPane hgap="10" vgap="10">
+                                <VBox fx:id="treeMilestoneCardYear1" styleClass="tree-achievement-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <Label styleClass="tree-achievement-icon" text="📚" />
+                                    <Label styleClass="tree-achievement-title" text="1. rok dokončený" />
+                                    <Label wrapText="true" styleClass="tree-achievement-description" text="Všetky predmety 1. ročníka splnené" />
+                                    <Label fx:id="treeMilestoneYear1Label" styleClass="status-label" text="🔒 Ešte neukončený 1. ročník" />
+                                </VBox>
+                                <VBox fx:id="treeMilestoneCardYear2" styleClass="tree-achievement-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <Label styleClass="tree-achievement-icon" text="📚" />
+                                    <Label styleClass="tree-achievement-title" text="2. rok dokončený" />
+                                    <Label wrapText="true" styleClass="tree-achievement-description" text="Všetky predmety 2. ročníka splnené" />
+                                    <Label fx:id="treeMilestoneYear2Label" styleClass="status-label" text="🔒 Ešte neukončený 2. ročník" />
+                                </VBox>
+                                <VBox fx:id="treeMilestoneCardFirstA" styleClass="tree-achievement-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                    <Label styleClass="tree-achievement-icon" text="⭐" />
+                                    <Label styleClass="tree-achievement-title" text="Prvá A" />
+                                    <Label wrapText="true" styleClass="tree-achievement-description" text="Získaj svoje prvé hodnotenie A" />
+                                    <Label fx:id="treeMilestoneFirstALabel" styleClass="status-label" text="🔒 Zatiaľ nezískané" />
+                                </VBox>
+                                <VBox fx:id="treeMilestoneCardTenSubjects" styleClass="tree-achievement-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <Label styleClass="tree-achievement-icon" text="🏅" />
+                                    <Label styleClass="tree-achievement-title" text="10 predmetov splnených" />
+                                    <Label wrapText="true" styleClass="tree-achievement-description" text="Úspešne absolvuj 10 predmetov" />
+                                    <Label fx:id="treeMilestoneTenSubjectsLabel" styleClass="status-label" text="🔒 Ešte 10 predmetov" />
+                                </VBox>
+                                <VBox fx:id="treeMilestoneCardMandatory" styleClass="tree-achievement-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <Label styleClass="tree-achievement-icon" text="🎯" />
+                                    <Label styleClass="tree-achievement-title" text="Všetky povinné predmety" />
+                                    <Label wrapText="true" styleClass="tree-achievement-description" text="Splň všetky povinné predmety" />
+                                    <Label fx:id="treeMilestoneMandatoryLabel" styleClass="status-label" text="🔒 Zostáva 0 predmetov" />
+                                </VBox>
+                            </GridPane>
+                        </VBox>
                     </VBox>
                 </ScrollPane>
             </Tab>
