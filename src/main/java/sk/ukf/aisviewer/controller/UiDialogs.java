@@ -44,6 +44,18 @@ final class UiDialogs {
                 "OK", null);
     }
 
+    static void showExportPlaceholder(Window owner, String message) {
+        showNotice(owner, "Exporty", message, "OK", null);
+    }
+
+    static void showExportSuccess(Window owner, String message) {
+        showNotice(owner, "Exporty", message, "OK", null);
+    }
+
+    static void showExportError(Window owner, String message) {
+        showNotice(owner, "Exporty", message, "OK", null);
+    }
+
     static Optional<String> showPasswordPrompt(Window owner) {
         Stage stage = createStage(owner, "Obnovenie údajov");
         VBox card = createCard("Obnovenie údajov");

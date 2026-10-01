@@ -22,7 +22,6 @@ import javafx.util.Duration;
 
 public class StudyTreeController {
 
-    private static final int TARGET_CREDITS = 180;
     private final ImageView baseLayer;
     private final ImageView branchesLayer;
     private final ImageView leavesLayer;
@@ -39,6 +38,7 @@ public class StudyTreeController {
     private final Label[] milestoneStatusLabels;
     private final ProgressBar progressBar;
     private final VBox[] phaseCards;
+    private final Label[] phaseDescriptionLabels;
     private final VBox[] milestoneCards;
 
     public StudyTreeController(ImageView baseLayer, ImageView branchesLayer, ImageView leavesLayer,
@@ -47,7 +47,8 @@ public class StudyTreeController {
                                Label percentageLabel, Label levelLabel, Label nextLevelLabel,
                                Label milestoneLabel, Label milestoneRemainingLabel,
                                Label[] milestoneStatusLabels, ProgressBar progressBar,
-                               VBox[] phaseCards, VBox[] milestoneCards) {
+                               VBox[] phaseCards, Label[] phaseDescriptionLabels,
+                               VBox[] milestoneCards) {
         this.baseLayer = baseLayer;
         this.branchesLayer = branchesLayer;
         this.leavesLayer = leavesLayer;
@@ -64,6 +65,7 @@ public class StudyTreeController {
         this.milestoneStatusLabels = milestoneStatusLabels;
         this.progressBar = progressBar;
         this.phaseCards = phaseCards;
+        this.phaseDescriptionLabels = phaseDescriptionLabels;
         this.milestoneCards = milestoneCards;
         loadTreeImages();
     }
@@ -87,24 +89,26 @@ public class StudyTreeController {
 
     public void update(int acquiredCredits, List<Subject> currentSubjects,
                        LocalCacheService.CacheSnapshot cacheSnapshot,
-                       StudentInfo studentInfo) {
-        double progress = Math.min(1.0, (double) acquiredCredits / TARGET_CREDITS);
-        int level = getGrowthLevel(acquiredCredits);
-        int nextLevelCredits = Math.min(TARGET_CREDITS, level * 10);
+                       StudentInfo studentInfo, int requiredCredits) {
+        requiredCredits = requiredCredits > 0 ? requiredCredits : 180;
+        double progress = Math.min(1.0, (double) acquiredCredits / requiredCredits);
+        int level = getGrowthLevel(acquiredCredits, requiredCredits);
+        int nextLevelCredits = getNextLevelCredits(level, requiredCredits);
         int creditsToNextLevel = level >= 20 ? 0 : Math.max(0, nextLevelCredits - acquiredCredits);
-        int nextMilestone = getNextMilestone(acquiredCredits);
+        int nextMilestone = getNextMilestone(acquiredCredits, requiredCredits);
 
         phaseLabel.setText(getPhase(progress));
         levelLabel.setText("Úroveň " + level + " / 20");
         subtitleLabel.setText("Rastie spolu s tvojím štúdiom");
-        creditsLabel.setText(acquiredCredits + " / " + TARGET_CREDITS);
+        creditsLabel.setText(acquiredCredits + " / " + requiredCredits);
         percentageLabel.setText(String.format("%.0f %% splnené", progress * 100));
         nextLevelLabel.setText(level >= 20
                 ? "🎓 Maximálna úroveň dosiahnutá"
                 : "Do úrovne " + (level + 1) + ":\n" + creditsToNextLevel + " "
                         + (creditsToNextLevel == 1 ? "kredit" : "kredity"));
-        if (nextMilestone == TARGET_CREDITS && acquiredCredits >= TARGET_CREDITS) {
-            milestoneLabel.setText("🎓 Štúdium splnené\n180 / 180 kreditov");
+        if (nextMilestone == requiredCredits && acquiredCredits >= requiredCredits) {
+            milestoneLabel.setText("🎓 Štúdium splnené\n"
+                    + requiredCredits + " / " + requiredCredits + " kreditov");
             milestoneRemainingLabel.setText("");
         } else {
             milestoneLabel.setText("Ďalší míľnik:\n" + nextMilestone + " kreditov");
@@ -112,6 +116,7 @@ public class StudyTreeController {
                     + Math.max(0, nextMilestone - acquiredCredits) + " kreditov");
         }
         progressBar.setProgress(progress);
+        updatePhaseDescriptions(requiredCredits);
         updateStudyMilestones(currentSubjects, cacheSnapshot, studentInfo);
         updatePhaseHighlight(level);
 
@@ -135,14 +140,20 @@ public class StudyTreeController {
         }
     }
 
-    private int getNextMilestone(int acquiredCredits) {
-        int[] milestones = {30, 50, 100, 150, TARGET_CREDITS};
+    private int getNextMilestone(int acquiredCredits, int requiredCredits) {
+        int[] milestones = {
+                scaledMilestone(1.0 / 6.0, requiredCredits),
+                scaledMilestone(5.0 / 18.0, requiredCredits),
+                scaledMilestone(5.0 / 9.0, requiredCredits),
+                scaledMilestone(5.0 / 6.0, requiredCredits),
+                requiredCredits
+        };
         for (int milestone : milestones) {
             if (acquiredCredits < milestone) {
                 return milestone;
             }
         }
-        return TARGET_CREDITS;
+        return requiredCredits;
     }
 
     private void updateStudyMilestones(List<Subject> currentSubjects,
@@ -246,9 +257,42 @@ public class StudyTreeController {
         return grade != null && grade.toUpperCase(Locale.ROOT).matches(".*\\bA\\b.*|.*\\(1\\).*");
     }
 
-    private int getGrowthLevel(int acquiredCredits) {
-        return Math.min(20, acquiredCredits >= TARGET_CREDITS
-                ? 20 : acquiredCredits / 10 + 1);
+    private int getGrowthLevel(int acquiredCredits, int requiredCredits) {
+        if (acquiredCredits >= requiredCredits) {
+            return 20;
+        }
+        double progress = Math.max(0, acquiredCredits) / (double) requiredCredits;
+        return Math.max(1, Math.min(19, (int) Math.floor(progress * 19) + 1));
+    }
+
+    private int getNextLevelCredits(int level, int requiredCredits) {
+        if (level >= 20) {
+            return requiredCredits;
+        }
+        return Math.min(requiredCredits,
+                (int) Math.ceil(requiredCredits * level / 19.0));
+    }
+
+    private int scaledMilestone(double ratio, int requiredCredits) {
+        return Math.min(requiredCredits,
+                Math.max(1, (int) Math.round(requiredCredits * ratio)));
+    }
+
+    private void updatePhaseDescriptions(int requiredCredits) {
+        int phase2Start = phaseStart(requiredCredits, 0.20);
+        int phase3Start = phaseStart(requiredCredits, 0.40);
+        int phase4Start = phaseStart(requiredCredits, 0.60);
+        int phase5Start = phaseStart(requiredCredits, 0.80);
+        phaseDescriptionLabels[0].setText("0–" + (phase2Start - 1) + " kreditov");
+        phaseDescriptionLabels[1].setText(phase2Start + "–" + (phase3Start - 1) + " kreditov");
+        phaseDescriptionLabels[2].setText(phase3Start + "–" + (phase4Start - 1) + " kreditov");
+        phaseDescriptionLabels[3].setText(phase4Start + "–" + (phase5Start - 1) + " kreditov");
+        phaseDescriptionLabels[4].setText(phase5Start + "–" + (requiredCredits - 1) + " kreditov");
+        phaseDescriptionLabels[5].setText(requiredCredits + " kreditov\nŠtúdium splnené");
+    }
+
+    private int phaseStart(int requiredCredits, double fraction) {
+        return Math.max(1, (int) Math.ceil(requiredCredits * fraction));
     }
 
     private String getPhase(double progress) {

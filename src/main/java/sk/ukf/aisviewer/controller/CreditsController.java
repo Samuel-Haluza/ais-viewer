@@ -18,6 +18,7 @@ public class CreditsController {
     private final Label totalCreditsLabel;
     private final Label mandatoryCreditsTotal;
     private final Label optionalCreditsTotal;
+    private final Label electiveCreditsTotal;
     private final Label avgGradeLabel;
     private final Label yearAvgGradeLabel;
     private final Label graduationCreditsLabel;
@@ -28,10 +29,12 @@ public class CreditsController {
 
     private LocalCacheService.CacheSnapshot cacheSnapshot;
     private int acquiredCredits;
+    private String averageGrade = "-";
 
     public CreditsController(Label totalCreditsLabel,
                              Label mandatoryCreditsTotal,
                              Label optionalCreditsTotal,
+                             Label electiveCreditsTotal,
                              Label avgGradeLabel,
                              Label yearAvgGradeLabel,
                              Label graduationCreditsLabel,
@@ -42,6 +45,7 @@ public class CreditsController {
         this.totalCreditsLabel = totalCreditsLabel;
         this.mandatoryCreditsTotal = mandatoryCreditsTotal;
         this.optionalCreditsTotal = optionalCreditsTotal;
+        this.electiveCreditsTotal = electiveCreditsTotal;
         this.avgGradeLabel = avgGradeLabel;
         this.yearAvgGradeLabel = yearAvgGradeLabel;
         this.graduationCreditsLabel = graduationCreditsLabel;
@@ -52,9 +56,10 @@ public class CreditsController {
     }
 
     public void updateCredits(List<Subject> subjects,
-                              LocalCacheService.CacheSnapshot cacheSnapshot) {
+                              LocalCacheService.CacheSnapshot cacheSnapshot,
+                              int requiredCredits) {
         this.cacheSnapshot = cacheSnapshot;
-        final int requiredCredits = 180;
+        requiredCredits = requiredCredits > 0 ? requiredCredits : 180;
         List<Subject> completedSubjects = getCompletedSubjectsFromAllEnrollments(subjects);
         int mandatory = completedSubjects.stream()
                 .filter(s -> "Povinné predmety".equals(s.getCategory()))
@@ -62,12 +67,16 @@ public class CreditsController {
         int optional = completedSubjects.stream()
                 .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
                 .mapToInt(Subject::getCreditsValue).sum();
+        int elective = completedSubjects.stream()
+                .filter(s -> "Výberové predmety".equals(s.getCategory()))
+                .mapToInt(Subject::getCreditsValue).sum();
         int total = completedSubjects.stream().mapToInt(Subject::getCreditsValue).sum();
         acquiredCredits = total;
 
         totalCreditsLabel.setText(String.valueOf(total));
         mandatoryCreditsTotal.setText(String.valueOf(mandatory));
         optionalCreditsTotal.setText(String.valueOf(optional));
+        electiveCreditsTotal.setText(String.valueOf(elective));
 
         double progress = (double) total / requiredCredits;
         int remaining = Math.max(0, requiredCredits - total);
@@ -79,19 +88,32 @@ public class CreditsController {
 
         creditsByCategoryChart.setData(FXCollections.observableArrayList(
                 new PieChart.Data("Povinné predmety", mandatory),
-                new PieChart.Data("Povinne voliteľné predmety", optional)));
+                new PieChart.Data("Povinne voliteľné predmety", optional),
+                new PieChart.Data("Výberové predmety", elective)));
 
         setWeightedAverageLabel(avgGradeLabel, completedSubjects);
         setWeightedAverageLabel(yearAvgGradeLabel, subjects);
+        averageGrade = calculateWeightedAverage(completedSubjects);
     }
 
     public int getAcquiredCredits() {
         return acquiredCredits;
     }
 
+    public String getAverageGrade() {
+        return averageGrade;
+    }
+
     private void setWeightedAverageLabel(Label label, List<Subject> subjects) {
         if (label == null || subjects == null) {
             return;
+        }
+        label.setText(calculateWeightedAverage(subjects));
+    }
+
+    private String calculateWeightedAverage(List<Subject> subjects) {
+        if (subjects == null) {
+            return "-";
         }
         double weightedGradeSum = 0;
         int gradedCredits = 0;
@@ -106,10 +128,9 @@ public class CreditsController {
                 gradedCredits += credits;
             }
         }
-
-        label.setText(gradedCredits > 0
+        return gradedCredits > 0
                 ? String.format("%.2f", weightedGradeSum / gradedCredits)
-                : "-");
+                : "-";
     }
 
     private List<Subject> getCompletedSubjectsFromAllEnrollments(List<Subject> currentSubjects) {

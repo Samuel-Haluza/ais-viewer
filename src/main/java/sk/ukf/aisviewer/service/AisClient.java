@@ -309,6 +309,11 @@ public class AisClient {
                             "    if ((lower.indexOf('povinne') >= 0 || lower.indexOf('povinné') >= 0)" +
                             "        && (lower.indexOf('voliteľ') >= 0 || lower.indexOf('volitel') >= 0)) {" +
                             "      category = 'Povinne voliteľné predmety';" +
+                            "    } else if (lower.indexOf('výberové predmety') >= 0" +
+                            "        || lower.indexOf('vyberove predmety') >= 0" +
+                            "        || lower.indexOf('voliteľné predmety') >= 0" +
+                            "        || lower.indexOf('volitelne predmety') >= 0) {" +
+                            "      category = 'Výberové predmety';" +
                             "    } else if (lower.indexOf('povinné') >= 0 || lower.indexOf('povinne') >= 0) {" +
                             "      if (lower.indexOf('voliteľ') < 0 && lower.indexOf('volitel') < 0) {" +
                             "        category = 'Povinné predmety';" +
@@ -323,7 +328,11 @@ public class AisClient {
                             "    if (!name || name.length < 3) continue;" +
                             // Preskočí ak to vyzerá ako kategória
                             "    var nameLower = name.toLowerCase();" +
-                            "    if (nameLower.indexOf('povinné') >= 0 || nameLower.indexOf('povinne') >= 0) continue;" +
+                            "    if (nameLower.indexOf('povinné') >= 0 || nameLower.indexOf('povinne') >= 0" +
+                            "        || nameLower.indexOf('výberové predmety') >= 0" +
+                            "        || nameLower.indexOf('vyberove predmety') >= 0" +
+                            "        || nameLower.indexOf('voliteľné predmety') >= 0" +
+                            "        || nameLower.indexOf('volitelne predmety') >= 0) continue;" +
                             // Kód predmetu
                             "    var codeEl = el.querySelector('.grey, .text-muted');" +
                             "    var code = codeEl ? codeEl.textContent.trim().split(' ')[0] : '-';" +
@@ -438,6 +447,11 @@ public class AisClient {
                         String text = el.getText().trim().toLowerCase();
                         if (text.contains("povinne voliteľ") || text.contains("povinne volitel")) {
                             currentCategory = "Povinne voliteľné predmety";
+                        } else if (text.contains("výberové predmety")
+                                || text.contains("vyberove predmety")
+                                || text.contains("voliteľné predmety")
+                                || text.contains("volitelne predmety")) {
+                            currentCategory = "Výberové predmety";
                         } else if (text.contains("povinné") || text.contains("povinne")) {
                             currentCategory = "Povinné predmety";
                         }

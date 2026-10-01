@@ -15,26 +15,33 @@ public class SubjectsController {
 
     private final TableView<Subject> mandatoryTable;
     private final TableView<Subject> optionalTable;
+    private final TableView<Subject> electiveTable;
     private final Label mandatoryCreditsLabel;
     private final Label optionalCreditsLabel;
+    private final Label electiveCreditsLabel;
     private final ComboBox<String> semesterFilterCombo;
     private List<Subject> allSubjects = List.of();
 
     public SubjectsController(TableView<Subject> mandatoryTable,
                               TableView<Subject> optionalTable,
+                              TableView<Subject> electiveTable,
                               Label mandatoryCreditsLabel,
                               Label optionalCreditsLabel,
+                              Label electiveCreditsLabel,
                               ComboBox<String> semesterFilterCombo) {
         this.mandatoryTable = mandatoryTable;
         this.optionalTable = optionalTable;
+        this.electiveTable = electiveTable;
         this.mandatoryCreditsLabel = mandatoryCreditsLabel;
         this.optionalCreditsLabel = optionalCreditsLabel;
+        this.electiveCreditsLabel = electiveCreditsLabel;
         this.semesterFilterCombo = semesterFilterCombo;
     }
 
     public void setup() {
         setupSubjectTable(mandatoryTable);
         setupSubjectTable(optionalTable);
+        setupSubjectTable(electiveTable);
         semesterFilterCombo.setItems(FXCollections.observableArrayList(
                 "Zimný semester", "Letný semester", "Oba semestre"));
         semesterFilterCombo.getSelectionModel().select("Oba semestre");
@@ -50,11 +57,13 @@ public class SubjectsController {
         allSubjects = List.of();
         mandatoryTable.setItems(FXCollections.observableArrayList());
         optionalTable.setItems(FXCollections.observableArrayList());
+        electiveTable.setItems(FXCollections.observableArrayList());
     }
 
     public void showUnavailable() {
         mandatoryTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
         optionalTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
+        electiveTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
     }
 
     @SuppressWarnings("unchecked")
@@ -104,20 +113,26 @@ public class SubjectsController {
         List<Subject> optional = filteredSubjects.stream()
                 .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
                 .collect(Collectors.toList());
+        List<Subject> elective = filteredSubjects.stream()
+                .filter(s -> "Výberové predmety".equals(s.getCategory()))
+                .collect(Collectors.toList());
 
         // If categories are not set, put everything in mandatory
-        if (mandatory.isEmpty() && optional.isEmpty()) {
+        if (mandatory.isEmpty() && optional.isEmpty() && elective.isEmpty()) {
             mandatory = filteredSubjects;
         }
 
         mandatoryTable.setItems(FXCollections.observableArrayList(mandatory));
         optionalTable.setItems(FXCollections.observableArrayList(optional));
+        electiveTable.setItems(FXCollections.observableArrayList(elective));
 
         int mandCredits = mandatory.stream().mapToInt(Subject::getCreditsValue).sum();
         int optCredits = optional.stream().mapToInt(Subject::getCreditsValue).sum();
+        int electiveCredits = elective.stream().mapToInt(Subject::getCreditsValue).sum();
 
         mandatoryCreditsLabel.setText("Kredity: " + mandCredits);
         optionalCreditsLabel.setText("Kredity: " + optCredits);
+        electiveCreditsLabel.setText("Kredity: " + electiveCredits);
     }
 
     private boolean matchesSemester(Subject subject, String selectedSemester) {

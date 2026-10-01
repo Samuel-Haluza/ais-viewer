@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Controller for the main window with tabs.
@@ -37,8 +39,10 @@ public class MainController {
     // --- Subjects Tab ---
     @FXML private TableView<Subject> mandatoryTable;
     @FXML private TableView<Subject> optionalTable;
+    @FXML private TableView<Subject> electiveTable;
     @FXML private Label mandatoryCreditsLabel;
     @FXML private Label optionalCreditsLabel;
+    @FXML private Label electiveCreditsLabel;
     @FXML private ComboBox<String> semesterFilterCombo;
 
     // --- Exams Tab ---
@@ -49,6 +53,7 @@ public class MainController {
     @FXML private Label totalCreditsLabel;
     @FXML private Label mandatoryCreditsTotal;
     @FXML private Label optionalCreditsTotal;
+    @FXML private Label electiveCreditsTotal;
     @FXML private Label avgGradeLabel;
     @FXML private Label yearAvgGradeLabel;
     @FXML private Label graduationCreditsLabel;
@@ -83,6 +88,12 @@ public class MainController {
     @FXML private VBox treePhaseCard4;
     @FXML private VBox treePhaseCard5;
     @FXML private VBox treePhaseCard6;
+    @FXML private Label treePhaseDescription1;
+    @FXML private Label treePhaseDescription2;
+    @FXML private Label treePhaseDescription3;
+    @FXML private Label treePhaseDescription4;
+    @FXML private Label treePhaseDescription5;
+    @FXML private Label treePhaseDescription6;
     @FXML private VBox treeMilestoneCardYear1;
     @FXML private VBox treeMilestoneCardYear2;
     @FXML private VBox treeMilestoneCardFirstA;
@@ -93,6 +104,10 @@ public class MainController {
     @FXML private VBox scheduleContainer;
     @FXML private Label scheduleStatusLabel;
 
+    // --- Exports Tab ---
+    @FXML private Button exportPdfButton;
+    @FXML private Button exportCsvButton;
+
     private static AisClient aisClient;
     private static String runtimePassword;
     private StudentInfo studentInfo;
@@ -100,11 +115,13 @@ public class MainController {
     private LocalCacheService.CacheSnapshot cacheSnapshot;
     private boolean dataDisplayed;
     private boolean syncInProgress;
+    private int requiredCredits = 180;
     private SubjectsController subjectsController;
     private ExamsController examsController;
     private CreditsController creditsController;
     private ScheduleController scheduleController;
     private StudyTreeController studyTreeController;
+    private ExportController exportController;
 
     public static void setAisClient(AisClient client) {
         aisClient = client;
@@ -116,14 +133,16 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        subjectsController = new SubjectsController(mandatoryTable, optionalTable,
-                mandatoryCreditsLabel, optionalCreditsLabel, semesterFilterCombo);
+        subjectsController = new SubjectsController(mandatoryTable, optionalTable, electiveTable,
+                mandatoryCreditsLabel, optionalCreditsLabel, electiveCreditsLabel,
+                semesterFilterCombo);
         examsController = new ExamsController(examsTable, examsStatusLabel);
         creditsController = new CreditsController(totalCreditsLabel, mandatoryCreditsTotal,
-                optionalCreditsTotal, avgGradeLabel, yearAvgGradeLabel,
+                optionalCreditsTotal, electiveCreditsTotal, avgGradeLabel, yearAvgGradeLabel,
                 graduationCreditsLabel, graduationProgressBar, graduationProgressLabel,
                 graduationRemainingLabel, creditsByCategoryChart);
         scheduleController = new ScheduleController(scheduleContainer, scheduleStatusLabel);
+        exportController = new ExportController(exportPdfButton, exportCsvButton);
         studyTreeController = new StudyTreeController(treeBaseLayer, treeBranchesLayer, treeLeavesLayer,
                 treeFlowersLayer, treeEffectsLayer, treePhaseLabel, treeSubtitleLabel,
                 treeCreditsLabel, treePercentageLabel, treeLevelLabel, treeNextLevelLabel,
@@ -133,6 +152,9 @@ public class MainController {
                 treeMilestoneMandatoryLabel}, treeProgressBar,
                 new VBox[]{treePhaseCard1, treePhaseCard2, treePhaseCard3,
                 treePhaseCard4, treePhaseCard5, treePhaseCard6},
+                new Label[]{treePhaseDescription1, treePhaseDescription2,
+                treePhaseDescription3, treePhaseDescription4,
+                treePhaseDescription5, treePhaseDescription6},
                 new VBox[]{treeMilestoneCardYear1, treeMilestoneCardYear2,
                 treeMilestoneCardFirstA, treeMilestoneCardTenSubjects,
                 treeMilestoneCardMandatory});
@@ -145,6 +167,8 @@ public class MainController {
         if (studentInfo == null) return;
 
         restoreCachedEnrollmentLists();
+        requiredCredits = resolveRequiredCredits(findLatestEnrollmentName());
+        exportController.setExportData(studentInfo, cacheSnapshot);
         updateStudentInfoBar();
         subjectsController.setup();
         examsController.setup();
@@ -348,10 +372,62 @@ public class MainController {
                            List<ScheduleEntry> scheduleEntries) {
         subjectsController.displaySubjects(subjects);
         examsController.displayExams(exams);
-        creditsController.updateCredits(subjects, cacheSnapshot);
+        creditsController.updateCredits(subjects, cacheSnapshot, requiredCredits);
         studyTreeController.update(creditsController.getAcquiredCredits(), subjects,
-                cacheSnapshot, studentInfo);
+                cacheSnapshot, studentInfo, requiredCredits);
+        exportController.setExportData(studentInfo, cacheSnapshot,
+                creditsController.getAcquiredCredits(), requiredCredits,
+                creditsController.getAverageGrade());
         scheduleController.displaySchedule(scheduleEntries);
+    }
+
+    private String findLatestEnrollmentName() {
+        List<String> names = studentInfo == null ? null : studentInfo.getEnrollmentListNames();
+        if (names == null || names.isEmpty()) {
+            return null;
+        }
+        String latest = names.get(0);
+        int latestYear = extractAcademicYear(latest);
+        for (String name : names) {
+            int year = extractAcademicYear(name);
+            if (year > latestYear) {
+                latest = name;
+                latestYear = year;
+            }
+        }
+        return latest;
+    }
+
+    private int extractAcademicYear(String enrollmentName) {
+        if (enrollmentName == null) {
+            return -1;
+        }
+        Matcher matcher = Pattern.compile("(\\d{4})").matcher(enrollmentName);
+        return matcher.find() ? Integer.parseInt(matcher.group(1)) : -1;
+    }
+
+    private int resolveRequiredCredits(String enrollmentName) {
+        if (enrollmentName != null) {
+            int openingBracket = enrollmentName.lastIndexOf('(');
+            int closingBracket = enrollmentName.lastIndexOf(')');
+            if (openingBracket >= 0 && closingBracket > openingBracket) {
+                String code = enrollmentName.substring(openingBracket + 1, closingBracket).trim();
+                if (!code.isEmpty()) {
+                    char studyType = Character.toLowerCase(
+                            code.charAt(code.length() - 1));
+                    if (studyType == 'b') {
+                        System.out.println("[AIS] Typ štúdia: b, požadované kredity: 180");
+                        return 180;
+                    }
+                    if (studyType == 'm') {
+                        System.out.println("[AIS] Typ štúdia: m, požadované kredity: 120");
+                        return 120;
+                    }
+                }
+            }
+        }
+        System.out.println("[AIS] Typ štúdia sa nepodarilo určiť, používam 180 kreditov");
+        return 180;
     }
 
     private void saveCache(String enrollmentListId, List<Subject> subjects,
@@ -366,6 +442,7 @@ public class MainController {
         String updatedAt = LocalDateTime.now()
                 .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         cacheSnapshot.setUpdatedAt(updatedAt);
+        exportController.setExportData(studentInfo, cacheSnapshot);
         showLastUpdated(updatedAt);
         try {
             cacheService.save(cacheSnapshot);

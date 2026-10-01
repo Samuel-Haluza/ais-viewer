@@ -83,6 +83,17 @@
                             </TableView>
                         </VBox>
 
+                        <!-- Výberové predmety -->
+                        <VBox spacing="6" styleClass="subject-group">
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Label styleClass="group-title" text="Výberové predmety" />
+                                <Label fx:id="electiveCreditsLabel" styleClass="credits-badge elective-badge" text="Kredity: 0" />
+                            </HBox>
+                            <TableView fx:id="electiveTable" prefHeight="150" styleClass="subject-table">
+                                <placeholder><Label text="Žiadne výberové predmety" /></placeholder>
+                            </TableView>
+                        </VBox>
+
                     </VBox>
                 </ScrollPane>
             </Tab>
@@ -127,6 +138,12 @@
                                 <Label styleClass="credit-card-label" text="Povinne voliteľné" />
                                 <Label fx:id="optionalCreditsTotal" styleClass="credit-card-value" text="-" />
                             </VBox>
+                            <!-- Elective -->
+                            <VBox alignment="CENTER" minWidth="140" spacing="4" styleClass="credit-card elective-card">
+                                <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
+                                <Label styleClass="credit-card-label" text="Výberové" />
+                                <Label fx:id="electiveCreditsTotal" styleClass="credit-card-value" text="-" />
+                            </VBox>
 
                            <!-- Grade average -->
                            <VBox alignment="CENTER_LEFT" maxWidth="300" spacing="4" styleClass="credit-card avg-card">
@@ -166,6 +183,37 @@
                 </ScrollPane>
             </Tab>
 
+            <!-- Tab 5: Exporty -->
+            <Tab text="📤  Exporty">
+                <ScrollPane fitToWidth="true" styleClass="tab-scroll">
+                    <VBox spacing="16" styleClass="tab-content">
+                        <padding><Insets bottom="24" left="24" right="24" top="24" /></padding>
+
+                        <Label styleClass="group-title" text="Export údajov" />
+                        <Label styleClass="credit-card-label"
+                               text="Exportuj svoj študijný prehľad do PDF alebo CSV." />
+
+                        <VBox spacing="12" styleClass="credit-card">
+                            <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+                            <Label styleClass="group-title" text="PDF report" />
+                            <Label styleClass="credit-card-label"
+                                   text="Vytvor prehľadný PDF report so študijnými údajmi." />
+                            <Button fx:id="exportPdfButton" styleClass="login-button"
+                                    text="Exportovať do PDF" />
+                        </VBox>
+
+                        <VBox spacing="12" styleClass="credit-card">
+                            <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+                            <Label styleClass="group-title" text="CSV export" />
+                            <Label styleClass="credit-card-label"
+                                   text="Exportuj predmety, známky, kredity a ďalšie údaje do CSV." />
+                            <Button fx:id="exportCsvButton" styleClass="login-button"
+                                    text="Exportovať do CSV" />
+                        </VBox>
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
             <!-- Tab 4: Study Tree -->
             <Tab text="🌳  Môj študijný strom">
                 <ScrollPane fitToWidth="true" styleClass="tab-scroll">
@@ -197,7 +245,7 @@
                         <VBox HBox.hgrow="ALWAYS" spacing="10" styleClass="credit-card">
                             <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
                             <Label styleClass="group-title" text="🌳 Tvoj aktuálny stav" />
-                            <Label fx:id="treeCreditsLabel" styleClass="credit-card-value" text="0 / 180" />
+                            <Label fx:id="treeCreditsLabel" styleClass="credit-card-value" text="0 / 0" />
                             <ProgressBar fx:id="treeProgressBar" maxWidth="Infinity" progress="0.0" />
                             <Label fx:id="treePercentageLabel" styleClass="credit-card-label" text="0 %" />
                             <Label styleClass="credit-card-label" text="kreditov" />
@@ -222,32 +270,32 @@
                                 <VBox fx:id="treePhaseCard1" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                     <Label styleClass="tree-phase-icon" text="🌱" />
                                     <Label styleClass="tree-phase-title" text="Úroveň 1–4" />
-                                    <Label styleClass="tree-phase-description" text="Začiatok štúdia" />
+                                    <Label fx:id="treePhaseDescription1" styleClass="tree-phase-description" text="Začiatok štúdia" />
                                 </VBox>
                                 <VBox fx:id="treePhaseCard2" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                     <Label styleClass="tree-phase-icon" text="🌿" />
                                     <Label styleClass="tree-phase-title" text="Úroveň 5–8" />
-                                    <Label styleClass="tree-phase-description" text="30–70 kreditov" />
+                                    <Label fx:id="treePhaseDescription2" styleClass="tree-phase-description" text="20–40 %" />
                                 </VBox>
                                 <VBox fx:id="treePhaseCard3" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="2" GridPane.rowIndex="0">
                                     <Label styleClass="tree-phase-icon" text="🌳" />
                                     <Label styleClass="tree-phase-title" text="Úroveň 9–12" />
-                                    <Label styleClass="tree-phase-description" text="71–110 kreditov" />
+                                    <Label fx:id="treePhaseDescription3" styleClass="tree-phase-description" text="40–60 %" />
                                 </VBox>
                                 <VBox fx:id="treePhaseCard4" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                     <Label styleClass="tree-phase-icon" text="🌸" />
                                     <Label styleClass="tree-phase-title" text="Úroveň 13–16" />
-                                    <Label styleClass="tree-phase-description" text="111–150 kreditov" />
+                                    <Label fx:id="treePhaseDescription4" styleClass="tree-phase-description" text="60–80 %" />
                                 </VBox>
                                 <VBox fx:id="treePhaseCard5" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                     <Label styleClass="tree-phase-icon" text="🌺" />
                                     <Label styleClass="tree-phase-title" text="Úroveň 17–19" />
-                                    <Label styleClass="tree-phase-description" text="151–179 kreditov" />
+                                    <Label fx:id="treePhaseDescription5" styleClass="tree-phase-description" text="80–100 %" />
                                 </VBox>
                                 <VBox fx:id="treePhaseCard6" styleClass="tree-phase-card" prefWidth="220" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                     <Label styleClass="tree-phase-icon" text="🎓" />
                                     <Label styleClass="tree-phase-title" text="Úroveň 20" />
-                                    <Label styleClass="tree-phase-description" text="180 kreditov&#10;Štúdium splnené" />
+                                    <Label fx:id="treePhaseDescription6" styleClass="tree-phase-description" text="Štúdium splnené" />
                                 </VBox>
                             </GridPane>
                         </VBox>
