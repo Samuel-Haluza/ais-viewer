@@ -1,0 +1,149 @@
+/* Light theme overrides. Layout and component sizing remain in styles.css. */
+.theme-light,
+.theme-light .root,
+.theme-light .main-root,
+.theme-light .tab-content,
+.theme-light .tab-scroll,
+.theme-light .tab-scroll .viewport,
+.theme-light .schedule-scroll,
+.theme-light .schedule-scroll .viewport {
+    -fx-background-color: #f4f6f9;
+    -fx-background: #f4f6f9;
+}
+
+.theme-light .login-root {
+    -fx-background-color: linear-gradient(to bottom, #f4f6f9, #e8edf4);
+}
+
+.theme-light .login-card,
+.theme-light .credit-card,
+.theme-light .subject-table,
+.theme-light .subject-info-dialog .content,
+.theme-light .subject-info-dialog .button-bar {
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-control-inner-background-alt: #f7f9fc;
+    -fx-border-color: #d7dee8;
+}
+
+.theme-light .login-card-title,
+.theme-light .group-title,
+.theme-light .credit-card-value,
+.theme-light .credit-card-value-large,
+.theme-light .subject-info-dialog .label,
+.theme-light .subject-info-text,
+.theme-light .subject-table .table-cell,
+.theme-light .table-row-cell .text,
+.theme-light .label {
+    -fx-text-fill: #1f2937;
+}
+
+.theme-light .field-label,
+.theme-light .credit-card-label,
+.theme-light .status-label,
+.theme-light .info-label,
+.theme-light .top-label {
+    -fx-text-fill: #526174;
+}
+
+.theme-light .login-field,
+.theme-light .text-field,
+.theme-light .password-field,
+.theme-light .combo-box,
+.theme-light .enrollment-combo {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c6d0dc;
+    -fx-text-fill: #1f2937;
+    -fx-prompt-text-fill: #7b8797;
+}
+
+.theme-light .combo-box .list-cell,
+.theme-light .combo-box-popup .list-view,
+.theme-light .combo-box-popup .list-view .list-cell {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2937;
+}
+
+.theme-light .combo-box-popup .list-view .list-cell:hover,
+.theme-light .combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: #dcecff;
+    -fx-text-fill: #12355b;
+}
+
+.theme-light .subject-table .column-header-background,
+.theme-light .subject-table .column-header,
+.theme-light .subject-table .filler {
+    -fx-background-color: #e7edf5;
+    -fx-border-color: #cbd5e1;
+}
+
+.theme-light .subject-table .column-header .label {
+    -fx-text-fill: #334155;
+}
+
+.theme-light .subject-table .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #e5eaf0 transparent;
+}
+
+.theme-light .subject-table .table-row-cell:odd {
+    -fx-background-color: #f7f9fc;
+}
+
+.theme-light .subject-table .table-row-cell:hover {
+    -fx-background-color: #eaf3ff;
+}
+
+.theme-light .subject-table .table-row-cell:selected {
+    -fx-background-color: #b9d8fa;
+}
+
+.theme-light .subject-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #102a43 !important;
+}
+
+.theme-light .subject-table .placeholder .label,
+.theme-light .subject-info-dialog .button {
+    -fx-text-fill: #526174;
+}
+
+.theme-light .subject-info-dialog,
+.theme-light .subject-info-scroll,
+.theme-light .subject-info-scroll .viewport,
+.theme-light .dialog-pane,
+.theme-light .dialog-pane .content,
+.theme-light .dialog-pane .button-bar {
+    -fx-background-color: #ffffff;
+}
+
+.theme-light .subject-info-heading {
+    -fx-text-fill: #0069c8;
+}
+
+.theme-light .scroll-bar .track {
+    -fx-background-color: #e5eaf0;
+}
+
+.theme-light .scroll-bar .thumb {
+    -fx-background-color: #aab8c8;
+}
+
+.theme-light .scroll-bar .thumb:hover {
+    -fx-background-color: #8798ad;
+}
+
+.theme-light .theme-toggle-button,
+.theme-light .refresh-button,
+.theme-light .logout-button {
+    -fx-text-fill: white;
+}
+
+.theme-light .error-label {
+    -fx-text-fill: #b42318;
+    -fx-background-color: #fff1f0;
+}
+
+.theme-light .info-label {
+    -fx-background-color: #e9f4ff;
+    -fx-text-fill: #075985;
+}

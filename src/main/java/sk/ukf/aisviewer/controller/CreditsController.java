@@ -6,11 +6,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import sk.ukf.aisviewer.model.Subject;
 import sk.ukf.aisviewer.service.LocalCacheService;
+import sk.ukf.aisviewer.service.SubjectCompletionService;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class CreditsController {
@@ -118,7 +118,7 @@ public class CreditsController {
         double weightedGradeSum = 0;
         int gradedCredits = 0;
         for (Subject subject : subjects) {
-            if (!isCompletedSubject(subject)) {
+            if (!SubjectCompletionService.isCompleted(subject)) {
                 continue;
             }
             double grade = subject.getGradeNumeric();
@@ -155,7 +155,7 @@ public class CreditsController {
     }
 
     private void addCompletedSubject(Map<String, Subject> uniqueSubjects, Subject subject) {
-        if (!isCompletedSubject(subject)) {
+        if (!SubjectCompletionService.isCompleted(subject)) {
             return;
         }
         String abbreviation = subject.getAbbreviation() == null
@@ -166,23 +166,6 @@ public class CreditsController {
     }
 
     public static boolean isCompletedSubject(Subject subject) {
-        if (subject == null || subject.getGrade() == null) {
-            return false;
-        }
-        String grade = subject.getGrade().trim();
-        if (grade.isBlank() || "-".equals(grade)) {
-            return false;
-        }
-
-        if (subject.getGradeNumeric() > 0) {
-            return true;
-        }
-
-        String normalizedGrade = grade.toLowerCase(Locale.ROOT);
-        if (normalizedGrade.contains("abs") || normalizedGrade.contains("absolv")) {
-            return true;
-        }
-
-        return normalizedGrade.matches("^[a-e](?:\\b|\\s|-|\\().*");
+        return SubjectCompletionService.isCompleted(subject);
     }
 }

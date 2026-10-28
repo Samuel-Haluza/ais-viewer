@@ -1,0 +1,1058 @@
+{
+    "programCode":  "AI22b",
+    "degreeLevel":  "BACHELOR",
+    "studyForm":  "FULL_TIME",
+    "requiredTotalCredits":  180,
+    "requiredStudyCredits":  170,
+    "stateExamCredits":  10,
+    "requiredMandatoryCredits":  104,
+    "requiredCompulsoryElectiveCredits":  66,
+    "subjects":  [
+                     {
+                         "code":  "KI/AA/22",
+                         "name":  "Akademická angličtina",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/APG/22",
+                         "name":  "Aplikovaná počítačová grafika",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/APR/26",
+                         "name":  "Aplikácie priemyselných riadiacich systémov",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+                                                 "KI/APR/22"
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/APS/22",
+                         "name":  "Aplikácie počítačových sietí",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/AZ/22",
+                         "name":  "Akademické zručnosti",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bBPSS/22",
+                         "name":  "Bakalárska práca a jej obhajoba",
+                         "credits":  10,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  0,
+                         "semester":  "BOTH",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/BI/26",
+                         "name":  "Biznis inteligencia",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bOP/22",
+                         "name":  "Odborná prax",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bSBP01/22",
+                         "name":  "Seminár k bakalárskej práci I.",
+                         "credits":  2,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bSBP02/22",
+                         "name":  "Seminár k bakalárskej práci II.",
+                         "credits":  2,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/BSPD/26",
+                         "name":  "Bezpečnosť a spracovanie priemyselných dát",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bSVK1/22",
+                         "name":  "Študentská vedecká konferencia 1",
+                         "credits":  2,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bSVK2/22",
+                         "name":  "Študentská vedecká konferencia 2",
+                         "credits":  2,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/bSVK3/22",
+                         "name":  "Študentská vedecká konferencia 3",
+                         "credits":  2,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/BT/22",
+                         "name":  "Backendové technológie",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "WEB_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/DBS/22",
+                         "name":  "Databázové systémy",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/DT/22",
+                         "name":  "Databázové technológie",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/FJA/22",
+                         "name":  "Formálne jazyky a automaty",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/FT/22",
+                         "name":  "Frontendové technológie",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "WEB_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/HVP/22",
+                         "name":  "Herné vývojové prostredia",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/ITPM/22",
+                         "name":  "IT projektový manažment",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/IV/22",
+                         "name":  "Internet vecí",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/JW/22",
+                         "name":  "Jazyky webu",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "WEB_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/KPB/22",
+                         "name":  "Koncepty počítačovej bezpečnosti",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/KZI/22",
+                         "name":  "Kódovanie a zobrazovanie informácií",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "MATHEMATICAL_FOUNDATIONS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/MS/22",
+                         "name":  "Modelovanie a simulácia",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/NV/22",
+                         "name":  "Návrhové vzory",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/OS/22",
+                         "name":  "Operačné systémy",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/OT/22",
+                         "name":  "Objektové technológie",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PAD/22",
+                         "name":  "Počítačová analýza dát",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PAS/22",
+                         "name":  "Programovanie aplikácií so senzormi",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PG/22",
+                         "name":  "Počítačová grafika",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PJC/26",
+                         "name":  "Programovanie v jazyku C",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+                                                 "KI/PJC/22"
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PMS/22",
+                         "name":  "Programovanie mikroprocesorových systémov",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PPI/22",
+                         "name":  "Princípy počítačového inžinierstva",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PPRS/26",
+                         "name":  "Programovanie priemyselných riadiacich systémov",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+                                                 "KI/PPRS/22"
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PPRS2/24",
+                         "name":  "Programovanie priemyselných riadiacich systémov II.",
+                         "credits":  2,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+                                                   "KI/PPRS/22"
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PROG/22",
+                         "name":  "Programovanie",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PS/22",
+                         "name":  "Počítačové siete",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PSJ/22",
+                         "name":  "Matematické princípy spracovania jazyka a strojového učenia",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "MATHEMATICAL_FOUNDATIONS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PST/22",
+                         "name":  "Počítačové systémy",
+                         "credits":  4,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/SJ/22",
+                         "name":  "Skriptovacie jazyky",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "WEB_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/SPROG/22",
+                         "name":  "Seminár z programovania",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/SUP/22",
+                         "name":  "Spracovanie údajov v jazyku Python",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/TCTF/26",
+                         "name":  "Techniky CTF kybernetických hier",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/TS/22",
+                         "name":  "Testovanie softvéru",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "WEB_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/UI/22",
+                         "name":  "Umelá inteligencia",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  3,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/UNIX/22",
+                         "name":  "Unixové systémy",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/UPS/22",
+                         "name":  "Úvod do počítačových systémov",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/USI/22",
+                         "name":  "Úvod do softvérového inžinierstva",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/USTJ/22",
+                         "name":  "Údajové štruktúry a triedy v jazyku Java",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/V3A/22",
+                         "name":  "Vývoj 3D aplikácií",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/VMA/22",
+                         "name":  "Vývoj mobilných aplikácií",
+                         "credits":  5,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/VZA/22",
+                         "name":  "Výpočtová zložitosť algoritmov",
+                         "credits":  6,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/WAJ/22",
+                         "name":  "Webové aplikácie na platforme Java",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  3,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "WEB_DEVELOPMENT"
+                                        ]
+                     }
+                 ]
+}
+

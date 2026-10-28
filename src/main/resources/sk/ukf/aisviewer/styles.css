@@ -315,7 +315,9 @@
 
 /* ---- Tables ---- */
 .subject-table {
-    -fx-background-color: transparent;
+    -fx-background-color: #23272f;
+    -fx-control-inner-background: #23272f;
+    -fx-control-inner-background-alt: #252a33;
     -fx-border-color: #2d3340;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
@@ -361,12 +363,77 @@
     -fx-border-color: transparent;
 }
 
+.subject-table .virtual-flow,
+.subject-table .clipped-container,
+.subject-table .sheet {
+    -fx-background-color: #23272f;
+}
+
+.subject-table .scroll-bar:vertical,
+.subject-table .scroll-bar:horizontal {
+    -fx-background-color: #1a1d23;
+}
+
+.subject-table .scroll-bar .thumb {
+    -fx-background-color: #3d4555;
+    -fx-background-radius: 4px;
+}
+
+.subject-table .scroll-bar .thumb:hover {
+    -fx-background-color: #5a637a;
+}
+
+.subject-table .scroll-bar .track,
+.subject-table .scroll-bar .increment-button,
+.subject-table .scroll-bar .decrement-button {
+    -fx-background-color: #1a1d23;
+}
+
 .subject-table .table-row-cell:odd {
     -fx-background-color: rgba(255,255,255,0.02);
 }
 
 .subject-table .placeholder .label {
     -fx-text-fill: #5a637a;
+}
+
+.subject-info-dialog {
+    -fx-background-color: #1a1d23;
+}
+
+.subject-info-dialog .header-panel,
+.subject-info-dialog .content,
+.subject-info-dialog .button-bar {
+    -fx-background-color: #1a1d23;
+}
+
+.subject-info-dialog .button {
+    -fx-background-color: #2d3340;
+    -fx-border-color: #3d4555;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #c8d0e0;
+}
+
+.subject-info-dialog .label {
+    -fx-text-fill: #c8d0e0;
+}
+
+.subject-info-heading {
+    -fx-text-fill: #64b5f6 !important;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 0 2 0;
+}
+
+.subject-info-text {
+    -fx-text-fill: #c8d0e0 !important;
+    -fx-line-spacing: 2px;
+}
+
+.subject-info-scroll,
+.subject-info-scroll .viewport {
+    -fx-background-color: #1a1d23;
 }
 
 /* ---- Status label ---- */
@@ -696,4 +763,19 @@
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
     -fx-font-size: 12px;
+}
+
+/* ---- Global theme hook ---- */
+.theme-toggle-button {
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-background-radius: 5px;
+    -fx-border-color: rgba(255,255,255,0.25);
+    -fx-border-radius: 5px;
+    -fx-text-fill: white;
+    -fx-padding: 7 10 7 10;
+    -fx-cursor: hand;
+}
+
+.theme-toggle-button:hover {
+    -fx-background-color: rgba(255,255,255,0.25);
 }

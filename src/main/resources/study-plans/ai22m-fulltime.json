@@ -1,0 +1,602 @@
+{
+    "programCode":  "AI22m",
+    "degreeLevel":  "MASTER",
+    "studyForm":  "FULL_TIME",
+    "requiredTotalCredits":  120,
+    "requiredStudyCredits":  100,
+    "stateExamCredits":  20,
+    "requiredMandatoryCredits":  36,
+    "requiredCompulsoryElectiveCredits":  64,
+    "subjects":  [
+                     {
+                         "code":  "KI/CT/22",
+                         "name":  "Cloudové technológie",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/DEJ/22",
+                         "name":  "Dejiny informatiky",
+                         "credits":  4,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/FP/22",
+                         "name":  "Funkcionálne programovanie",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "ALGORITHMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/HAD/22",
+                         "name":  "Hĺbková analýza dát",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/IB/22",
+                         "name":  "Informačná bezpečnosť",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "COMPUTER_SYSTEMS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/INT/22",
+                         "name":  "Inteligentné systémy",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/ITP/22",
+                         "name":  "Informačné technológie v priemysle a praxi",
+                         "credits":  2,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/KPL/22",
+                         "name":  "Korpusová a počítačová lingvistika",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/mDPSS/22",
+                         "name":  "Diplomová práca a jej obhajoba",
+                         "credits":  20,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  0,
+                         "semester":  "BOTH",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+
+                                        ]
+                     },
+                     {
+                         "code":  "KI/mOP/22",
+                         "name":  "Odborná prax",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "BOTH",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/mSDP01/22",
+                         "name":  "Seminár k diplomovej práci I.",
+                         "credits":  2,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/mSDP02/22",
+                         "name":  "Seminár k diplomovej práci II.",
+                         "credits":  2,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/MSP/22",
+                         "name":  "Manažment softvérových projektov",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/MVI/22",
+                         "name":  "Metodológia výskumu v informatike",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/NS/22",
+                         "name":  "Neurónové siete",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/OAJ/22",
+                         "name":  "Odborná komunikácia v anglickom jazyku",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/OZ/22",
+                         "name":  "Objavovanie znalostí",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/OZED/22",
+                         "name":  "Objavovanie znalostí z edukačných dát",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PSM/22",
+                         "name":  "Princípy robotických systémov a priemyselných meraní",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/PTS/22",
+                         "name":  "Pokročilé testovanie softvéru",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/RR/22",
+                         "name":  "Rozšírená realita",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/SAP/22",
+                         "name":  "Systémy aplikovanej a priemyselnej informatiky",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "INTELLIGENT_TECHNOLOGIES"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/SI/22",
+                         "name":  "Softvérové inžinierstvo",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/SMA/22",
+                         "name":  "Spoločenské, morálne a ekonomické aspekty informatiky",
+                         "credits":  4,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GENERAL_SKILLS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/TSV/22",
+                         "name":  "Technológie spracovania veľkých dát",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/USPJ/22",
+                         "name":  "Úvod do spracovania prirodzeného jazyka",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/USU/22",
+                         "name":  "Úvod do strojového učenia",
+                         "credits":  6,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "MANDATORY",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "DATA_AND_AI"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/VAI/22",
+                         "name":  "Vývoj aplikácií pre iOS",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  2,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/VKVS1/22",
+                         "name":  "Vybrané kapitoly z vývoja softvéru I.",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/VKVS2/22",
+                         "name":  "Vybrané kapitoly z vývoja softvéru II.",
+                         "credits":  3,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "SOFTWARE_DEVELOPMENT"
+                                        ]
+                     },
+                     {
+                         "code":  "KI/VR/22",
+                         "name":  "Virtuálna realita",
+                         "credits":  5,
+                         "degreeLevel":  "MASTER",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "GAME_AND_GRAPHICS"
+                                        ]
+                     }
+                 ]
+}
+

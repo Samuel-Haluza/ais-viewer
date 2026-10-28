@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import sk.ukf.aisviewer.controller.MainController;
 import sk.ukf.aisviewer.service.LocalCacheService;
+import sk.ukf.aisviewer.service.ThemeManager;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,6 +50,7 @@ public class App extends Application {
     public static void showLoginScreen() throws IOException {
         FXMLLoader loader = new FXMLLoader(App.class.getResource("login.fxml"));
         Scene scene = new Scene(loader.load(), 600, 600);
+        ThemeManager.getInstance().applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
         primaryStage.show();
@@ -57,6 +59,7 @@ public class App extends Application {
     public static void showMainScreen() throws IOException {
         FXMLLoader loader = new FXMLLoader(App.class.getResource("main.fxml"));
         Scene scene = new Scene(loader.load(), 1000, 700);
+        ThemeManager.getInstance().applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
         primaryStage.setMinWidth(800);

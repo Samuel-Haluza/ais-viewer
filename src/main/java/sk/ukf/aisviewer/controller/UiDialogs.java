@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.util.Optional;
+import sk.ukf.aisviewer.service.ThemeManager;
 
 final class UiDialogs {
 
@@ -150,6 +151,7 @@ final class UiDialogs {
         String stylesheet = UiDialogs.class.getResource("/sk/ukf/aisviewer/styles.css")
                 .toExternalForm();
         scene.getStylesheets().add(stylesheet);
+        ThemeManager.getInstance().applyTheme(scene);
         return scene;
     }
 }

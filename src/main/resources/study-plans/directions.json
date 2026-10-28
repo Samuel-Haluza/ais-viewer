@@ -1,0 +1,11 @@
+[
+  {"code":"ALGORITHMS","name":"Algoritmizácia"},
+  {"code":"SOFTWARE_DEVELOPMENT","name":"Vývoj softvéru"},
+  {"code":"DATA_AND_AI","name":"Dáta a umelá inteligencia"},
+  {"code":"WEB_DEVELOPMENT","name":"Tvorba webu"},
+  {"code":"GAME_AND_GRAPHICS","name":"Vývoj hier a grafika"},
+  {"code":"COMPUTER_SYSTEMS","name":"Počítačové systémy"},
+  {"code":"INTELLIGENT_TECHNOLOGIES","name":"Inteligentné technológie"},
+  {"code":"MATHEMATICAL_FOUNDATIONS","name":"Matematické princípy informatiky"},
+  {"code":"GENERAL_SKILLS","name":"Všeobecné zručnosti"}
+]

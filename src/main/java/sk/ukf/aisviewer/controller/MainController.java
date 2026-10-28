@@ -14,6 +14,8 @@ import sk.ukf.aisviewer.model.StudentInfo;
 import sk.ukf.aisviewer.model.Subject;
 import sk.ukf.aisviewer.service.AisClient;
 import sk.ukf.aisviewer.service.LocalCacheService;
+import sk.ukf.aisviewer.service.AppTheme;
+import sk.ukf.aisviewer.service.ThemeManager;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -105,8 +107,8 @@ public class MainController {
     @FXML private Label scheduleStatusLabel;
 
     // --- Exports Tab ---
-    @FXML private Button exportPdfButton;
     @FXML private Button exportCsvButton;
+    @FXML private Button themeToggleButton;
 
     private static AisClient aisClient;
     private static String runtimePassword;
@@ -122,6 +124,7 @@ public class MainController {
     private ScheduleController scheduleController;
     private StudyTreeController studyTreeController;
     private ExportController exportController;
+    @FXML private StudyPlanController studyPlanController;
 
     public static void setAisClient(AisClient client) {
         aisClient = client;
@@ -133,6 +136,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        updateThemeToggleText();
         subjectsController = new SubjectsController(mandatoryTable, optionalTable, electiveTable,
                 mandatoryCreditsLabel, optionalCreditsLabel, electiveCreditsLabel,
                 semesterFilterCombo);
@@ -142,7 +146,7 @@ public class MainController {
                 graduationCreditsLabel, graduationProgressBar, graduationProgressLabel,
                 graduationRemainingLabel, creditsByCategoryChart);
         scheduleController = new ScheduleController(scheduleContainer, scheduleStatusLabel);
-        exportController = new ExportController(exportPdfButton, exportCsvButton);
+        exportController = new ExportController(exportCsvButton);
         studyTreeController = new StudyTreeController(treeBaseLayer, treeBranchesLayer, treeLeavesLayer,
                 treeFlowersLayer, treeEffectsLayer, treePhaseLabel, treeSubtitleLabel,
                 treeCreditsLabel, treePercentageLabel, treeLevelLabel, treeNextLevelLabel,
@@ -164,15 +168,31 @@ public class MainController {
         if (studentInfo == null && cacheSnapshot != null) {
             studentInfo = cacheSnapshot.getStudentInfo();
         }
+
         if (studentInfo == null) return;
 
         restoreCachedEnrollmentLists();
         requiredCredits = resolveRequiredCredits(findLatestEnrollmentName());
         exportController.setExportData(studentInfo, cacheSnapshot);
+        studyPlanController.update(studentInfo, List.of(), cacheSnapshot);
         updateStudentInfoBar();
         subjectsController.setup();
         examsController.setup();
         loadInitialData();
+    }
+
+    @FXML
+    private void handleThemeToggle() {
+        ThemeManager.getInstance().toggleTheme();
+        updateThemeToggleText();
+    }
+
+    private void updateThemeToggleText() {
+        if (themeToggleButton == null) {
+            return;
+        }
+        themeToggleButton.setText(ThemeManager.getInstance().getCurrentTheme() == AppTheme.DARK
+                ? "☀ Svetlý režim" : "🌙 Tmavý režim");
     }
 
     private void updateStudentInfoBar() {
@@ -197,7 +217,16 @@ public class MainController {
     private void loadInitialData() {
         boolean usableCache = cacheSnapshot != null
                 && cacheSnapshot.getStudentInfo() != null
-                && (aisClient == null || isCacheForCurrentStudent(cacheSnapshot));
+                && (aisClient == null || isCacheForCurrentStudent(cacheSnapshot))
+                && hasAllEnrollmentData();
+        if (cacheSnapshot != null && cacheSnapshot.getStudentInfo() != null) {
+            System.out.println("[CACHE] enrollment metadata="
+                    + studentInfo.getEnrollmentListIds()
+                    + ", cached data="
+                    + cacheSnapshot.getEnrollmentData().keySet()
+                    + ", total enrollment years="
+                    + cacheSnapshot.getEnrollmentData().size());
+        }
         if (usableCache) {
             displaySelectedEnrollmentFromCache();
             showLastUpdated(cacheSnapshot.getUpdatedAt());
@@ -277,6 +306,12 @@ public class MainController {
             boolean olderLoadFailed = false;
             for (int i = 0; i < enrollmentIds.size(); i++) {
                 String enrollmentListId = enrollmentIds.get(i);
+                String enrollmentName = enrollmentName(enrollmentListId, i);
+                System.out.println("[SYNC] enrollment=" + enrollmentName + ", id="
+                        + enrollmentListId + ", selected=" + (i == 0)
+                        + ", cachedBefore="
+                        + (cacheSnapshot != null
+                        && cacheSnapshot.getEnrollmentData().containsKey(enrollmentListId)));
                 try {
                     LoadedData loadedData = loadEnrollmentData(enrollmentListId);
                     if (loadedData.isEmpty()) {
@@ -284,6 +319,9 @@ public class MainController {
                     }
                     boolean isCurrent = i == 0;
                     if (isCurrent) currentLoaded = true;
+                    System.out.println("[SYNC] enrollment=" + enrollmentName + ", id="
+                            + enrollmentListId + ", loaded=true, subjects="
+                            + loadedData.subjects.size());
 
                     Platform.runLater(() -> {
                         saveCache(enrollmentListId, loadedData.subjects,
@@ -296,6 +334,8 @@ public class MainController {
                     });
                 } catch (Exception e) {
                     boolean isCurrent = i == 0;
+                    System.out.println("[SYNC] enrollment=" + enrollmentName + ", id="
+                            + enrollmentListId + ", loaded=false, error=" + e.getMessage());
                     Platform.runLater(() -> {
                         if (isCurrent && !dataDisplayed) {
                             showNoDataMessage();
@@ -375,10 +415,9 @@ public class MainController {
         creditsController.updateCredits(subjects, cacheSnapshot, requiredCredits);
         studyTreeController.update(creditsController.getAcquiredCredits(), subjects,
                 cacheSnapshot, studentInfo, requiredCredits);
-        exportController.setExportData(studentInfo, cacheSnapshot,
-                creditsController.getAcquiredCredits(), requiredCredits,
-                creditsController.getAverageGrade());
+        exportController.setExportData(studentInfo, cacheSnapshot);
         scheduleController.displaySchedule(scheduleEntries);
+        studyPlanController.update(studentInfo, subjects, cacheSnapshot);
     }
 
     private String findLatestEnrollmentName() {
@@ -439,6 +478,9 @@ public class MainController {
         }
         cacheSnapshot.getEnrollmentData().put(enrollmentListId,
                 LocalCacheService.EnrollmentData.of(subjects, exams, scheduleEntries));
+        System.out.println("[SYNC] enrollment=" + enrollmentName(enrollmentListId, -1)
+                + ", id=" + enrollmentListId + ", savedToCache=true, subjects="
+                + subjects.size());
         String updatedAt = LocalDateTime.now()
                 .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         cacheSnapshot.setUpdatedAt(updatedAt);
@@ -449,6 +491,26 @@ public class MainController {
         } catch (IOException e) {
             System.out.println("[CACHE] Cache sa nepodarilo uložiť: " + e.getMessage());
         }
+    }
+
+    private boolean hasAllEnrollmentData() {
+        if (studentInfo == null || studentInfo.getEnrollmentListIds() == null
+                || cacheSnapshot == null || cacheSnapshot.getEnrollmentData() == null) {
+            return false;
+        }
+        return studentInfo.getEnrollmentListIds().stream()
+                .allMatch(cacheSnapshot.getEnrollmentData()::containsKey);
+    }
+
+    private String enrollmentName(String enrollmentId, int fallbackIndex) {
+        if (studentInfo != null && studentInfo.getEnrollmentListIds() != null
+                && studentInfo.getEnrollmentListNames() != null) {
+            int index = studentInfo.getEnrollmentListIds().indexOf(enrollmentId);
+            if (index >= 0 && index < studentInfo.getEnrollmentListNames().size()) {
+                return studentInfo.getEnrollmentListNames().get(index);
+            }
+        }
+        return fallbackIndex >= 0 ? "index-" + fallbackIndex : "unknown";
     }
 
     private void showLastUpdated(String timestamp) {

@@ -42,6 +42,8 @@
             <ComboBox fx:id="enrollmentListCombo" prefWidth="180" styleClass="enrollment-combo" />
 
             <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="refresh-button" text="Obnoviť údaje" />
+            <Button fx:id="themeToggleButton" onAction="#handleThemeToggle"
+                    styleClass="theme-toggle-button" text="☀ Svetlý režim" />
             <Button onAction="#handleLogout" styleClass="logout-button" text="Odhlásiť" />
         </HBox>
     </top>
@@ -96,6 +98,10 @@
 
                     </VBox>
                 </ScrollPane>
+            </Tab>
+
+            <Tab text="🗺  Plánovanie">
+                <fx:include fx:id="studyPlan" source="study-plan.fxml"/>
             </Tab>
 
             <!-- Tab 2: Skúšky -->
@@ -191,16 +197,7 @@
 
                         <Label styleClass="group-title" text="Export údajov" />
                         <Label styleClass="credit-card-label"
-                               text="Exportuj svoj študijný prehľad do PDF alebo CSV." />
-
-                        <VBox spacing="12" styleClass="credit-card">
-                            <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
-                            <Label styleClass="group-title" text="PDF report" />
-                            <Label styleClass="credit-card-label"
-                                   text="Vytvor prehľadný PDF report so študijnými údajmi." />
-                            <Button fx:id="exportPdfButton" styleClass="login-button"
-                                    text="Exportovať do PDF" />
-                        </VBox>
+                               text="Exportuj svoj študijný prehľad do CSV." />
 
                         <VBox spacing="12" styleClass="credit-card">
                             <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>

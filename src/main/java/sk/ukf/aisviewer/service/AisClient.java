@@ -103,6 +103,7 @@ public class AisClient {
 
             LocalCacheService.CacheSnapshot cachedSnapshot =
                     new LocalCacheService().load().orElse(null);
+            boolean cacheLoaded = false;
             if (isCacheForCurrentStudent(cachedSnapshot)) {
                 StudentInfo cachedStudent = cachedSnapshot.getStudentInfo();
                 currentStudent.setEnrollmentListId(cachedStudent.getEnrollmentListId());
@@ -110,15 +111,12 @@ public class AisClient {
                         new ArrayList<>(cachedStudent.getEnrollmentListIds()));
                 currentStudent.setEnrollmentListNames(
                         new ArrayList<>(cachedStudent.getEnrollmentListNames()));
-                System.out.println("[AIS] Login úspešný.");
-                System.out.println("[AIS] Študent: " + currentStudent.getFullName());
-                System.out.println("[CACHE] Platná cache nájdená.");
-                System.out.println("[CACHE] Používam zápisné listy z cache.");
-                System.out.println("[CACHE] Selenium discovery zápisných listov preskočený.");
-                return true;
+                cacheLoaded = true;
+                System.out.println("[CACHE] Platná cache nájdená, zápisné listy sa overia v AiS2.");
             }
 
-            System.out.println("[AIS] Hľadám zápisné listy...");
+            System.out.println("[AIS] Hľadám všetky zápisné listy v AiS2..."
+                    + (cacheLoaded ? " (cache je iba základ)" : ""));
             Thread.sleep(1500);
 
             List<WebElement> allLinks = driver.findElements(By.tagName("a"));
@@ -184,6 +182,23 @@ public class AisClient {
                 }
             }
 
+            System.out.println("[AIS] Zápisné listy ponúknuté AiS2:");
+            for (int i = 0; i < currentStudent.getEnrollmentListIds().size(); i++) {
+                System.out.println("[AIS] enrollment=" + currentStudent.getEnrollmentListNames().get(i)
+                        + ", id=" + currentStudent.getEnrollmentListIds().get(i)
+                        + ", selected=" + currentStudent.getEnrollmentListIds().get(i)
+                        .equals(currentStudent.getEnrollmentListId()));
+            }
+            if (cachedSnapshot != null) {
+                cachedSnapshot.setStudentInfo(currentStudent);
+                try {
+                    new LocalCacheService().save(cachedSnapshot);
+                    System.out.println("[CACHE] Aktualizované enrollment metadata uložené do cache.");
+                } catch (Exception e) {
+                    System.out.println("[CACHE] Enrollment metadata sa nepodarilo uložiť: "
+                            + e.getMessage());
+                }
+            }
             System.out.println("[AIS] Zápisné listy: " + currentStudent.getEnrollmentListIds());
             return true;
 
