@@ -1,13 +1,15 @@
 package sk.ukf.aisviewer.controller;
 
+import sk.ukf.aisviewer.AppLog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.chart.PieChart;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
 import sk.ukf.aisviewer.App;
+import sk.ukf.aisviewer.model.EnrollmentName;
 import sk.ukf.aisviewer.model.Exam;
 import sk.ukf.aisviewer.model.ScheduleEntry;
 import sk.ukf.aisviewer.model.StudentInfo;
@@ -15,19 +17,19 @@ import sk.ukf.aisviewer.model.Subject;
 import sk.ukf.aisviewer.service.AisClient;
 import sk.ukf.aisviewer.service.LocalCacheService;
 import sk.ukf.aisviewer.service.AppTheme;
+import sk.ukf.aisviewer.service.GradeChanges;
 import sk.ukf.aisviewer.service.ThemeManager;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Controller for the main window with tabs.
  */
 public class MainController {
+    private static final Logger LOG = AppLog.get(MainController.class);
 
     // --- Student Info Bar ---
     @FXML private Label studentNameLabel;
@@ -38,76 +40,6 @@ public class MainController {
     @FXML private ProgressIndicator syncProgressIndicator;
     @FXML private Button refreshButton;
 
-    // --- Subjects Tab ---
-    @FXML private TableView<Subject> mandatoryTable;
-    @FXML private TableView<Subject> optionalTable;
-    @FXML private TableView<Subject> electiveTable;
-    @FXML private Label mandatoryCreditsLabel;
-    @FXML private Label optionalCreditsLabel;
-    @FXML private Label electiveCreditsLabel;
-    @FXML private ComboBox<String> semesterFilterCombo;
-
-    // --- Exams Tab ---
-    @FXML private TableView<Exam> examsTable;
-    @FXML private Label examsStatusLabel;
-
-    // --- Credits Tab ---
-    @FXML private Label totalCreditsLabel;
-    @FXML private Label mandatoryCreditsTotal;
-    @FXML private Label optionalCreditsTotal;
-    @FXML private Label electiveCreditsTotal;
-    @FXML private Label avgGradeLabel;
-    @FXML private Label yearAvgGradeLabel;
-    @FXML private Label graduationCreditsLabel;
-    @FXML private ProgressBar graduationProgressBar;
-    @FXML private Label graduationProgressLabel;
-    @FXML private Label graduationRemainingLabel;
-    @FXML private PieChart creditsByCategoryChart;
-
-    // --- Study Tree Tab ---
-    @FXML private ImageView treeBaseLayer;
-    @FXML private ImageView treeBranchesLayer;
-    @FXML private ImageView treeLeavesLayer;
-    @FXML private ImageView treeFlowersLayer;
-    @FXML private ImageView treeEffectsLayer;
-    @FXML private Label treePhaseLabel;
-    @FXML private Label treeSubtitleLabel;
-    @FXML private Label treeCreditsLabel;
-    @FXML private Label treePercentageLabel;
-    @FXML private Label treeLevelLabel;
-    @FXML private Label treeNextLevelLabel;
-    @FXML private Label treeMilestoneLabel;
-    @FXML private Label treeMilestoneRemainingLabel;
-    @FXML private Label treeMilestoneYear1Label;
-    @FXML private Label treeMilestoneYear2Label;
-    @FXML private Label treeMilestoneFirstALabel;
-    @FXML private Label treeMilestoneTenSubjectsLabel;
-    @FXML private Label treeMilestoneMandatoryLabel;
-    @FXML private ProgressBar treeProgressBar;
-    @FXML private VBox treePhaseCard1;
-    @FXML private VBox treePhaseCard2;
-    @FXML private VBox treePhaseCard3;
-    @FXML private VBox treePhaseCard4;
-    @FXML private VBox treePhaseCard5;
-    @FXML private VBox treePhaseCard6;
-    @FXML private Label treePhaseDescription1;
-    @FXML private Label treePhaseDescription2;
-    @FXML private Label treePhaseDescription3;
-    @FXML private Label treePhaseDescription4;
-    @FXML private Label treePhaseDescription5;
-    @FXML private Label treePhaseDescription6;
-    @FXML private VBox treeMilestoneCardYear1;
-    @FXML private VBox treeMilestoneCardYear2;
-    @FXML private VBox treeMilestoneCardFirstA;
-    @FXML private VBox treeMilestoneCardTenSubjects;
-    @FXML private VBox treeMilestoneCardMandatory;
-
-    // --- Schedule Tab ---
-    @FXML private VBox scheduleContainer;
-    @FXML private Label scheduleStatusLabel;
-
-    // --- Exports Tab ---
-    @FXML private Button exportCsvButton;
     @FXML private Button themeToggleButton;
 
     private static AisClient aisClient;
@@ -117,13 +49,18 @@ public class MainController {
     private LocalCacheService.CacheSnapshot cacheSnapshot;
     private boolean dataDisplayed;
     private boolean syncInProgress;
+    /** Nové / zmenené známky zistené počas jednej synchronizácie. */
+    private final List<GradeChanges.Change> gradeChanges = new java.util.ArrayList<>();
     private int requiredCredits = 180;
-    private SubjectsController subjectsController;
-    private ExamsController examsController;
-    private CreditsController creditsController;
-    private ScheduleController scheduleController;
-    private StudyTreeController studyTreeController;
-    private ExportController exportController;
+
+    // Controllery záložiek – každá záložka má vlastný .fxml (fx:include v main.fxml).
+    // JavaFX ich vloží podľa fx:id + "Controller", napr. fx:id="subjects" → subjectsController.
+    @FXML private SubjectsController subjectsController;
+    @FXML private ExamsController examsController;
+    @FXML private CreditsController creditsController;
+    @FXML private ScheduleController scheduleController;
+    @FXML private StudyTreeController studyTreeController;
+    private final ExportController exportController = new ExportController();
     @FXML private StudyPlanController studyPlanController;
 
     public static void setAisClient(AisClient client) {
@@ -137,31 +74,6 @@ public class MainController {
     @FXML
     public void initialize() {
         updateThemeToggleText();
-        subjectsController = new SubjectsController(mandatoryTable, optionalTable, electiveTable,
-                mandatoryCreditsLabel, optionalCreditsLabel, electiveCreditsLabel,
-                semesterFilterCombo);
-        examsController = new ExamsController(examsTable, examsStatusLabel);
-        creditsController = new CreditsController(totalCreditsLabel, mandatoryCreditsTotal,
-                optionalCreditsTotal, electiveCreditsTotal, avgGradeLabel, yearAvgGradeLabel,
-                graduationCreditsLabel, graduationProgressBar, graduationProgressLabel,
-                graduationRemainingLabel, creditsByCategoryChart);
-        scheduleController = new ScheduleController(scheduleContainer, scheduleStatusLabel);
-        exportController = new ExportController(exportCsvButton);
-        studyTreeController = new StudyTreeController(treeBaseLayer, treeBranchesLayer, treeLeavesLayer,
-                treeFlowersLayer, treeEffectsLayer, treePhaseLabel, treeSubtitleLabel,
-                treeCreditsLabel, treePercentageLabel, treeLevelLabel, treeNextLevelLabel,
-                treeMilestoneLabel, treeMilestoneRemainingLabel,
-                new Label[]{treeMilestoneYear1Label, treeMilestoneYear2Label,
-                treeMilestoneFirstALabel, treeMilestoneTenSubjectsLabel,
-                treeMilestoneMandatoryLabel}, treeProgressBar,
-                new VBox[]{treePhaseCard1, treePhaseCard2, treePhaseCard3,
-                treePhaseCard4, treePhaseCard5, treePhaseCard6},
-                new Label[]{treePhaseDescription1, treePhaseDescription2,
-                treePhaseDescription3, treePhaseDescription4,
-                treePhaseDescription5, treePhaseDescription6},
-                new VBox[]{treeMilestoneCardYear1, treeMilestoneCardYear2,
-                treeMilestoneCardFirstA, treeMilestoneCardTenSubjects,
-                treeMilestoneCardMandatory});
 
         cacheSnapshot = cacheService.load().orElse(null);
         studentInfo = aisClient != null ? aisClient.getCurrentStudent() : null;
@@ -176,8 +88,6 @@ public class MainController {
         exportController.setExportData(studentInfo, cacheSnapshot);
         studyPlanController.update(studentInfo, List.of(), cacheSnapshot);
         updateStudentInfoBar();
-        subjectsController.setup();
-        examsController.setup();
         loadInitialData();
     }
 
@@ -220,7 +130,7 @@ public class MainController {
                 && (aisClient == null || isCacheForCurrentStudent(cacheSnapshot))
                 && hasAllEnrollmentData();
         if (cacheSnapshot != null && cacheSnapshot.getStudentInfo() != null) {
-            System.out.println("[CACHE] enrollment metadata="
+            LOG.fine("enrollment metadata="
                     + studentInfo.getEnrollmentListIds()
                     + ", cached data="
                     + cacheSnapshot.getEnrollmentData().keySet()
@@ -292,6 +202,7 @@ public class MainController {
         }
 
         syncInProgress = true;
+        gradeChanges.clear();
         refreshButton.setDisable(true);
         if (!initialLoad) {
             enrollmentListCombo.getSelectionModel().selectFirst();
@@ -307,19 +218,19 @@ public class MainController {
             for (int i = 0; i < enrollmentIds.size(); i++) {
                 String enrollmentListId = enrollmentIds.get(i);
                 String enrollmentName = enrollmentName(enrollmentListId, i);
-                System.out.println("[SYNC] enrollment=" + enrollmentName + ", id="
+                LOG.info("enrollment=" + enrollmentName + ", id="
                         + enrollmentListId + ", selected=" + (i == 0)
                         + ", cachedBefore="
                         + (cacheSnapshot != null
                         && cacheSnapshot.getEnrollmentData().containsKey(enrollmentListId)));
                 try {
-                    LoadedData loadedData = loadEnrollmentData(enrollmentListId);
+                    LoadedData loadedData = loadEnrollmentData(enrollmentListId, i == 0);
                     if (loadedData.isEmpty()) {
                         throw new IllegalStateException("AIS nevrátil žiadne údaje");
                     }
                     boolean isCurrent = i == 0;
                     if (isCurrent) currentLoaded = true;
-                    System.out.println("[SYNC] enrollment=" + enrollmentName + ", id="
+                    LOG.info("enrollment=" + enrollmentName + ", id="
                             + enrollmentListId + ", loaded=true, subjects="
                             + loadedData.subjects.size());
 
@@ -334,7 +245,7 @@ public class MainController {
                     });
                 } catch (Exception e) {
                     boolean isCurrent = i == 0;
-                    System.out.println("[SYNC] enrollment=" + enrollmentName + ", id="
+                    LOG.info("enrollment=" + enrollmentName + ", id="
                             + enrollmentListId + ", loaded=false, error=" + e.getMessage());
                     Platform.runLater(() -> {
                         if (isCurrent && !dataDisplayed) {
@@ -360,16 +271,26 @@ public class MainController {
                 } else if (synchronizationLoadedCurrent) {
                     showSyncStatus("Údaje boli aktualizované.", false);
                 }
+                if (!gradeChanges.isEmpty()) {
+                    showSyncStatus("🎉 Nové hodnotenia: " + gradeChanges.size(), false);
+                    UiDialogs.showGradeChanges(refreshButton.getScene().getWindow(), List.copyOf(gradeChanges));
+                }
             });
         });
         loadThread.setDaemon(true);
         loadThread.start();
     }
 
-    private LoadedData loadEnrollmentData(String enrollmentListId) {
+    /**
+     * Rozvrh sa načíta len pre aktuálny (prvý) zápisný list – stránka rozvrhu v AIS parameter
+     * zl ignoruje a vždy vráti aktuálny semester, takže pre staršie ročníky by bol nesprávny.
+     */
+    private LoadedData loadEnrollmentData(String enrollmentListId, boolean current) {
         List<Subject> subjects = aisClient.fetchSubjects(enrollmentListId);
         List<Exam> exams = aisClient.fetchExams(enrollmentListId);
-        List<ScheduleEntry> scheduleEntries = aisClient.fetchScheduleEntries(enrollmentListId);
+        List<ScheduleEntry> scheduleEntries = current
+                ? aisClient.fetchScheduleEntries(enrollmentListId)
+                : List.of();
         return new LoadedData(subjects, exams, scheduleEntries);
     }
 
@@ -412,60 +333,29 @@ public class MainController {
                            List<ScheduleEntry> scheduleEntries) {
         subjectsController.displaySubjects(subjects);
         examsController.displayExams(exams);
-        creditsController.updateCredits(subjects, cacheSnapshot, requiredCredits);
+        creditsController.updateCredits(subjects, cacheSnapshot, requiredCredits, studentInfo);
         studyTreeController.update(creditsController.getAcquiredCredits(), subjects,
                 cacheSnapshot, studentInfo, requiredCredits);
         exportController.setExportData(studentInfo, cacheSnapshot);
-        scheduleController.displaySchedule(scheduleEntries);
+        scheduleController.displaySchedule(scheduleEntries, isCurrentEnrollment(getSelectedEnrollmentId()));
         studyPlanController.update(studentInfo, subjects, cacheSnapshot);
     }
 
     private String findLatestEnrollmentName() {
-        List<String> names = studentInfo == null ? null : studentInfo.getEnrollmentListNames();
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-        String latest = names.get(0);
-        int latestYear = extractAcademicYear(latest);
-        for (String name : names) {
-            int year = extractAcademicYear(name);
-            if (year > latestYear) {
-                latest = name;
-                latestYear = year;
-            }
-        }
-        return latest;
-    }
-
-    private int extractAcademicYear(String enrollmentName) {
-        if (enrollmentName == null) {
-            return -1;
-        }
-        Matcher matcher = Pattern.compile("(\\d{4})").matcher(enrollmentName);
-        return matcher.find() ? Integer.parseInt(matcher.group(1)) : -1;
+        return EnrollmentName.latest(studentInfo == null ? null : studentInfo.getEnrollmentListNames());
     }
 
     private int resolveRequiredCredits(String enrollmentName) {
-        if (enrollmentName != null) {
-            int openingBracket = enrollmentName.lastIndexOf('(');
-            int closingBracket = enrollmentName.lastIndexOf(')');
-            if (openingBracket >= 0 && closingBracket > openingBracket) {
-                String code = enrollmentName.substring(openingBracket + 1, closingBracket).trim();
-                if (!code.isEmpty()) {
-                    char studyType = Character.toLowerCase(
-                            code.charAt(code.length() - 1));
-                    if (studyType == 'b') {
-                        System.out.println("[AIS] Typ štúdia: b, požadované kredity: 180");
-                        return 180;
-                    }
-                    if (studyType == 'm') {
-                        System.out.println("[AIS] Typ štúdia: m, požadované kredity: 120");
-                        return 120;
-                    }
-                }
-            }
+        char studyType = EnrollmentName.degreeLetter(enrollmentName);
+        if (studyType == 'b') {
+            LOG.info("Typ štúdia: b, požadované kredity: 180");
+            return 180;
         }
-        System.out.println("[AIS] Typ štúdia sa nepodarilo určiť, používam 180 kreditov");
+        if (studyType == 'm') {
+            LOG.info("Typ štúdia: m, požadované kredity: 120");
+            return 120;
+        }
+        LOG.info("Typ štúdia sa nepodarilo určiť, používam 180 kreditov");
         return 180;
     }
 
@@ -476,9 +366,11 @@ public class MainController {
         } else {
             cacheSnapshot.setStudentInfo(studentInfo);
         }
+        LocalCacheService.EnrollmentData previous = cacheSnapshot.getEnrollmentData().get(enrollmentListId);
+        gradeChanges.addAll(GradeChanges.detect(previous == null ? null : previous.getSubjects(), subjects));
         cacheSnapshot.getEnrollmentData().put(enrollmentListId,
                 LocalCacheService.EnrollmentData.of(subjects, exams, scheduleEntries));
-        System.out.println("[SYNC] enrollment=" + enrollmentName(enrollmentListId, -1)
+        LOG.info("enrollment=" + enrollmentName(enrollmentListId, -1)
                 + ", id=" + enrollmentListId + ", savedToCache=true, subjects="
                 + subjects.size());
         String updatedAt = LocalDateTime.now()
@@ -489,7 +381,7 @@ public class MainController {
         try {
             cacheService.save(cacheSnapshot);
         } catch (IOException e) {
-            System.out.println("[CACHE] Cache sa nepodarilo uložiť: " + e.getMessage());
+            LOG.info("Cache sa nepodarilo uložiť: " + e.getMessage());
         }
     }
 
@@ -540,8 +432,7 @@ public class MainController {
     }
 
     private void setLoadingState(String message) {
-        examsStatusLabel.setText(message);
-        examsStatusLabel.setVisible(true);
+        examsController.showLoading(message);
         scheduleController.showLoading(message);
         showSyncStatus(message, true);
         lastUpdatedLabel.setText("Prvé načítanie môže trvať dlhšie.");
@@ -553,6 +444,12 @@ public class MainController {
         subjectsController.showUnavailable();
         examsController.showUnavailable();
         scheduleController.showUnavailable();
+    }
+
+    /** Aktuálny zápisný list je prvý v zozname z AIS (najnovší ročník). */
+    private boolean isCurrentEnrollment(String enrollmentId) {
+        List<String> ids = studentInfo == null ? null : studentInfo.getEnrollmentListIds();
+        return ids == null || ids.isEmpty() || ids.get(0).equals(enrollmentId);
     }
 
     private String getSelectedEnrollmentId() {
@@ -578,8 +475,13 @@ public class MainController {
         try {
             App.showLoginScreen();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Prihlasovacie okno sa nepodarilo otvoriť.", e);
         }
+    }
+
+    @FXML
+    private void handleExport() {
+        exportController.exportCsv(refreshButton.getScene().getWindow());
     }
 
     @FXML

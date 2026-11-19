@@ -12,7 +12,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+import java.util.List;
 import java.util.Optional;
+import sk.ukf.aisviewer.service.GradeChanges;
 import sk.ukf.aisviewer.service.ThemeManager;
 
 final class UiDialogs {
@@ -36,6 +38,19 @@ final class UiDialogs {
                         + "Ak ste aplikáciu po poslednom prihlásení reštartovali,\n"
                         + "bude potrebné heslo zadať znova.",
                 "OK / Pokračovať", "Zrušiť");
+    }
+
+    /** Po obnovení údajov: zoznam nových alebo zmenených hodnotení. */
+    static void showGradeChanges(Window owner, List<GradeChanges.Change> changes) {
+        StringBuilder text = new StringBuilder();
+        for (GradeChanges.Change change : changes) {
+            text.append(change.isNew() ? "🆕 " : "✏ ").append(change.subjectName()).append(":  ")
+                    .append(change.newGrade());
+            if (!change.isNew()) text.append("   (predtým ").append(change.oldGrade()).append(")");
+            text.append(System.lineSeparator());
+        }
+        showNotice(owner, changes.size() == 1 ? "Nové hodnotenie" : "Nové hodnotenia (" + changes.size() + ")",
+                text.toString().trim(), "Super", null);
     }
 
     static void showInvalidPassword(Window owner) {

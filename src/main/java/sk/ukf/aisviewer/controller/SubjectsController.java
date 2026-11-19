@@ -1,50 +1,45 @@
 package sk.ukf.aisviewer.controller;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import sk.ukf.aisviewer.model.Subject;
+import sk.ukf.aisviewer.model.SubjectCategory;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class SubjectsController {
 
-    private final TableView<Subject> mandatoryTable;
-    private final TableView<Subject> optionalTable;
-    private final TableView<Subject> electiveTable;
-    private final Label mandatoryCreditsLabel;
-    private final Label optionalCreditsLabel;
-    private final Label electiveCreditsLabel;
-    private final ComboBox<String> semesterFilterCombo;
+    private static final String WINTER = "Zimný semester";
+    private static final String SUMMER = "Letný semester";
+    private static final String BOTH = "Oba semestre";
+
+    @FXML private TableView<Subject> mandatoryTable;
+    @FXML private TableView<Subject> optionalTable;
+    @FXML private TableView<Subject> electiveTable;
+    @FXML private VBox mandatoryGroup;
+    @FXML private VBox optionalGroup;
+    @FXML private VBox electiveGroup;
+    @FXML private Label mandatoryCreditsLabel;
+    @FXML private Label optionalCreditsLabel;
+    @FXML private Label electiveCreditsLabel;
+    @FXML private ComboBox<String> semesterFilterCombo;
     private List<Subject> allSubjects = List.of();
 
-    public SubjectsController(TableView<Subject> mandatoryTable,
-                              TableView<Subject> optionalTable,
-                              TableView<Subject> electiveTable,
-                              Label mandatoryCreditsLabel,
-                              Label optionalCreditsLabel,
-                              Label electiveCreditsLabel,
-                              ComboBox<String> semesterFilterCombo) {
-        this.mandatoryTable = mandatoryTable;
-        this.optionalTable = optionalTable;
-        this.electiveTable = electiveTable;
-        this.mandatoryCreditsLabel = mandatoryCreditsLabel;
-        this.optionalCreditsLabel = optionalCreditsLabel;
-        this.electiveCreditsLabel = electiveCreditsLabel;
-        this.semesterFilterCombo = semesterFilterCombo;
-    }
-
-    public void setup() {
+    @FXML
+    public void initialize() {
         setupSubjectTable(mandatoryTable);
         setupSubjectTable(optionalTable);
         setupSubjectTable(electiveTable);
-        semesterFilterCombo.setItems(FXCollections.observableArrayList(
-                "Zimný semester", "Letný semester", "Oba semestre"));
-        semesterFilterCombo.getSelectionModel().select("Oba semestre");
+        semesterFilterCombo.setItems(FXCollections.observableArrayList(WINTER, SUMMER, BOTH));
+        semesterFilterCombo.getSelectionModel().select(BOTH);
         semesterFilterCombo.setOnAction(event -> refreshSubjectTables());
     }
 
@@ -55,69 +50,73 @@ public class SubjectsController {
 
     public void clear() {
         allSubjects = List.of();
-        mandatoryTable.setItems(FXCollections.observableArrayList());
-        optionalTable.setItems(FXCollections.observableArrayList());
-        electiveTable.setItems(FXCollections.observableArrayList());
+        refreshSubjectTables();
     }
 
     public void showUnavailable() {
-        mandatoryTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
-        optionalTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
-        electiveTable.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
+        for (TableView<Subject> table : List.of(mandatoryTable, optionalTable, electiveTable)) {
+            table.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
+        }
     }
 
-    @SuppressWarnings("unchecked")
     private void setupSubjectTable(TableView<Subject> table) {
         TableColumn<Subject, String> nameCol = new TableColumn<>("Predmet");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameCol.setPrefWidth(220);
+        nameCol.setCellFactory(TableUi.textWithTooltip());
+        nameCol.setPrefWidth(320);
 
-        TableColumn<Subject, String> abbrCol = new TableColumn<>("Skratka");
-        abbrCol.setCellValueFactory(new PropertyValueFactory<>("abbreviation"));
-        abbrCol.setPrefWidth(70);
-
-        TableColumn<Subject, String> creditsCol = new TableColumn<>("Kredity");
-        creditsCol.setCellValueFactory(new PropertyValueFactory<>("credits"));
-        creditsCol.setPrefWidth(65);
-
-        TableColumn<Subject, String> semCol = new TableColumn<>("Sem.");
-        semCol.setCellValueFactory(new PropertyValueFactory<>("semester"));
-        semCol.setPrefWidth(50);
-
-        TableColumn<Subject, String> typeCol = new TableColumn<>("Typ");
-        typeCol.setCellValueFactory(new PropertyValueFactory<>("gradeType"));
-        typeCol.setPrefWidth(55);
+        TableColumn<Subject, String> abbrCol = textColumn("Skratka", 75, Subject::getAbbreviation);
+        TableColumn<Subject, String> creditsCol = textColumn("Kredity", 60,
+                subject -> subject.getCreditsValue() > 0 ? String.valueOf(subject.getCreditsValue()) : "-");
+        TableColumn<Subject, String> semCol = textColumn("Sem.", 50, Subject::getSemester);
+        TableColumn<Subject, String> typeCol = textColumn("Typ", 90, subject -> gradeTypeName(subject.getGradeType()));
 
         TableColumn<Subject, String> gradeCol = new TableColumn<>("Hodnotenie");
         gradeCol.setCellValueFactory(new PropertyValueFactory<>("grade"));
-        gradeCol.setPrefWidth(160);
+        gradeCol.setCellFactory(TableUi.gradeCell());
+        gradeCol.setPrefWidth(180);
 
         TableColumn<Subject, String> teacherCol = new TableColumn<>("Vyučujúci");
         teacherCol.setCellValueFactory(new PropertyValueFactory<>("teacher"));
-        teacherCol.setPrefWidth(220);
+        teacherCol.setCellFactory(TableUi.textWithTooltip());
+        teacherCol.setPrefWidth(230);
 
-        table.getColumns().setAll(nameCol, abbrCol, creditsCol, semCol, typeCol, gradeCol, teacherCol);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.getColumns().setAll(List.of(nameCol, abbrCol, creditsCol, semCol, typeCol, gradeCol, teacherCol));
+        TableUi.columnWeights(table, 0.30, 0.08, 0.06, 0.05, 0.11, 0.18, 0.22);
         table.setPlaceholder(new Label("Žiadne predmety"));
+        TableUi.fitHeightToRows(table);
+    }
+
+    private static TableColumn<Subject, String> textColumn(String title, double width,
+                                                           Function<Subject, String> value) {
+        TableColumn<Subject, String> column = new TableColumn<>(title);
+        column.setCellValueFactory(data -> new SimpleStringProperty(value.apply(data.getValue())));
+        column.setPrefWidth(width);
+        return column;
+    }
+
+    /** S / PH / A z AIS na zrozumiteľné slovo. */
+    static String gradeTypeName(String type) {
+        if (type == null) return "-";
+        return switch (type.trim().toUpperCase()) {
+            case "S" -> "Skúška";
+            case "PH" -> "Priebežné";
+            case "A" -> "Absolvovanie";
+            default -> type.isBlank() ? "-" : type;
+        };
     }
 
     private void refreshSubjectTables() {
         String selectedSemester = semesterFilterCombo.getValue();
         List<Subject> filteredSubjects = allSubjects.stream()
                 .filter(subject -> matchesSemester(subject, selectedSemester))
-                .collect(Collectors.toList());
+                .toList();
 
-        List<Subject> mandatory = filteredSubjects.stream()
-                .filter(s -> "Povinné predmety".equals(s.getCategory()))
-                .collect(Collectors.toList());
-        List<Subject> optional = filteredSubjects.stream()
-                .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
-                .collect(Collectors.toList());
-        List<Subject> elective = filteredSubjects.stream()
-                .filter(s -> "Výberové predmety".equals(s.getCategory()))
-                .collect(Collectors.toList());
+        List<Subject> mandatory = SubjectCategory.MANDATORY.filter(filteredSubjects);
+        List<Subject> optional = SubjectCategory.COMPULSORY_ELECTIVE.filter(filteredSubjects);
+        List<Subject> elective = SubjectCategory.ELECTIVE.filter(filteredSubjects);
 
-        // If categories are not set, put everything in mandatory
+        // Ak kategórie chýbajú, všetko pôjde medzi povinné.
         if (mandatory.isEmpty() && optional.isEmpty() && elective.isEmpty()) {
             mandatory = filteredSubjects;
         }
@@ -126,22 +125,32 @@ public class SubjectsController {
         optionalTable.setItems(FXCollections.observableArrayList(optional));
         electiveTable.setItems(FXCollections.observableArrayList(elective));
 
-        int mandCredits = mandatory.stream().mapToInt(Subject::getCreditsValue).sum();
-        int optCredits = optional.stream().mapToInt(Subject::getCreditsValue).sum();
-        int electiveCredits = elective.stream().mapToInt(Subject::getCreditsValue).sum();
+        mandatoryCreditsLabel.setText("Kredity: " + sumCredits(mandatory));
+        optionalCreditsLabel.setText("Kredity: " + sumCredits(optional));
+        electiveCreditsLabel.setText("Kredity: " + sumCredits(elective));
 
-        mandatoryCreditsLabel.setText("Kredity: " + mandCredits);
-        optionalCreditsLabel.setText("Kredity: " + optCredits);
-        electiveCreditsLabel.setText("Kredity: " + electiveCredits);
+        // Prázdne skupiny (napr. výberové predmety) sa skryjú – povinné ostanú vždy viditeľné.
+        boolean anySubjects = !filteredSubjects.isEmpty();
+        setVisible(optionalGroup, !optional.isEmpty() || !anySubjects);
+        setVisible(electiveGroup, !elective.isEmpty());
+    }
+
+    private static int sumCredits(List<Subject> subjects) {
+        return subjects.stream().mapToInt(Subject::getCreditsValue).sum();
+    }
+
+    private static void setVisible(VBox group, boolean visible) {
+        group.setVisible(visible);
+        group.setManaged(visible);
     }
 
     private boolean matchesSemester(Subject subject, String selectedSemester) {
-        if (selectedSemester == null || "Oba semestre".equals(selectedSemester)) {
+        if (selectedSemester == null || BOTH.equals(selectedSemester)) {
             return true;
         }
         String semester = subject.getSemester();
         if (semester == null) return false;
-        if ("Zimný semester".equals(selectedSemester)) {
+        if (WINTER.equals(selectedSemester)) {
             return "ZS".equalsIgnoreCase(semester.trim());
         }
         return "LS".equalsIgnoreCase(semester.trim());

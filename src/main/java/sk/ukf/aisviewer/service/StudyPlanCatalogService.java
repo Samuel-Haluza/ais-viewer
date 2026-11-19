@@ -12,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StudyPlanCatalogService {
     private final Gson gson = new GsonBuilder().create();
@@ -56,28 +54,7 @@ public class StudyPlanCatalogService {
         if (studentInfo.getStudyProgram() != null && !studentInfo.getStudyProgram().isBlank()) {
             return studentInfo.getStudyProgram().toLowerCase(Locale.ROOT);
         }
-        if (studentInfo.getEnrollmentListNames() != null
-                && !studentInfo.getEnrollmentListNames().isEmpty()) {
-            String latest = studentInfo.getEnrollmentListNames().get(0);
-            int latestYear = academicYear(latest);
-            for (String name : studentInfo.getEnrollmentListNames()) {
-                int year = academicYear(name);
-                if (year > latestYear) {
-                    latest = name;
-                    latestYear = year;
-                }
-            }
-            return latest.toLowerCase(Locale.ROOT);
-        }
-        return "";
-    }
-
-    private int academicYear(String value) {
-        if (value == null) {
-            return -1;
-        }
-        Matcher matcher = Pattern.compile("(\\d{4})").matcher(value);
-        return matcher.find() ? Integer.parseInt(matcher.group(1)) : -1;
+        return EnrollmentName.lower(EnrollmentName.latest(studentInfo.getEnrollmentListNames()));
     }
 
     public String resourceName(DegreeLevel degreeLevel, StudyForm studyForm) {

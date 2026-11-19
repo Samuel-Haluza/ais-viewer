@@ -8,7 +8,9 @@ SIZE = 1024
 CX = SIZE // 2
 CY = SIZE // 2
 
-TREE_DIR = Path(__file__).resolve().parents[1] / "src/main/resources/sk/ukf/aisviewer/images/tree"
+# Skript leží v koreni projektu, takže priečinok projektu je jeho rodič (parent),
+# nie parents[1] – to by ukazovalo o úroveň vyššie, mimo projektu.
+TREE_DIR = Path(__file__).resolve().parent / "src/main/resources/sk/ukf/aisviewer/images/tree"
 
 
 def new_layer():

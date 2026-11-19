@@ -1,5 +1,8 @@
 package sk.ukf.aisviewer;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,6 +16,8 @@ import java.io.IOException;
 import java.net.URL;
 
 public class App extends Application {
+    private static final Logger LOG = AppLog.get(App.class);
+
 
     private static Stage primaryStage;
 
@@ -26,23 +31,22 @@ public class App extends Application {
             stage.getIcons().add(new Image(iconUrl.toExternalForm()));
         }
 
-        System.out.println("[STARTUP] Začínam načítanie cache.");
+        LOG.info("Začínam načítanie cache.");
         try {
             LocalCacheService.CacheSnapshot cachedSnapshot =
                     new LocalCacheService().load().orElse(null);
             if (cachedSnapshot != null && cachedSnapshot.getStudentInfo() != null
                     && cachedSnapshot.getEnrollmentData() != null
                     && !cachedSnapshot.getEnrollmentData().isEmpty()) {
-                System.out.println("[STARTUP] Platná cache nájdená, otváram hlavné okno.");
+                LOG.info("Platná cache nájdená, otváram hlavné okno.");
                 MainController.setAisClient(null);
                 showMainScreen();
             } else {
-                System.out.println("[STARTUP] Použiteľná cache nebola nájdená, otváram login.");
+                LOG.info("Použiteľná cache nebola nájdená, otváram login.");
                 showLoginScreen();
             }
         } catch (Exception e) {
-            System.err.println("[STARTUP] Chyba pri otváraní UI s cache, prechádzam na login.");
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Chyba pri otváraní UI s cache, prechádzam na login.", e);
             showLoginScreen();
         }
     }

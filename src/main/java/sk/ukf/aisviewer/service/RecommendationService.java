@@ -116,42 +116,19 @@ public class RecommendationService {
     }
 
     public Set<String> completedCodes(StudyPlanCatalog catalog, List<Subject> subjects) {
-        Set<String> aisCodes = subjects == null ? Set.of() : subjects.stream()
-                .filter(SubjectCompletionService::isCompleted)
-                .map(Subject::getAbbreviation)
-                .filter(Objects::nonNull)
-                .map(SubjectCompletionService::extractSubjectAbbreviation)
-                .collect(Collectors.toSet());
-        Set<String> completedCodes = new HashSet<>();
-        catalog.getSubjects().stream()
-                .filter(subject -> belongsToCatalog(subject, catalog))
-                .filter(subject -> aisCodes.stream().anyMatch(aisCode -> codesEquivalent(aisCode, subject)))
-                .forEach(subject -> {
-                    completedCodes.add(subjectAbbreviation(subject));
-                    subject.getEquivalentCodes().stream()
-                            .map(SubjectCompletionService::extractSubjectAbbreviation)
-                            .forEach(completedCodes::add);
-                });
-        return completedCodes;
+        return CompletedSubjectsService.completedCodes(catalog, subjects);
     }
 
     public boolean codesEquivalent(String aisCode, CurriculumSubject curriculumSubject) {
-        String normalizedAisCode = SubjectCompletionService.normalizeCode(aisCode);
-        return normalizedAisCode.equals(subjectAbbreviation(curriculumSubject))
-                || curriculumSubject.getEquivalentCodes().stream()
-                .map(SubjectCompletionService::extractSubjectAbbreviation)
-                .anyMatch(normalizedAisCode::equals);
+        return CompletedSubjectsService.codesEquivalent(aisCode, curriculumSubject);
     }
 
     private String subjectAbbreviation(CurriculumSubject subject) {
-        return SubjectCompletionService.extractSubjectAbbreviation(subject.getCode());
+        return CompletedSubjectsService.abbreviation(subject);
     }
 
     private boolean belongsToCatalog(CurriculumSubject subject, StudyPlanCatalog catalog) {
-        return subject.getDegreeLevel() == null || catalog.getDegreeLevel() == null
-                || subject.getDegreeLevel() == catalog.getDegreeLevel()
-                && (subject.getStudyForm() == null || catalog.getStudyForm() == null
-                || subject.getStudyForm() == catalog.getStudyForm());
+        return CompletedSubjectsService.belongsToCatalog(subject, catalog);
     }
 
     private Set<String> plannedCodes(List<PlannedSubject> planned) {

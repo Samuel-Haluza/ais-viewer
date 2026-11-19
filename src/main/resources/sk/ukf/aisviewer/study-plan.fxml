@@ -16,17 +16,23 @@
             <ComboBox fx:id="secondaryDirectionCombo" prefWidth="240"/>
         </HBox>
         <Label fx:id="statusLabel" styleClass="status-label"/>
-        <Label fx:id="creditsLabel" styleClass="credit-card-label" wrapText="true"/>
+        <Label fx:id="creditsLabel" styleClass="plan-credits" wrapText="true"/>
         <Label styleClass="group-title" text="Povinné predmety"/>
-        <TableView fx:id="mandatoryTable" prefHeight="170" styleClass="subject-table"/>
+        <TableView fx:id="mandatoryTable" styleClass="subject-table">
+            <placeholder><Label text="Všetky povinné predmety máš splnené alebo naplánované"/></placeholder>
+        </TableView>
         <Label styleClass="group-title" text="Odporúčané predmety"/>
-        <TableView fx:id="recommendationTable" prefHeight="230" styleClass="subject-table"/>
+        <TableView fx:id="recommendationTable" styleClass="subject-table">
+            <placeholder><Label text="Vyber hlavný smer – zobrazia sa odporúčané predmety"/></placeholder>
+        </TableView>
         <HBox spacing="8">
             <Button onAction="#addSelectedRecommendation" text="Pridať do plánu"/>
             <Button onAction="#showAllPvp" text="Zobraziť všetky PVP predmety"/>
         </HBox>
         <Label styleClass="group-title" text="Môj plán"/>
-        <TableView fx:id="plannedTable" prefHeight="160" styleClass="subject-table"/>
+        <TableView fx:id="plannedTable" styleClass="subject-table">
+            <placeholder><Label text="Zatiaľ nemáš naplánovaný žiadny predmet"/></placeholder>
+        </TableView>
         <Button onAction="#removeSelectedPlanned" text="Odstrániť vybraný predmet"/>
     </VBox>
 </ScrollPane>

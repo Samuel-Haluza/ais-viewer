@@ -16,11 +16,15 @@ public final class SubjectCompletionService {
         if (grade.isBlank() || "-".equals(grade)) {
             return false;
         }
+        String normalized = grade.toLowerCase(Locale.ROOT);
+        // Neúspech: FX alebo "neabsolvoval/a" (obsahuje "abs", preto skôr než kontrola nižšie).
+        if (subject.isFailingGrade() || normalized.contains("neabsolv")) {
+            return false;
+        }
         if (subject.getGradeNumeric() > 0) {
             return true;
         }
-        String normalized = grade.toLowerCase(Locale.ROOT);
-        return normalized.contains("abs") || normalized.contains("absolv")
+        return normalized.startsWith("abs") || normalized.contains("absolv")
                 || normalized.matches("^[a-e](?:\\b|\\s|-|\\().*");
     }
 
@@ -39,6 +43,21 @@ public final class SubjectCompletionService {
                 .replaceAll("[\\p{Z}\\p{C}]", "")
                 .trim()
                 .toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Kľúč, podľa ktorého sa spozná ten istý predmet v rôznych zápisných listoch:
+     * skratka predmetu ("PROG", "KI/PROG/22" → "prog"), ak chýba, tak názov.
+     */
+    public static String identityKey(Subject subject) {
+        if (subject == null) {
+            return "";
+        }
+        String code = extractSubjectAbbreviation(subject.getAbbreviation());
+        if (!code.isEmpty() && !"-".equals(code)) {
+            return code;
+        }
+        return subject.getName() == null ? "" : subject.getName().trim().toLowerCase(Locale.ROOT);
     }
 
     public static String extractSubjectAbbreviation(String curriculumCode) {

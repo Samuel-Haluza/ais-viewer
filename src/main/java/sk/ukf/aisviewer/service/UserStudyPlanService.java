@@ -15,10 +15,7 @@ public class UserStudyPlanService {
     private final Path planFile;
 
     public UserStudyPlanService() {
-        String appData = System.getenv("APPDATA");
-        Path base = appData != null && !appData.isBlank()
-                ? Path.of(appData, "AIS Viewer") : Path.of(System.getProperty("user.home"), ".ais-viewer");
-        planFile = base.resolve("study-plan.json");
+        this(AppStorage.file("study-plan.json"));
     }
 
     public UserStudyPlanService(Path planFile) {
@@ -39,16 +36,7 @@ public class UserStudyPlanService {
     public void save(UserStudyPlan plan) throws IOException {
         Objects.requireNonNull(plan, "plan");
         validateDirections(plan.getPrimaryDirection(), plan.getSecondaryDirection());
-        Files.createDirectories(planFile.getParent());
-        Path temporary = planFile.resolveSibling("study-plan.json.tmp");
-        Files.writeString(temporary, gson.toJson(plan), StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        try {
-            Files.move(temporary, planFile, StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException e) {
-            Files.move(temporary, planFile, StandardCopyOption.REPLACE_EXISTING);
-        }
+        AppStorage.writeAtomically(planFile, gson.toJson(plan));
     }
 
     public void validateDirections(StudyDirection primary, StudyDirection secondary) {

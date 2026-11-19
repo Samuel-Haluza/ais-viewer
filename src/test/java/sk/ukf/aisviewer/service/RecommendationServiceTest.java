@@ -343,8 +343,7 @@ class RecommendationServiceTest {
                 StudyDirection.ALGORITHMS, null).stream()
                 .noneMatch(item -> Set.of("KI/A/22", "KI/B/22", "KI/C/22", "KI/D/22")
                         .contains(item.getSubject().getCode())));
-        assertEquals(12, new StudyPlanCreditsService().acquiredTotalCredits(
-                studyPlanCatalog, all));
+        assertEquals(12, new StudyPlanCreditsService().acquiredTotalCredits(all));
     }
 
     private Subject ais(String code) {

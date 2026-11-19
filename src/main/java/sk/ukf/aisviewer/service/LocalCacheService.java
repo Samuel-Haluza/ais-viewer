@@ -1,5 +1,9 @@
 package sk.ukf.aisviewer.service;
 
+import sk.ukf.aisviewer.AppLog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -10,11 +14,8 @@ import sk.ukf.aisviewer.model.Subject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class LocalCacheService {
+    private static final Logger LOG = AppLog.get(LocalCacheService.class);
+
 
     private static final DateTimeFormatter TIMESTAMP_FORMAT =
             DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -32,14 +35,12 @@ public class LocalCacheService {
     private final Path cacheFile;
 
     public LocalCacheService() {
-        String appData = System.getenv("APPDATA");
-        Path baseDirectory = appData != null && !appData.isBlank()
-                ? Path.of(appData)
-                : Path.of(System.getProperty("user.home"), ".ais-viewer");
-        Path applicationDirectory = appData != null && !appData.isBlank()
-                ? baseDirectory.resolve("AIS Viewer")
-                : baseDirectory;
-        cacheFile = applicationDirectory.resolve("cache.json");
+        this(AppStorage.file("cache.json"));
+    }
+
+    /** Pre testy – cache v zadanom súbore. */
+    public LocalCacheService(Path cacheFile) {
+        this.cacheFile = cacheFile;
     }
 
     public Optional<CacheSnapshot> load() {
@@ -55,29 +56,16 @@ public class LocalCacheService {
             }
             return Optional.of(snapshot);
         } catch (IOException | JsonSyntaxException e) {
-            System.err.println("[CACHE] Cache sa nepodarilo načítať: " + e.getMessage());
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Cache sa nepodarilo načítať: " + e.getMessage(), e);
             return Optional.empty();
         } catch (RuntimeException e) {
-            System.err.println("[CACHE] Neočakávaná chyba pri načítaní cache.");
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Neočakávaná chyba pri načítaní cache.", e);
             return Optional.empty();
         }
     }
 
     public void save(CacheSnapshot snapshot) throws IOException {
-        Files.createDirectories(cacheFile.getParent());
-        Path temporaryFile = cacheFile.resolveSibling("cache.json.tmp");
-        String json = gson.toJson(snapshot);
-        Files.writeString(temporaryFile, json, StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        try {
-            Files.move(temporaryFile, cacheFile,
-                    StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException e) {
-            Files.move(temporaryFile, cacheFile, StandardCopyOption.REPLACE_EXISTING);
-        }
+        AppStorage.writeAtomically(cacheFile, gson.toJson(snapshot));
     }
 
     public static CacheSnapshot createSnapshot(StudentInfo studentInfo) {

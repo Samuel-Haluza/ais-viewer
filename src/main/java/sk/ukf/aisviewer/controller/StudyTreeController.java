@@ -1,14 +1,18 @@
 package sk.ukf.aisviewer.controller;
 
 import javafx.animation.FadeTransition;
+import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import sk.ukf.aisviewer.model.EnrollmentName;
 import sk.ukf.aisviewer.model.StudentInfo;
 import sk.ukf.aisviewer.model.Subject;
+import sk.ukf.aisviewer.model.SubjectCategory;
 import sk.ukf.aisviewer.service.LocalCacheService;
+import sk.ukf.aisviewer.service.SubjectCompletionService;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,60 +26,58 @@ import javafx.util.Duration;
 
 public class StudyTreeController {
 
-    private final ImageView baseLayer;
-    private final ImageView branchesLayer;
-    private final ImageView leavesLayer;
-    private final ImageView flowersLayer;
-    private final ImageView effectsLayer;
-    private final Label phaseLabel;
-    private final Label subtitleLabel;
-    private final Label creditsLabel;
-    private final Label percentageLabel;
-    private final Label levelLabel;
-    private final Label nextLevelLabel;
-    private final Label milestoneLabel;
-    private final Label milestoneRemainingLabel;
-    private final Label[] milestoneStatusLabels;
-    private final ProgressBar progressBar;
-    private final VBox[] phaseCards;
-    private final Label[] phaseDescriptionLabels;
-    private final VBox[] milestoneCards;
+    /** Napr. "2. ročník" – keď názov zápisného listu nemá rok. */
+    private static final Pattern STUDY_YEAR_TEXT = Pattern.compile("(\\d+)\\.?\\s*ro[cč]n");
 
-    public StudyTreeController(ImageView baseLayer, ImageView branchesLayer, ImageView leavesLayer,
-                               ImageView flowersLayer, ImageView effectsLayer,
-                               Label phaseLabel, Label subtitleLabel, Label creditsLabel,
-                               Label percentageLabel, Label levelLabel, Label nextLevelLabel,
-                               Label milestoneLabel, Label milestoneRemainingLabel,
-                               Label[] milestoneStatusLabels, ProgressBar progressBar,
-                               VBox[] phaseCards, Label[] phaseDescriptionLabels,
-                               VBox[] milestoneCards) {
-        this.baseLayer = baseLayer;
-        this.branchesLayer = branchesLayer;
-        this.leavesLayer = leavesLayer;
-        this.flowersLayer = flowersLayer;
-        this.effectsLayer = effectsLayer;
-        this.phaseLabel = phaseLabel;
-        this.subtitleLabel = subtitleLabel;
-        this.creditsLabel = creditsLabel;
-        this.percentageLabel = percentageLabel;
-        this.levelLabel = levelLabel;
-        this.nextLevelLabel = nextLevelLabel;
-        this.milestoneLabel = milestoneLabel;
-        this.milestoneRemainingLabel = milestoneRemainingLabel;
-        this.milestoneStatusLabels = milestoneStatusLabels;
-        this.progressBar = progressBar;
-        this.phaseCards = phaseCards;
-        this.phaseDescriptionLabels = phaseDescriptionLabels;
-        this.milestoneCards = milestoneCards;
+    @FXML private ImageView treeBaseLayer;
+    @FXML private ImageView treeBranchesLayer;
+    @FXML private ImageView treeLeavesLayer;
+    @FXML private ImageView treeFlowersLayer;
+    @FXML private ImageView treeEffectsLayer;
+    @FXML private Label treePhaseLabel;
+    @FXML private Label treeSubtitleLabel;
+    @FXML private Label treeCreditsLabel;
+    @FXML private Label treePercentageLabel;
+    @FXML private Label treeLevelLabel;
+    @FXML private Label treeNextLevelLabel;
+    @FXML private Label treeMilestoneLabel;
+    @FXML private Label treeMilestoneRemainingLabel;
+    @FXML private ProgressBar treeProgressBar;
+
+    // Karty fáz a míľnikov – v FXML sú jednotlivo, tu sa spoja do polí podľa poradia.
+    @FXML private VBox treePhaseCard1, treePhaseCard2, treePhaseCard3,
+            treePhaseCard4, treePhaseCard5, treePhaseCard6;
+    @FXML private Label treePhaseDescription1, treePhaseDescription2, treePhaseDescription3,
+            treePhaseDescription4, treePhaseDescription5, treePhaseDescription6;
+    @FXML private VBox treeMilestoneCardYear1, treeMilestoneCardYear2, treeMilestoneCardFirstA,
+            treeMilestoneCardTenSubjects, treeMilestoneCardMandatory;
+    @FXML private Label treeMilestoneYear1Label, treeMilestoneYear2Label, treeMilestoneFirstALabel,
+            treeMilestoneTenSubjectsLabel, treeMilestoneMandatoryLabel;
+
+    private VBox[] phaseCards;
+    private Label[] phaseDescriptionLabels;
+    private VBox[] milestoneCards;
+    private Label[] milestoneStatusLabels;
+
+    @FXML
+    public void initialize() {
+        phaseCards = new VBox[]{treePhaseCard1, treePhaseCard2, treePhaseCard3,
+                treePhaseCard4, treePhaseCard5, treePhaseCard6};
+        phaseDescriptionLabels = new Label[]{treePhaseDescription1, treePhaseDescription2,
+                treePhaseDescription3, treePhaseDescription4, treePhaseDescription5, treePhaseDescription6};
+        milestoneCards = new VBox[]{treeMilestoneCardYear1, treeMilestoneCardYear2,
+                treeMilestoneCardFirstA, treeMilestoneCardTenSubjects, treeMilestoneCardMandatory};
+        milestoneStatusLabels = new Label[]{treeMilestoneYear1Label, treeMilestoneYear2Label,
+                treeMilestoneFirstALabel, treeMilestoneTenSubjectsLabel, treeMilestoneMandatoryLabel};
         loadTreeImages();
     }
 
     private void loadTreeImages() {
-        baseLayer.setImage(loadImage("tree-base.png"));
-        branchesLayer.setImage(loadImage("tree-branches.png"));
-        leavesLayer.setImage(loadImage("tree-leaves.png"));
-        flowersLayer.setImage(loadImage("tree-flowers.png"));
-        effectsLayer.setImage(loadImage("tree-effects.png"));
+        treeBaseLayer.setImage(loadImage("tree-base.png"));
+        treeBranchesLayer.setImage(loadImage("tree-branches.png"));
+        treeLeavesLayer.setImage(loadImage("tree-leaves.png"));
+        treeFlowersLayer.setImage(loadImage("tree-flowers.png"));
+        treeEffectsLayer.setImage(loadImage("tree-effects.png"));
     }
 
     private Image loadImage(String fileName) {
@@ -97,33 +99,33 @@ public class StudyTreeController {
         int creditsToNextLevel = level >= 20 ? 0 : Math.max(0, nextLevelCredits - acquiredCredits);
         int nextMilestone = getNextMilestone(acquiredCredits, requiredCredits);
 
-        phaseLabel.setText(getPhase(progress));
-        levelLabel.setText("Úroveň " + level + " / 20");
-        subtitleLabel.setText("Rastie spolu s tvojím štúdiom");
-        creditsLabel.setText(acquiredCredits + " / " + requiredCredits);
-        percentageLabel.setText(String.format("%.0f %% splnené", progress * 100));
-        nextLevelLabel.setText(level >= 20
+        treePhaseLabel.setText(getPhase(progress));
+        treeLevelLabel.setText("Úroveň " + level + " / 20");
+        treeSubtitleLabel.setText("Rastie spolu s tvojím štúdiom");
+        treeCreditsLabel.setText(acquiredCredits + " / " + requiredCredits);
+        treePercentageLabel.setText(String.format("%.0f %% splnené", progress * 100));
+        treeNextLevelLabel.setText(level >= 20
                 ? "🎓 Maximálna úroveň dosiahnutá"
                 : "Do úrovne " + (level + 1) + ":\n" + creditsToNextLevel + " "
                         + (creditsToNextLevel == 1 ? "kredit" : "kredity"));
         if (nextMilestone == requiredCredits && acquiredCredits >= requiredCredits) {
-            milestoneLabel.setText("🎓 Štúdium splnené\n"
+            treeMilestoneLabel.setText("🎓 Štúdium splnené\n"
                     + requiredCredits + " / " + requiredCredits + " kreditov");
-            milestoneRemainingLabel.setText("");
+            treeMilestoneRemainingLabel.setText("");
         } else {
-            milestoneLabel.setText("Ďalší míľnik:\n" + nextMilestone + " kreditov");
-            milestoneRemainingLabel.setText("Zostáva: "
+            treeMilestoneLabel.setText("Ďalší míľnik:\n" + nextMilestone + " kreditov");
+            treeMilestoneRemainingLabel.setText("Zostáva: "
                     + Math.max(0, nextMilestone - acquiredCredits) + " kreditov");
         }
-        progressBar.setProgress(progress);
+        treeProgressBar.setProgress(progress);
         updatePhaseDescriptions(requiredCredits);
         updateStudyMilestones(currentSubjects, cacheSnapshot, studentInfo);
         updatePhaseHighlight(level);
 
-        animateLayer(branchesLayer, Math.max(0.15, layerOpacity(progress, 0.05, 0.45)));
-        animateLayer(leavesLayer, layerOpacity(progress, 0.30, 0.70));
-        animateLayer(flowersLayer, layerOpacity(progress, 0.55, 0.85));
-        animateLayer(effectsLayer, layerOpacity(progress, 0.80, 1.00));
+        animateLayer(treeBranchesLayer, Math.max(0.15, layerOpacity(progress, 0.05, 0.45)));
+        animateLayer(treeLeavesLayer, layerOpacity(progress, 0.30, 0.70));
+        animateLayer(treeFlowersLayer, layerOpacity(progress, 0.55, 0.85));
+        animateLayer(treeEffectsLayer, layerOpacity(progress, 0.80, 1.00));
     }
 
     private void updatePhaseHighlight(int level) {
@@ -180,12 +182,11 @@ public class StudyTreeController {
                 "🔒 Ešte " + missingSubjects + " predmetov", "✓ Dosiahnuté");
 
         List<Subject> allKnownSubjects = uniqueSubjects(allSubjects, false);
-        long mandatoryIncomplete = allKnownSubjects.stream()
-                .filter(s -> "Povinné predmety".equals(s.getCategory()))
-                .filter(s -> !CreditsController.isCompletedSubject(s))
+        List<Subject> mandatorySubjects = SubjectCategory.MANDATORY.filter(allKnownSubjects);
+        long mandatoryIncomplete = mandatorySubjects.stream()
+                .filter(s -> !SubjectCompletionService.isCompleted(s))
                 .count();
-        boolean mandatoryComplete = !allKnownSubjects.isEmpty() && mandatoryIncomplete == 0
-                && allKnownSubjects.stream().anyMatch(s -> "Povinné predmety".equals(s.getCategory()));
+        boolean mandatoryComplete = !mandatorySubjects.isEmpty() && mandatoryIncomplete == 0;
         setMilestone(4, mandatoryComplete,
                 "🔒 Zostáva " + mandatoryIncomplete + " predmetov", "✓ Splnené");
     }
@@ -225,9 +226,9 @@ public class StudyTreeController {
         ordered.sort(Comparator.comparingInt(id -> {
             int index = info.getEnrollmentListIds().indexOf(id);
             String name = index >= 0 && names != null && index < names.size() ? names.get(index) : id;
-            Matcher year = Pattern.compile("(\\d{4})").matcher(name == null ? "" : name);
-            if (year.find()) return Integer.parseInt(year.group(1));
-            Matcher studyYear = Pattern.compile("(\\d+)\\.?\\s*ro[cč]n").matcher(
+            int startYear = EnrollmentName.startYear(name);
+            if (startYear > 0) return startYear;
+            Matcher studyYear = STUDY_YEAR_TEXT.matcher(
                     name == null ? "" : name.toLowerCase(Locale.ROOT));
             return studyYear.find() ? Integer.parseInt(studyYear.group(1)) * 10000 : 50000 + index;
         }));
@@ -238,23 +239,21 @@ public class StudyTreeController {
         if (index >= ids.size()) return false;
         List<Subject> subjects = data.get(ids.get(index));
         return subjects != null && !subjects.isEmpty()
-                && subjects.stream().allMatch(CreditsController::isCompletedSubject);
+                && subjects.stream().allMatch(SubjectCompletionService::isCompleted);
     }
 
     private List<Subject> uniqueSubjects(List<Subject> subjects, boolean completedOnly) {
         Map<String, Subject> unique = new LinkedHashMap<>();
         for (Subject subject : subjects) {
-            if (subject == null || (completedOnly && !CreditsController.isCompletedSubject(subject))) continue;
-            String key = ((subject.getAbbreviation() == null ? "" : subject.getAbbreviation().trim())
-                    + "|" + (subject.getName() == null ? "" : subject.getName().trim())).toLowerCase(Locale.ROOT);
-            unique.putIfAbsent(key, subject);
+            if (subject == null || (completedOnly && !SubjectCompletionService.isCompleted(subject))) continue;
+            unique.putIfAbsent(SubjectCompletionService.identityKey(subject), subject);
         }
         return new ArrayList<>(unique.values());
     }
 
     private boolean isGradeA(Subject subject) {
-        String grade = subject.getGrade();
-        return grade != null && grade.toUpperCase(Locale.ROOT).matches(".*\\bA\\b.*|.*\\(1\\).*");
+        // Predtým regex \bA\b zachytil aj "ABS - absolvoval/A" (koncové "/A").
+        return subject.getGradeNumeric() == 1.0;
     }
 
     private int getGrowthLevel(int acquiredCredits, int requiredCredits) {

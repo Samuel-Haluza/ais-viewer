@@ -1,5 +1,9 @@
 package sk.ukf.aisviewer.service;
 
+import sk.ukf.aisviewer.AppLog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import sk.ukf.aisviewer.model.Subject;
 
 import java.util.ArrayList;
@@ -8,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class StudyPlanCompletionService {
+    private static final Logger LOG = AppLog.get(StudyPlanCompletionService.class);
+
     private StudyPlanCompletionService() {
     }
 
@@ -28,7 +34,8 @@ public final class StudyPlanCompletionService {
     }
 
     private static void logSubject(String enrollmentYear, Subject subject) {
-        System.out.println("[STUDY-PLAN][AIS2] enrollment=" + enrollmentYear
+        if (!LOG.isLoggable(Level.FINE)) return; // diagnostika len s -Dais.debug=true
+        LOG.fine("enrollment=" + enrollmentYear
                 + ", name=[" + (subject == null ? null : subject.getName())
                 + "], abbreviation=[" + (subject == null ? null : subject.getAbbreviation())
                 + "], credits=[" + (subject == null ? null : subject.getCredits())

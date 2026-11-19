@@ -1,10 +1,11 @@
 package sk.ukf.aisviewer.controller;
 
-import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import sk.ukf.aisviewer.model.EnrollmentName;
 import sk.ukf.aisviewer.model.StudentInfo;
 import sk.ukf.aisviewer.model.Subject;
+import sk.ukf.aisviewer.model.SubjectCategory;
 import sk.ukf.aisviewer.service.LocalCacheService;
 
 import java.io.BufferedWriter;
@@ -16,19 +17,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ExportController {
-    private final Button csvButton;
+    private Window owner;
     private StudentInfo studentInfo;
     private LocalCacheService.CacheSnapshot cacheSnapshot;
 
-    public ExportController(Button csvButton) {
-        this.csvButton = csvButton;
-        if (csvButton != null) {
-            this.csvButton.setOnAction(event -> exportCsv());
-        }
+    /** Export sa spúšťa tlačidlom „Export CSV“ v hornej lište (MainController). */
+    public ExportController() {
     }
 
     public void setExportData(StudentInfo studentInfo,
@@ -37,7 +33,8 @@ public class ExportController {
         this.cacheSnapshot = cacheSnapshot;
     }
 
-    private void exportCsv() {
+    public void exportCsv(Window owner) {
+        this.owner = owner;
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Exportovať študijný prehľad do CSV");
         chooser.setInitialFileName(createFileName());
@@ -181,13 +178,11 @@ public class ExportController {
                         String.CASE_INSENSITIVE_ORDER);
     }
 
+    /** Poradie podľa enumu: povinné → povinne voliteľné → výberové → ostatné. */
     private int categorySortKey(String category) {
-        return switch (valueOrDash(category)) {
-            case "Povinné predmety" -> 0;
-            case "Povinne voliteľné predmety" -> 1;
-            case "Výberové predmety" -> 2;
-            default -> 3;
-        };
+        return SubjectCategory.fromDisplayName(category)
+                .map(Enum::ordinal)
+                .orElse(SubjectCategory.values().length);
     }
 
     private String normalizeSemester(String semester) {
@@ -202,40 +197,24 @@ public class ExportController {
         };
     }
 
+    // Zápisné listy bez roka / ročníka idú na koniec (MAX_VALUE).
     private int academicYearSortKey(String enrollmentName) {
-        Matcher matcher = Pattern.compile("(20\\d{2})").matcher(
-                valueOrDash(extractAcademicYear(enrollmentName)));
-        return matcher.find() ? Integer.parseInt(matcher.group(1)) : Integer.MAX_VALUE;
+        int year = EnrollmentName.startYear(EnrollmentName.academicYear(enrollmentName));
+        return year > 0 ? year : Integer.MAX_VALUE;
     }
 
     private int enrollmentYearSortKey(String enrollmentCode) {
-        Matcher matcher = Pattern.compile("^(\\d+)").matcher(valueOrDash(enrollmentCode));
-        return matcher.find() ? Integer.parseInt(matcher.group(1)) : Integer.MAX_VALUE;
+        int year = EnrollmentName.studyYear(enrollmentCode);
+        return year > 0 ? year : Integer.MAX_VALUE;
     }
 
     private String extractAcademicYear(String enrollmentName) {
-        if (enrollmentName == null || enrollmentName.isBlank()) {
-            return "-";
-        }
-        int openingBracket = enrollmentName.lastIndexOf('(');
-        return openingBracket > 0
-                ? valueOrDash(enrollmentName.substring(0, openingBracket).trim())
-                : valueOrDash(enrollmentName);
+        return valueOrDash(EnrollmentName.academicYear(enrollmentName));
     }
 
     private String extractEnrollmentCode(String enrollmentName) {
-        if (enrollmentName == null || enrollmentName.isBlank()) {
-            return "-";
-        }
-        int openingBracket = enrollmentName.lastIndexOf('(');
-        int closingBracket = enrollmentName.lastIndexOf(')');
-        if (openingBracket >= 0 && closingBracket > openingBracket) {
-            String code = enrollmentName.substring(openingBracket + 1, closingBracket).trim();
-            if (!code.isBlank()) {
-                return code;
-            }
-        }
-        return valueOrDash(enrollmentName);
+        String code = EnrollmentName.programCode(enrollmentName);
+        return code.isBlank() ? valueOrDash(enrollmentName) : code;
     }
 
     private String createFileName() {
@@ -265,7 +244,7 @@ public class ExportController {
     }
 
     private Window window() {
-        return csvButton.getScene().getWindow();
+        return owner;
     }
 
     private static final class EnrollmentSection {

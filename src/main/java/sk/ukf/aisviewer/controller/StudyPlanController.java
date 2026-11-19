@@ -1,5 +1,9 @@
 package sk.ukf.aisviewer.controller;
 
+import sk.ukf.aisviewer.AppLog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -10,13 +14,14 @@ import sk.ukf.aisviewer.service.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 public class StudyPlanController {
+    private static final Logger LOG = AppLog.get(StudyPlanController.class);
+
     @FXML private ComboBox<StudyDirection> primaryDirectionCombo;
     @FXML private ComboBox<StudyDirection> secondaryDirectionCombo;
     @FXML private TableView<Recommendation> mandatoryTable;
@@ -46,18 +51,6 @@ public class StudyPlanController {
                 super.updateItem(item, empty);
                 setText(empty ? null : item == null ? "Bez vedľajšieho smeru" : item.toString());
             }
-
-            private String reasonText(RecommendationReason reason) {
-                if (reason == RecommendationReason.PRIMARY_DIRECTION && plan != null
-                        && plan.getPrimaryDirection() != null) {
-                    return "Odporúčaný pre hlavný smer " + plan.getPrimaryDirection().getSlovakName();
-                }
-                if (reason == RecommendationReason.SECONDARY_DIRECTION && plan != null
-                        && plan.getSecondaryDirection() != null) {
-                    return "Odporúčaný pre vedľajší smer " + plan.getSecondaryDirection().getSlovakName();
-                }
-                return reason.getDisplayName();
-            }
         });
         secondaryDirectionCombo.setCellFactory(list -> new ListCell<>() {
             @Override protected void updateItem(StudyDirection item, boolean empty) {
@@ -66,6 +59,7 @@ public class StudyPlanController {
             }
         });
         configureTables();
+        primaryDirectionCombo.setPromptText("Vyber hlavný smer");
         primaryDirectionCombo.setOnAction(event -> directionsChanged());
         secondaryDirectionCombo.setOnAction(event -> directionsChanged());
         plan = userPlanService.load();
@@ -76,7 +70,7 @@ public class StudyPlanController {
         DegreeLevel level = catalogService.resolveDegreeLevel(studentInfo);
         StudyForm form = catalogService.resolveStudyForm(studentInfo);
         catalog = catalogService.load(level, form).orElse(null);
-        System.out.println("[STUDY-PLAN] degreeLevel=" + level + ", studyForm=" + form
+        LOG.fine("degreeLevel=" + level + ", studyForm=" + form
                 + ", catalog=" + catalogService.resourceName(level, form)
                 + ", subjects=" + (catalog == null ? 0 : catalog.getSubjects().size()));
         completedSubjects = StudyPlanCompletionService.aggregateSubjects(currentSubjects, snapshot);
@@ -188,7 +182,7 @@ public class StudyPlanController {
                 recommendations));
         plannedTable.setItems(FXCollections.observableArrayList(planned));
         int plannedCredits = creditsService.plannedCredits(catalog, plan, completedSubjects);
-        int acquired = creditsService.acquiredTotalCredits(catalog, completedSubjects);
+        int acquired = creditsService.acquiredTotalCredits(completedSubjects);
         creditsLabel.setText("Získané kredity: " + acquired + " / " + catalog.getRequiredTotalCredits()
                 + "\nNaplánované: " + plannedCredits
                 + "\nPo splnení plánu: " + (acquired + plannedCredits)
@@ -198,6 +192,7 @@ public class StudyPlanController {
 
     private void logCandidateDecisions(List<Recommendation> mandatory,
                                        List<Recommendation> recommendations) {
+        if (!LOG.isLoggable(Level.FINE)) return; // diagnostika len s -Dais.debug=true
         Set<String> completedCodes = recommendationService.completedCodes(catalog, completedSubjects);
         List<Recommendation> allPvp = recommendationService.otherSubjects(
                 catalog, completedSubjects, plan.getPlannedSubjects(),
@@ -215,7 +210,7 @@ public class StudyPlanController {
             boolean displayed = visible.contains(code);
             completedSubjects.stream()
                     .filter(ais -> similarName(ais.getName(), subject.getName()))
-                    .forEach(ais -> System.out.println("[STUDY-PLAN][NAME-CANDIDATE] curriculum="
+                    .forEach(ais -> LOG.fine("curriculum="
                             + subject.getCode() + ", aisOriginal=[" + ais.getAbbreviation()
                             + "], aisName=[" + ais.getName() + "], codePresent="
                             + (ais.getAbbreviation() != null && !ais.getAbbreviation().isBlank())
@@ -223,7 +218,7 @@ public class StudyPlanController {
             completedSubjects.stream()
                     .filter(SubjectCompletionService::isCompleted)
                     .filter(ais -> recommendationService.codesEquivalent(ais.getAbbreviation(), subject))
-                    .forEach(ais -> System.out.println("[STUDY-PLAN][MATCH] curriculum="
+                    .forEach(ais -> LOG.fine("curriculum="
                             + subject.getCode() + ", aisOriginal=[" + ais.getAbbreviation()
                             + "], aisNormalized=[" + normalize(ais.getAbbreviation())
                             + "], extractedCurriculumAbbreviation=[" + code
@@ -233,7 +228,7 @@ public class StudyPlanController {
                             .map(SubjectCompletionService::extractSubjectAbbreviation)
                             .anyMatch(normalize(ais.getAbbreviation())::equals)
                             + ", " + SubjectCompletionService.decisionDetails(ais)));
-            System.out.println("[STUDY-PLAN][DECISION] curriculum code=[" + subject.getCode()
+            LOG.fine("curriculum code=[" + subject.getCode()
                     + "], name=[" + subject.getName() + "], equivalentCodes="
                     + subject.getEquivalentCodes() + ", type=" + subject.getType()
                     + ", extractedCurriculumAbbreviation=[" + code
@@ -275,7 +270,39 @@ public class StudyPlanController {
                 semesterText(data.getValue().getPlannedSemester())));
         TableColumn<PlannedSubject, Void> info = plannedInfoColumn();
         plannedTable.getColumns().setAll(subject, code, credits, year, semester, info);
+        // Predmet | Kredity | Kedy | ⓘ   …   podiely zo šírky tabuľky
+        TableUi.columnWeights(mandatoryTable, 0.50, 0.10, 0.32, 0.08);
+        TableUi.columnWeights(recommendationTable, 0.40, 0.08, 0.22, 0.22, 0.08);
+        TableUi.columnWeights(plannedTable, 0.38, 0.14, 0.10, 0.12, 0.18, 0.08);
+        for (TableView<?> table : List.of(mandatoryTable, recommendationTable, plannedTable)) {
+            TableUi.fitHeightToRows(table);
+        }
+        statusLabel.managedProperty().bind(statusLabel.textProperty().isNotEmpty());
+        mandatoryTable.setRowFactory(table -> recommendationRow());
+        recommendationTable.setRowFactory(table -> recommendationRow());
+        plannedTable.setRowFactory(table -> {
+            TableRow<PlannedSubject> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    catalogService.findByCode(catalog, row.getItem().getSubjectCode())
+                            .ifPresent(this::openSubjectInfo);
+                }
+            });
+            return row;
+        });
     }
+
+    /** Dvojklik na riadok otvorí detail predmetu (rovnako ako tlačidlo ⓘ). */
+    private TableRow<Recommendation> recommendationRow() {
+        TableRow<Recommendation> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && !row.isEmpty()) {
+                openSubjectInfo(row.getItem().getSubject());
+            }
+        });
+        return row;
+    }
+
 
     private void addMandatoryColumns() {
         TableColumn<Recommendation, String> subject = new TableColumn<>("Predmet");
@@ -303,9 +330,9 @@ public class StudyPlanController {
     }
 
     private TableColumn<Recommendation, String> semesterColumn() {
-        TableColumn<Recommendation, String> semester = new TableColumn<>("Odporúčaný semester");
+        TableColumn<Recommendation, String> semester = new TableColumn<>("Kedy");
         semester.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getSubject().getRecommendedYear() + ". ročník, "
+                yearText(data.getValue().getSubject().getRecommendedYear()) + ", "
                         + semesterText(data.getValue().getSubject().getSemester())));
         return semester;
     }
@@ -324,12 +351,18 @@ public class StudyPlanController {
         table.getColumns().setAll(subject, code, credits, semester, infoColumn());
     }
 
+    /** Ročník 0 v katalógu = záverečná práca / štátnice (nemá pevný ročník). */
+    static String yearText(int year) {
+        return year > 0 ? year + ". ročník" : "Záver štúdia";
+    }
+
     private TableColumn<Recommendation, Void> infoColumn() {
-        TableColumn<Recommendation, Void> column = new TableColumn<>("Info");
+        TableColumn<Recommendation, Void> column = new TableColumn<>("ⓘ");
         column.setCellFactory(table -> new TableCell<>() {
-            private final Button button = new Button("Info");
+            private final Button button = new Button("ⓘ");
             {
-                button.getStyleClass().add("dialog-secondary-button");
+                button.getStyleClass().add("table-info-button");
+                button.setTooltip(new Tooltip("Detail predmetu (alebo dvojklik na riadok)"));
                 button.setOnAction(event -> {
                     Recommendation recommendation = getTableView().getItems().get(getIndex());
                     openSubjectInfo(recommendation.getSubject());
@@ -346,11 +379,12 @@ public class StudyPlanController {
     }
 
     private TableColumn<PlannedSubject, Void> plannedInfoColumn() {
-        TableColumn<PlannedSubject, Void> column = new TableColumn<>("Info");
+        TableColumn<PlannedSubject, Void> column = new TableColumn<>("ⓘ");
         column.setCellFactory(table -> new TableCell<>() {
-            private final Button button = new Button("Info");
+            private final Button button = new Button("ⓘ");
             {
-                button.getStyleClass().add("dialog-secondary-button");
+                button.getStyleClass().add("table-info-button");
+                button.setTooltip(new Tooltip("Detail predmetu (alebo dvojklik na riadok)"));
                 button.setOnAction(event -> {
                     PlannedSubject planned = getTableView().getItems().get(getIndex());
                     catalogService.findByCode(catalog, planned.getSubjectCode())
@@ -426,45 +460,16 @@ public class StudyPlanController {
 
     private void printEnrollmentDiagnostics(LocalCacheService.CacheSnapshot snapshot,
                                             List<Subject> aggregated) {
+        if (!LOG.isLoggable(Level.FINE)) return; // diagnostika len s -Dais.debug=true
         if (snapshot == null || snapshot.getEnrollmentData() == null) return;
         snapshot.getEnrollmentData().forEach((year, data) -> {
             long completed = data.getSubjects().stream()
                     .filter(SubjectCompletionService::isCompleted).count();
-            System.out.println("[STUDY-PLAN] enrollment=" + year + ", subjects="
+            LOG.fine("enrollment=" + year + ", subjects="
                     + data.getSubjects().size() + ", completed=" + completed);
         });
-        Set<String> completedCodes = new HashSet<>();
-        aggregated.stream().filter(SubjectCompletionService::isCompleted)
-                .map(Subject::getAbbreviation)
-                .map(SubjectCompletionService::normalizeCode)
-                .forEach(completedCodes::add);
-        System.out.println("[STUDY-PLAN] aggregated completed codes=" + completedCodes);
-        if (catalog != null) {
-            catalog.getSubjects().stream()
-                    .filter(subject -> completedCodes.contains(
-                            SubjectCompletionService.extractSubjectAbbreviation(subject.getCode()))
-                            || subject.getEquivalentCodes().stream()
-                            .map(SubjectCompletionService::extractSubjectAbbreviation)
-                            .anyMatch(completedCodes::contains))
-                    .findFirst()
-                    .ifPresent(subject -> {
-                        String year = snapshot.getEnrollmentData().entrySet().stream()
-                                .filter(entry -> entry.getValue().getSubjects().stream()
-                                        .filter(SubjectCompletionService::isCompleted)
-                                        .map(Subject::getAbbreviation)
-                                        .map(SubjectCompletionService::normalizeCode)
-                                        .anyMatch(code -> SubjectCompletionService.extractSubjectAbbreviation(
-                                                subject.getCode()).equals(code)
-                                                || subject.getEquivalentCodes().stream()
-                                                .map(SubjectCompletionService::extractSubjectAbbreviation)
-                                                .anyMatch(code::equals)))
-                                .map(Map.Entry::getKey)
-                                .findFirst()
-                                .orElse("neznámy");
-                        System.out.println("[STUDY-PLAN] completed catalog subject "
-                                + subject.getCode() + " found in enrollment=" + year);
-                    });
-        }
+        LOG.fine("completed catalog codes="
+                + CompletedSubjectsService.completedCodes(catalog, aggregated));
     }
 
     private void clearTables() {

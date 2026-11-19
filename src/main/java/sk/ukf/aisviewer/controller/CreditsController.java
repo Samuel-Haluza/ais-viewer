@@ -1,75 +1,59 @@
 package sk.ukf.aisviewer.controller;
 
-import javafx.collections.FXCollections;
-import javafx.scene.chart.PieChart;
+import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import sk.ukf.aisviewer.model.EnrollmentName;
+import sk.ukf.aisviewer.model.StudentInfo;
+import sk.ukf.aisviewer.model.StudyPlanCatalog;
 import sk.ukf.aisviewer.model.Subject;
+import sk.ukf.aisviewer.model.SubjectCategory;
 import sk.ukf.aisviewer.service.LocalCacheService;
+import sk.ukf.aisviewer.service.StudyPlanCatalogService;
 import sk.ukf.aisviewer.service.SubjectCompletionService;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CreditsController {
 
-    private final Label totalCreditsLabel;
-    private final Label mandatoryCreditsTotal;
-    private final Label optionalCreditsTotal;
-    private final Label electiveCreditsTotal;
-    private final Label avgGradeLabel;
-    private final Label yearAvgGradeLabel;
-    private final Label graduationCreditsLabel;
-    private final ProgressBar graduationProgressBar;
-    private final Label graduationProgressLabel;
-    private final Label graduationRemainingLabel;
-    private final PieChart creditsByCategoryChart;
+    @FXML private Label totalCreditsLabel;
+    @FXML private Label mandatoryCreditsTotal;
+    @FXML private Label optionalCreditsTotal;
+    @FXML private Label electiveCreditsTotal;
+    @FXML private Label avgGradeLabel;
+    @FXML private Label yearAvgGradeLabel;
+    @FXML private Label yearAvgHintLabel;
+    @FXML private Label graduationCreditsLabel;
+    @FXML private ProgressBar graduationProgressBar;
+    @FXML private Label graduationProgressLabel;
+    @FXML private Label graduationRemainingLabel;
+    @FXML private VBox categoryBox;
+    @FXML private VBox yearAveragesBox;
 
+    private final StudyPlanCatalogService catalogService = new StudyPlanCatalogService();
     private LocalCacheService.CacheSnapshot cacheSnapshot;
     private int acquiredCredits;
     private String averageGrade = "-";
 
-    public CreditsController(Label totalCreditsLabel,
-                             Label mandatoryCreditsTotal,
-                             Label optionalCreditsTotal,
-                             Label electiveCreditsTotal,
-                             Label avgGradeLabel,
-                             Label yearAvgGradeLabel,
-                             Label graduationCreditsLabel,
-                             ProgressBar graduationProgressBar,
-                             Label graduationProgressLabel,
-                             Label graduationRemainingLabel,
-                             PieChart creditsByCategoryChart) {
-        this.totalCreditsLabel = totalCreditsLabel;
-        this.mandatoryCreditsTotal = mandatoryCreditsTotal;
-        this.optionalCreditsTotal = optionalCreditsTotal;
-        this.electiveCreditsTotal = electiveCreditsTotal;
-        this.avgGradeLabel = avgGradeLabel;
-        this.yearAvgGradeLabel = yearAvgGradeLabel;
-        this.graduationCreditsLabel = graduationCreditsLabel;
-        this.graduationProgressBar = graduationProgressBar;
-        this.graduationProgressLabel = graduationProgressLabel;
-        this.graduationRemainingLabel = graduationRemainingLabel;
-        this.creditsByCategoryChart = creditsByCategoryChart;
-    }
-
     public void updateCredits(List<Subject> subjects,
                               LocalCacheService.CacheSnapshot cacheSnapshot,
-                              int requiredCredits) {
+                              int requiredCredits,
+                              StudentInfo studentInfo) {
         this.cacheSnapshot = cacheSnapshot;
         requiredCredits = requiredCredits > 0 ? requiredCredits : 180;
         List<Subject> completedSubjects = getCompletedSubjectsFromAllEnrollments(subjects);
-        int mandatory = completedSubjects.stream()
-                .filter(s -> "Povinné predmety".equals(s.getCategory()))
-                .mapToInt(Subject::getCreditsValue).sum();
-        int optional = completedSubjects.stream()
-                .filter(s -> "Povinne voliteľné predmety".equals(s.getCategory()))
-                .mapToInt(Subject::getCreditsValue).sum();
-        int elective = completedSubjects.stream()
-                .filter(s -> "Výberové predmety".equals(s.getCategory()))
-                .mapToInt(Subject::getCreditsValue).sum();
+        int mandatory = SubjectCategory.MANDATORY.sumCredits(completedSubjects);
+        int optional = SubjectCategory.COMPULSORY_ELECTIVE.sumCredits(completedSubjects);
+        int elective = SubjectCategory.ELECTIVE.sumCredits(completedSubjects);
         int total = completedSubjects.stream().mapToInt(Subject::getCreditsValue).sum();
         acquiredCredits = total;
 
@@ -80,20 +64,27 @@ public class CreditsController {
 
         double progress = (double) total / requiredCredits;
         int remaining = Math.max(0, requiredCredits - total);
-        double percentage = Math.min(100, progress * 100);
         graduationCreditsLabel.setText(total + " / " + requiredCredits + " kreditov");
         graduationProgressBar.setProgress(Math.min(1.0, progress));
-        graduationProgressLabel.setText(String.format("%.0f %%", percentage));
-        graduationRemainingLabel.setText("Zostáva " + remaining + " kreditov");
+        graduationProgressLabel.setText(String.format("%.0f %%", Math.min(100, progress * 100)));
+        graduationRemainingLabel.setText(remaining == 0 ? "🎓 Kredity na ukončenie štúdia máš splnené"
+                : "Zostáva " + remaining + " kreditov");
 
-        creditsByCategoryChart.setData(FXCollections.observableArrayList(
-                new PieChart.Data("Povinné predmety", mandatory),
-                new PieChart.Data("Povinne voliteľné predmety", optional),
-                new PieChart.Data("Výberové predmety", elective)));
+        StudyPlanCatalog catalog = loadCatalog(studentInfo);
+        categoryBox.getChildren().setAll(
+                categoryRow(SubjectCategory.MANDATORY, mandatory,
+                        catalog == null ? 0 : catalog.getRequiredMandatoryCredits(), "category-mandatory"),
+                categoryRow(SubjectCategory.COMPULSORY_ELECTIVE, optional,
+                        catalog == null ? 0 : catalog.getRequiredCompulsoryElectiveCredits(), "category-optional"),
+                categoryRow(SubjectCategory.ELECTIVE, elective, 0, "category-elective"));
 
-        setWeightedAverageLabel(avgGradeLabel, completedSubjects);
-        setWeightedAverageLabel(yearAvgGradeLabel, subjects);
+        avgGradeLabel.setText(calculateWeightedAverage(completedSubjects));
+        String yearAverage = calculateWeightedAverage(subjects);
+        yearAvgGradeLabel.setText(yearAverage);
+        yearAvgHintLabel.setText("-".equals(yearAverage) ? "Zatiaľ bez známok" : "Podľa vybraného ročníka");
         averageGrade = calculateWeightedAverage(completedSubjects);
+
+        fillYearAverages(studentInfo);
     }
 
     public int getAcquiredCredits() {
@@ -104,14 +95,80 @@ public class CreditsController {
         return averageGrade;
     }
 
-    private void setWeightedAverageLabel(Label label, List<Subject> subjects) {
-        if (label == null || subjects == null) {
-            return;
-        }
-        label.setText(calculateWeightedAverage(subjects));
+    /** Riadok "Povinné predmety   71 / 104" + pruh vo farbe kategórie. */
+    private VBox categoryRow(SubjectCategory category, int acquired, int required, String styleClass) {
+        Label name = new Label(category.displayName());
+        name.getStyleClass().add("category-name");
+        Label value = new Label(required > 0 ? acquired + " / " + required + " kr." : acquired + " kr.");
+        value.getStyleClass().add("category-value");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox header = new HBox(8, name, spacer, value);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        ProgressBar bar = new ProgressBar(required > 0 ? Math.min(1.0, (double) acquired / required) : 0);
+        bar.setMaxWidth(Double.MAX_VALUE);
+        bar.getStyleClass().addAll("category-bar", styleClass);
+
+        Label hint = new Label(required <= 0
+                ? "Nepovinné – kredity sa rátajú do celkového súčtu"
+                : acquired >= required ? "✓ Splnené" : "Chýba " + (required - acquired) + " kr.");
+        hint.getStyleClass().add("category-hint");
+        if (required > 0 && acquired >= required) hint.getStyleClass().add("category-done");
+        return new VBox(4, header, bar, hint);
     }
 
-    private String calculateWeightedAverage(List<Subject> subjects) {
+    /** Pre každý zápisný list (od najstaršieho): ročník, akademický rok, priemer a získané kredity. */
+    private void fillYearAverages(StudentInfo studentInfo) {
+        yearAveragesBox.getChildren().clear();
+        if (studentInfo == null || cacheSnapshot == null || cacheSnapshot.getEnrollmentData() == null
+                || studentInfo.getEnrollmentListIds() == null) {
+            return;
+        }
+        List<String> ids = new ArrayList<>(studentInfo.getEnrollmentListIds());
+        List<String> names = studentInfo.getEnrollmentListNames();
+        ids.sort(Comparator.comparingInt(id -> EnrollmentName.startYear(nameOf(id, ids, names, studentInfo))));
+        for (String id : ids) {
+            LocalCacheService.EnrollmentData data = cacheSnapshot.getEnrollmentData().get(id);
+            if (data == null || data.getSubjects() == null) continue;
+            String enrollmentName = nameOf(id, ids, names, studentInfo);
+            int studyYear = EnrollmentName.studyYear(EnrollmentName.programCode(enrollmentName));
+            String title = (studyYear > 0 ? studyYear + ". ročník" : "Ročník") + "  ·  "
+                    + EnrollmentName.academicYear(enrollmentName);
+            int credits = data.getSubjects().stream()
+                    .filter(SubjectCompletionService::isCompleted)
+                    .mapToInt(Subject::getCreditsValue).sum();
+            String average = calculateWeightedAverage(data.getSubjects());
+
+            Label titleLabel = new Label(title);
+            titleLabel.getStyleClass().add("year-row-title");
+            Label creditsLabel = new Label(credits + " kr.");
+            creditsLabel.getStyleClass().add("year-row-credits");
+            Label averageLabel = new Label("-".equals(average) ? "bez známok" : "⌀ " + average);
+            averageLabel.getStyleClass().add("-".equals(average) ? "year-row-empty" : "year-row-average");
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            HBox row = new HBox(12, titleLabel, spacer, creditsLabel, averageLabel);
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.getStyleClass().add("year-row");
+            yearAveragesBox.getChildren().add(row);
+        }
+    }
+
+    private static String nameOf(String id, List<String> sortedIds, List<String> names, StudentInfo info) {
+        int index = info.getEnrollmentListIds().indexOf(id);
+        return names != null && index >= 0 && index < names.size() ? names.get(index) : id;
+    }
+
+    private StudyPlanCatalog loadCatalog(StudentInfo studentInfo) {
+        try {
+            return studentInfo == null ? null : catalogService.loadForStudent(studentInfo).orElse(null);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    static String calculateWeightedAverage(List<Subject> subjects) {
         if (subjects == null) {
             return "-";
         }
@@ -158,14 +215,6 @@ public class CreditsController {
         if (!SubjectCompletionService.isCompleted(subject)) {
             return;
         }
-        String abbreviation = subject.getAbbreviation() == null
-                ? "" : subject.getAbbreviation().trim();
-        String name = subject.getName() == null ? "" : subject.getName().trim();
-        String key = (abbreviation + "|" + name).toLowerCase();
-        uniqueSubjects.putIfAbsent(key, subject);
-    }
-
-    public static boolean isCompletedSubject(Subject subject) {
-        return SubjectCompletionService.isCompleted(subject);
+        uniqueSubjects.putIfAbsent(SubjectCompletionService.identityKey(subject), subject);
     }
 }

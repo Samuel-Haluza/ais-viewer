@@ -1052,6 +1052,44 @@
                          "directions":  [
                                             "WEB_DEVELOPMENT"
                                         ]
+                     },
+                     {
+                         "code":  "KM/MPI1/22",
+                         "name":  "Matematika pre informatikov 1",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "WINTER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "MATHEMATICAL_FOUNDATIONS"
+                                        ]
+                     },
+                     {
+                         "code":  "KM/MPI2/22",
+                         "name":  "Matematika pre informatikov 2",
+                         "credits":  3,
+                         "degreeLevel":  "BACHELOR",
+                         "studyForm":  "FULL_TIME",
+                         "type":  "COMPULSORY_ELECTIVE",
+                         "recommendedYear":  1,
+                         "semester":  "SUMMER",
+                         "prerequisiteCodes":  [
+
+                                               ],
+                         "equivalentCodes":  [
+
+                                             ],
+                         "directions":  [
+                                            "MATHEMATICAL_FOUNDATIONS"
+                                        ]
                      }
                  ]
 }

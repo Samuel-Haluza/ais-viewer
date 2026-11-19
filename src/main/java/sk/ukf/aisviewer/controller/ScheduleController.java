@@ -1,5 +1,6 @@
 package sk.ukf.aisviewer.controller;
 
+import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -9,26 +10,39 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import sk.ukf.aisviewer.model.ScheduleEntry;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ScheduleController {
 
     private static final String[] DAY_NAMES = {"Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok"};
     private static final int MINUTES_PER_SLOT = 30; // each row = 30 min
+    private static final double ROW_HEIGHT = 28;
 
-    private final VBox scheduleContainer;
-    private final Label scheduleStatusLabel;
-
-    public ScheduleController(VBox scheduleContainer, Label scheduleStatusLabel) {
-        this.scheduleContainer = scheduleContainer;
-        this.scheduleStatusLabel = scheduleStatusLabel;
-    }
+    @FXML private VBox scheduleContainer;
+    @FXML private Label scheduleStatusLabel;
 
     public void displaySchedule(List<ScheduleEntry> entries) {
+        displaySchedule(entries, true);
+    }
+
+    /** Pre starší zápisný list AIS rozvrh neponúka – zobrazí sa vysvetlenie namiesto mriežky. */
+    public void displaySchedule(List<ScheduleEntry> entries, boolean currentEnrollment) {
+        if (!currentEnrollment) {
+            scheduleContainer.getChildren().clear();
+            Label info = new Label("AIS ponúka rozvrh len pre aktuálny zápisný list.\n"
+                    + "Aktuálny rozvrh uvidíš po výbere aktuálneho zápisného listu v hornom zozname.");
+            info.getStyleClass().add("schedule-no-data");
+            info.setWrapText(true);
+            scheduleContainer.getChildren().add(info);
+            scheduleStatusLabel.setVisible(false);
+            return;
+        }
         buildScheduleGrid(entries);
         scheduleStatusLabel.setVisible(false);
     }
@@ -111,9 +125,12 @@ public class ScheduleController {
         GridPane.setFillHeight(corner, true);
         grid.add(corner, 0, 0);
 
+        LocalDateTime now = LocalDateTime.now();
+        int todayIndex = now.getDayOfWeek().getValue() - 1; // pondelok = 0
         for (int d = 0; d < numDays; d++) {
-            Label dayLabel = new Label(DAY_NAMES[d]);
+            Label dayLabel = new Label(d == todayIndex ? DAY_NAMES[d] + "  •  dnes" : DAY_NAMES[d]);
             dayLabel.getStyleClass().add("schedule-header");
+            if (d == todayIndex) dayLabel.getStyleClass().add("schedule-header-today");
             dayLabel.setMaxWidth(Double.MAX_VALUE);
             dayLabel.setMaxHeight(Double.MAX_VALUE);
             dayLabel.setAlignment(Pos.CENTER);
@@ -125,8 +142,8 @@ public class ScheduleController {
         // Time slot rows
         for (int slot = 0; slot < totalSlots; slot++) {
             RowConstraints rc = new RowConstraints();
-            rc.setMinHeight(28);
-            rc.setPrefHeight(28);
+            rc.setMinHeight(ROW_HEIGHT);
+            rc.setPrefHeight(ROW_HEIGHT);
             grid.getRowConstraints().add(rc);
 
             int hour = minHour + (slot * MINUTES_PER_SLOT) / 60;
@@ -185,8 +202,29 @@ public class ScheduleController {
             grid.add(card, dayIdx + 1, startSlot + 1, 1, span);
         }
 
+        addNowLine(grid, now, todayIndex, numDays, minHour, totalSlots);
+
         scheduleContainer.getChildren().add(grid);
         VBox.setVgrow(grid, Priority.ALWAYS);
+    }
+
+    /** Červená čiara v dnešnom stĺpci na mieste aktuálneho času (len cez pracovný týždeň a v rozsahu mriežky). */
+    private void addNowLine(GridPane grid, LocalDateTime now, int todayIndex, int numDays,
+                            int minHour, int totalSlots) {
+        if (todayIndex < 0 || todayIndex >= numDays) return;
+        int minutesFromStart = (now.getHour() - minHour) * 60 + now.getMinute();
+        int slot = minutesFromStart / MINUTES_PER_SLOT;
+        if (minutesFromStart < 0 || slot >= totalSlots) return;
+        Region line = new Region();
+        line.getStyleClass().add("schedule-now-line");
+        line.setMinHeight(2);
+        line.setPrefHeight(2);
+        line.setMaxHeight(2);
+        line.setMaxWidth(Double.MAX_VALUE);
+        line.setMouseTransparent(true);
+        line.setTranslateY((minutesFromStart % MINUTES_PER_SLOT) / (double) MINUTES_PER_SLOT * ROW_HEIGHT);
+        GridPane.setValignment(line, VPos.TOP);
+        grid.add(line, todayIndex + 1, slot + 1);
     }
 
     /**

@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 public class CurriculumCatalogImportService {
     private static final Pattern VERSION_PATTERN = Pattern.compile("/(\\d+)$");
+    private static final Pattern SUBJECT_CODE = Pattern.compile("[A-Z]{1,6}/[A-Za-z0-9]+/\\d+");
     private static final Map<String, Set<StudyDirection>> DIRECTION_NAMES = createDirectionNames();
 
     public ImportResult importCatalog(Path html, StudyPlanCatalog metadata) {
@@ -25,20 +26,13 @@ public class CurriculumCatalogImportService {
             while (rowMatcher.find()) {
                 String row = rowMatcher.group(1);
                 String rowText = normalize(stripTags(row));
-                if (rowText.equalsIgnoreCase("Povinné predmety")) {
-                    category = "Povinné predmety";
-                    continue;
-                }
-                if (rowText.equalsIgnoreCase("Povinne voliteľné predmety")) {
-                    category = "Povinne voliteľné predmety";
-                    continue;
-                }
-                if (rowText.equalsIgnoreCase("Výberové predmety")) {
-                    category = "Výberové predmety";
+                Optional<SubjectCategory> heading = SubjectCategory.fromDisplayName(rowText);
+                if (heading.isPresent()) {
+                    category = heading.get().displayName();
                     continue;
                 }
                 List<String> cells = cells(row);
-                if (cells.size() < 10 || !cells.get(0).matches("^KI/.+/.+")) {
+                if (cells.size() < 10 || !cells.get(0).matches("^[A-Z]{1,6}/.+/.+")) {
                     continue;
                 }
                 if (category == null) {
@@ -137,15 +131,16 @@ public class CurriculumCatalogImportService {
 
     private static List<String> codes(String value) {
         List<String> result = new ArrayList<>();
-        Matcher matcher = Pattern.compile("KI/[A-Za-z0-9]+/\\d+").matcher(value);
+        // Akákoľvek katedra (KI/…, KM/… pre matematiku a pod.), nie len informatika.
+        Matcher matcher = SUBJECT_CODE.matcher(value);
         while (matcher.find()) result.add(matcher.group());
         return result;
     }
 
     private static SubjectType type(String category) {
-        if ("Povinne voliteľné predmety".equals(category)) return SubjectType.COMPULSORY_ELECTIVE;
-        if ("Výberové predmety".equals(category)) return SubjectType.ELECTIVE;
-        return SubjectType.MANDATORY;
+        return SubjectCategory.fromDisplayName(category)
+                .map(SubjectCategory::subjectType)
+                .orElse(SubjectType.MANDATORY);
     }
 
     private static int version(String code) {

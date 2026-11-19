@@ -30,7 +30,7 @@ class ExportControllerTest {
                 subject("Zimný povinný", "Z2", "5 K", "ZS", "S",
                         "Povinné predmety")));
 
-        ExportController controller = new ExportController(null);
+        ExportController controller = new ExportController();
         controller.setExportData(student, snapshot);
         String csv = controller.createCsv();
 

@@ -58,7 +58,6 @@ public final class ThemeManager {
         }
         scenes.put(scene, Boolean.TRUE);
         applyRootTheme(scene.getRoot());
-        updateThemeStylesheet(scene);
     }
 
     public void applyTheme(DialogPane dialogPane) {
@@ -67,7 +66,6 @@ public final class ThemeManager {
         }
         applyRootTheme(dialogPane);
         addBaseStylesheet(dialogPane.getStylesheets());
-        updateThemeStylesheet(dialogPane.getStylesheets());
         dialogPane.sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene != null) {
                 applyTheme(newScene);
@@ -75,26 +73,14 @@ public final class ThemeManager {
         });
     }
 
+    /**
+     * Téma = trieda theme-dark / theme-light na koreni scény. Farby oboch tém sú
+     * ako paleta premenných v styles.css, takže sa nič iné meniť nemusí.
+     */
     private void applyRootTheme(Parent root) {
         root.getStyleClass().removeAll("theme-dark", "theme-light");
         root.getStyleClass().add(currentTheme == AppTheme.DARK
                 ? "theme-dark" : "theme-light");
-    }
-
-    private void updateThemeStylesheet(Scene scene) {
-        updateThemeStylesheet(scene.getStylesheets());
-    }
-
-    private void updateThemeStylesheet(java.util.List<String> stylesheets) {
-        URL lightUrl = ThemeManager.class.getResource("/sk/ukf/aisviewer/theme-light.css");
-        if (lightUrl == null) {
-            return;
-        }
-        String lightStylesheet = lightUrl.toExternalForm();
-        stylesheets.remove(lightStylesheet);
-        if (currentTheme == AppTheme.LIGHT) {
-            stylesheets.add(lightStylesheet);
-        }
     }
 
     private void addBaseStylesheet(java.util.List<String> stylesheets) {
