@@ -22,7 +22,7 @@
 
     <!-- Top Bar -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="top-bar">
+        <HBox fx:id="topBar" alignment="CENTER_LEFT" spacing="10" styleClass="top-bar">
             <padding><Insets bottom="10" left="16" right="16" top="10" /></padding>
 
             <VBox spacing="2" HBox.hgrow="ALWAYS">
@@ -38,14 +38,14 @@
                 <Label fx:id="lastUpdatedLabel" managed="false" styleClass="top-last-updated" text="" visible="false" />
             </VBox>
 
-            <Label styleClass="top-label" text="Zápisný list:" />
+            <Label fx:id="enrollmentLabel" styleClass="top-label" text="Zápisný list:" />
             <ComboBox fx:id="enrollmentListCombo" prefWidth="180" styleClass="enrollment-combo" />
 
-            <Button onAction="#handleExport" styleClass="refresh-button" text="⬇ Export CSV" />
+            <Button fx:id="exportButton" onAction="#handleExport" styleClass="refresh-button" text="⬇ Export CSV" />
             <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="refresh-button" text="⟳ Obnoviť údaje" />
             <Button fx:id="themeToggleButton" onAction="#handleThemeToggle"
                     styleClass="theme-toggle-button" text="☀ Svetlý režim" />
-            <Button onAction="#handleLogout" styleClass="logout-button" text="Odhlásiť" />
+            <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="logout-button" text="Odhlásiť" />
         </HBox>
     </top>
 
@@ -72,9 +72,9 @@
                 <fx:include fx:id="credits" source="credits-tab.fxml"/>
             </Tab>
 
-            <!-- Tab 4: Study Tree -->
-            <Tab text="🌳  Môj študijný strom">
-                <fx:include fx:id="studyTree" source="study-tree-tab.fxml"/>
+            <!-- Môj pokrok: hodnosť, XP, achievementy -->
+            <Tab text="🏆  Môj pokrok">
+                <fx:include fx:id="progress" source="progress-tab.fxml"/>
             </Tab>
 
             <!-- Tab 5: Rozvrh -->

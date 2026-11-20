@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Záložka „Môj pokrok“ – hodnosť a XP, štatistiky, achievementy a časová os semestrov.
+     Väčšina obsahu sa vytvára v ProgressController podľa údajov z AIS. -->
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sk.ukf.aisviewer.controller.ProgressController"
+            fitToWidth="true" styleClass="tab-scroll">
+    <VBox spacing="16" styleClass="tab-content">
+        <padding><Insets bottom="24" left="24" right="24" top="24" /></padding>
+
+        <!-- Hodnosť a XP – obsah vytvára ProgressController.showRank -->
+        <VBox fx:id="rankPanel" spacing="18" styleClass="credit-card, rank-card">
+            <padding><Insets bottom="20" left="24" right="24" top="20" /></padding>
+        </VBox>
+
+        <!-- Štatistiky -->
+        <HBox fx:id="statsBox" spacing="16" fillHeight="true" />
+
+        <!-- Najbližšie k splneniu -->
+        <VBox spacing="10" styleClass="credit-card">
+            <padding><Insets bottom="18" left="20" right="20" top="18" /></padding>
+            <Label styleClass="group-title" text="🎯 Najbližšie k splneniu" />
+            <VBox fx:id="closestBox" spacing="12" />
+        </VBox>
+
+        <!-- Achievementy -->
+        <VBox spacing="12" styleClass="credit-card">
+            <padding><Insets bottom="18" left="20" right="20" top="18" /></padding>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label styleClass="group-title" text="🏅 Achievementy" />
+                <Label fx:id="achievementCountLabel" styleClass="status-label" text="" />
+            </HBox>
+            <HBox fx:id="filterBox" spacing="6" />
+            <FlowPane fx:id="achievementsPane" hgap="12" vgap="12" />
+        </VBox>
+
+        <!-- Časová os -->
+        <VBox spacing="12" styleClass="credit-card">
+            <padding><Insets bottom="18" left="20" right="20" top="18" /></padding>
+            <Label styleClass="group-title" text="🗓 Časová os štúdia" />
+            <HBox fx:id="timelineBox" alignment="TOP_LEFT" spacing="0" />
+        </VBox>
+    </VBox>
+</ScrollPane>

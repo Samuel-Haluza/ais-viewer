@@ -8,6 +8,8 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import sk.ukf.aisviewer.App;
 import sk.ukf.aisviewer.model.EnrollmentName;
 import sk.ukf.aisviewer.model.Exam;
@@ -41,6 +43,16 @@ public class MainController {
     @FXML private Button refreshButton;
 
     @FXML private Button themeToggleButton;
+    @FXML private HBox topBar;
+    @FXML private Label enrollmentLabel;
+    @FXML private Button exportButton;
+    @FXML private Button logoutButton;
+
+    /** Pod touto šírkou okna sa tlačidlá v hornej lište zmenia len na ikony (texty ostanú v tooltipoch). */
+    private static final double COMPACT_WIDTH = 1180;
+    private boolean compactTopBar;
+    /** Text „Naposledy aktualizované…“ – v kompaktnom režime sa ukáže len v tooltipe tlačidla Obnoviť. */
+    private String lastUpdatedText = "";
 
     private static AisClient aisClient;
     private static String runtimePassword;
@@ -59,7 +71,7 @@ public class MainController {
     @FXML private ExamsController examsController;
     @FXML private CreditsController creditsController;
     @FXML private ScheduleController scheduleController;
-    @FXML private StudyTreeController studyTreeController;
+    @FXML private ProgressController progressController;
     private final ExportController exportController = new ExportController();
     @FXML private StudyPlanController studyPlanController;
 
@@ -73,6 +85,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        setupTopBar();
         updateThemeToggleText();
 
         cacheSnapshot = cacheService.load().orElse(null);
@@ -101,8 +114,44 @@ public class MainController {
         if (themeToggleButton == null) {
             return;
         }
-        themeToggleButton.setText(ThemeManager.getInstance().getCurrentTheme() == AppTheme.DARK
-                ? "☀ Svetlý režim" : "🌙 Tmavý režim");
+        boolean dark = ThemeManager.getInstance().getCurrentTheme() == AppTheme.DARK;
+        String full = dark ? "☀ Svetlý režim" : "🌙 Tmavý režim";
+        themeToggleButton.setText(compactTopBar ? full.substring(0, full.indexOf(' ')) : full);
+        themeToggleButton.setTooltip(new Tooltip(dark ? "Prepnúť na svetlý režim" : "Prepnúť na tmavý režim"));
+    }
+
+    // ---------------------------------------------------------------- horná lišta
+
+    /** Tooltipy a prepínanie medzi plnou a kompaktnou lištou podľa šírky okna. */
+    private void setupTopBar() {
+        exportButton.setTooltip(new Tooltip("Exportovať študijný prehľad do CSV"));
+        logoutButton.setTooltip(new Tooltip("Odhlásiť sa z aplikácie"));
+        enrollmentListCombo.setTooltip(new Tooltip("Zápisný list (ročník), ktorého údaje sa zobrazujú"));
+        studentNameLabel.setMinWidth(Region.USE_PREF_SIZE); // meno sa nikdy neoreže
+        dataStatusLabel.setMaxWidth(260);
+        topBar.widthProperty().addListener((obs, oldWidth, width) -> applyTopBarLayout(width.doubleValue()));
+        applyTopBarLayout(topBar.getWidth());
+    }
+
+    private void applyTopBarLayout(double width) {
+        compactTopBar = width > 0 && width < COMPACT_WIDTH;
+        enrollmentLabel.setVisible(!compactTopBar);
+        enrollmentLabel.setManaged(!compactTopBar);
+        exportButton.setText(compactTopBar ? "⬇" : "⬇ Export CSV");
+        refreshButton.setText(compactTopBar ? "⟳" : "⟳ Obnoviť údaje");
+        enrollmentListCombo.setPrefWidth(width > 0 && width < 900 ? 150 : 180);
+        dataStatusLabel.setMaxWidth(compactTopBar ? 170 : 260);
+        updateThemeToggleText();
+        updateLastUpdatedLabel();
+    }
+
+    private void updateLastUpdatedLabel() {
+        boolean show = !lastUpdatedText.isBlank() && !compactTopBar;
+        lastUpdatedLabel.setText(lastUpdatedText);
+        lastUpdatedLabel.setVisible(show);
+        lastUpdatedLabel.setManaged(show);
+        refreshButton.setTooltip(new Tooltip("Obnoviť údaje z AIS"
+                + (lastUpdatedText.isBlank() ? "" : System.lineSeparator() + lastUpdatedText)));
     }
 
     private void updateStudentInfoBar() {
@@ -334,7 +383,7 @@ public class MainController {
         subjectsController.displaySubjects(subjects);
         examsController.displayExams(exams);
         creditsController.updateCredits(subjects, cacheSnapshot, requiredCredits, studentInfo);
-        studyTreeController.update(creditsController.getAcquiredCredits(), subjects,
+        progressController.update(creditsController.getAcquiredCredits(), subjects,
                 cacheSnapshot, studentInfo, requiredCredits);
         exportController.setExportData(studentInfo, cacheSnapshot);
         scheduleController.displaySchedule(scheduleEntries, isCurrentEnrollment(getSelectedEnrollmentId()));
@@ -407,26 +456,26 @@ public class MainController {
 
     private void showLastUpdated(String timestamp) {
         if (timestamp == null || timestamp.isBlank()) {
-            lastUpdatedLabel.setText("");
-            lastUpdatedLabel.setVisible(false);
-            lastUpdatedLabel.setManaged(false);
-            return;
+            lastUpdatedText = "";
+        } else {
+            try {
+                LocalDateTime dateTime = LocalDateTime.parse(timestamp,
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                lastUpdatedText = "Naposledy aktualizované: "
+                        + dateTime.format(DateTimeFormatter.ofPattern("d. M. uuuu, HH:mm"));
+            } catch (Exception e) {
+                lastUpdatedText = "Naposledy aktualizované: " + timestamp;
+            }
         }
-        try {
-            LocalDateTime dateTime = LocalDateTime.parse(timestamp,
-                    DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            lastUpdatedLabel.setText("Naposledy aktualizované: "
-                    + dateTime.format(DateTimeFormatter.ofPattern("d. M. uuuu, HH:mm")));
-        } catch (Exception e) {
-            lastUpdatedLabel.setText("Naposledy aktualizované: " + timestamp);
-        }
-        lastUpdatedLabel.setVisible(true);
-        lastUpdatedLabel.setManaged(true);
+        updateLastUpdatedLabel();
     }
 
     private void showSyncStatus(String message, boolean running) {
         dataStatusLabel.setText(message);
+        dataStatusLabel.setTooltip(new Tooltip(message));
+        // predtým bol label managed="false" → mal nulovú šírku a stav sa nikdy nezobrazil
         dataStatusLabel.setVisible(true);
+        dataStatusLabel.setManaged(true);
         syncProgressIndicator.setVisible(running);
         syncProgressIndicator.setManaged(running);
     }
@@ -435,9 +484,8 @@ public class MainController {
         examsController.showLoading(message);
         scheduleController.showLoading(message);
         showSyncStatus(message, true);
-        lastUpdatedLabel.setText("Prvé načítanie môže trvať dlhšie.");
-        lastUpdatedLabel.setVisible(true);
-        lastUpdatedLabel.setManaged(true);
+        lastUpdatedText = "Prvé načítanie môže trvať dlhšie.";
+        updateLastUpdatedLabel();
     }
 
     private void showNoDataMessage() {
