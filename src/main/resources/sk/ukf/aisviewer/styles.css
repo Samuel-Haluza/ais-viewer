@@ -1,101 +1,134 @@
 /* ===================================================
-   AIS Viewer – Stylesheet
-   Farby sú v PALETE nižšie (premenné -app-*). Pravidlá komponentov
-   používajú iba tieto premenné, takže tmavý aj svetlý režim fungujú
-   všade rovnako. Novú farbu pridaj do OBOCH paliet.
+   AIS Viewer – Stylesheet, vizuálny smer „Výkaz o štúdiu“
+   Teplý papier, atramentovo modrý akcent, tenké linky namiesto kariet a tieňov.
+   Nadpisy a veľké čísla: Source Serif 4. Text: IBM Plex Sans. Kódy a časy: IBM Plex Mono.
+   Písma sú v resources/fonts (OFL), načíta ich ThemeManager. Polotučné rezy JavaFX
+   registruje ako samostatné rodiny: "IBM Plex Sans SmBld" a "Source Serif 4 Semibold".
+
+   Farby sú len v PALETÁCH nižšie (premenné -app-*). Novú farbu pridaj do OBOCH paliet.
+   Kontrast textu je overený (WCAG AA 4.5:1) na -app-bg, -app-surface aj -app-surface-2.
+
+   Farby: každá záložka má svoju farbu (-app-page), kategórie predmetov a známky tiež.
+   Škála písma:  11 · 12 · 13 · 15 · 17 · 22 · 30 px
+   Rozostupy:    4 · 8 · 12 · 16 · 24 · 32 px
+   Zaoblenie:    3 px (ovládacie prvky), 2 px (pruhy)
    =================================================== */
 
 /* ===================================================
-   PALETA – tmavý režim (predvolený)
-   Trieda theme-dark / theme-light je na koreni každej scény
-   (nastavuje ju ThemeManager).
+   PALETA – tmavý režim (grafit)
    =================================================== */
 .theme-dark {
     /* plochy */
-    -app-bg: #1a1d23;
-    -app-surface: #23272f;
-    -app-surface-2: #2d3340;
-    -app-surface-3: #3d4555;
-    -app-card: #1f232b;
-    -app-row-alt: rgba(255, 255, 255, 0.02);
-    -app-border: #2d3340;
-    -app-border-strong: #3d4555;
-    -app-shadow: rgba(0, 0, 0, 0.35);
+    -app-bg: #16181c;
+    -app-surface: #1c1f24;
+    -app-surface-2: #23272d;
+    -app-surface-3: #2e333a;
+    -app-card: #1c1f24;
+    -app-row-alt: #1c1f24;
+    -app-border: #2c3037;
+    -app-border-strong: #6b717b;
+    -app-rule: #3c424b;
+    -app-shadow: rgba(0, 0, 0, 0.30);
     /* text */
-    -app-text: #e8eaf0;
-    -app-text-2: #c8d0e0;
-    -app-text-3: #9ba8bc;
-    -app-text-muted: #8892a4;
-    -app-text-faint: #5a637a;
-    /* akcenty */
-    -app-accent: #0069c8;
-    -app-accent-hover: #0078e0;
-    -app-accent-pressed: #005aaa;
-    -app-accent-text: #64b5f6;
-    -app-accent-soft: rgba(0, 105, 200, 0.20);
-    -app-success: #81c784;
-    -app-success-strong: #66bb6a;
-    -app-success-soft: rgba(102, 187, 106, 0.20);
-    -app-warning: #ffa726;
-    -app-warning-soft: rgba(255, 167, 38, 0.20);
-    -app-purple: #a78bfa;
-    -app-error: #ff6b6b;
-    -app-error-soft: rgba(255, 107, 107, 0.10);
+    -app-text: #e9e6df;
+    -app-text-2: #d3cfc6;
+    -app-text-3: #b4b0a7;
+    -app-text-muted: #a19d94;
+    -app-text-faint: #96928a;
+    /* akcent: jeden atramentovo modrý */
+    -app-accent: #3a679f;
+    -app-accent-hover: #4574b0;
+    -app-accent-pressed: #2f5788;
+    -app-accent-text: #8db3e6;
+    -app-accent-soft: #23303f;
+    -app-focus: #8db3e6;
+    /* stavové farby (len tam, kde nesú význam) */
+    -app-success: #8fc28f;
+    -app-success-strong: #8fc28f;
+    -app-success-soft: #1f2c22;
+    -app-warning: #d9b26a;
+    -app-warning-soft: #2f2a1e;
+    -app-purple: #8db3e6;
+    -app-error: #ee8d82;
+    -app-error-soft: #33201e;
+    /* rozvrh: nepriehľadné tóny, aby mriežka nepresvitala cez text */
+    -app-lecture-bg: #1f2a38;
+    -app-seminar-bg: #1f2c22;
+    -app-other-bg: #2f2a1e;
+    /* farby záložiek, kategórií a známok (text aj pruhy, kontrast overený) */
+    -app-blue: #8db3e6;   -app-blue-soft: #1f2a38;
+    -app-green: #8fc28f;  -app-green-soft: #1f2c22;
+    -app-teal: #7cc4c4;   -app-teal-soft: #1b2c2e;
+    -app-ochre: #d9b26a;  -app-ochre-soft: #2f2a1e;
+    -app-red: #ee8d82;    -app-red-soft: #33201e;
+    -app-plum: #c4a0e0;   -app-plum-soft: #2a2233;
+    -app-page: #8db3e6;   -app-page-soft: #1f2a38;
 
-    /* základné farby JavaFX (Modena) – prefarbia aj prvky bez vlastného štýlu */
-    -fx-base: #2d3340;
-    -fx-background: #1a1d23;
-    -fx-control-inner-background: #23272f;
-    -fx-control-inner-background-alt: #252a33;
-    -fx-accent: #0069c8;
-    -fx-focus-color: #0069c8;
-    -fx-faint-focus-color: rgba(0, 105, 200, 0.2);
+    -fx-base: #23272d;
+    -fx-background: #16181c;
+    -fx-control-inner-background: #1c1f24;
+    -fx-control-inner-background-alt: #1c1f24;
+    -fx-accent: #3a679f;
+    -fx-focus-color: #8db3e6;
+    -fx-faint-focus-color: transparent;
 }
 
 /* ===================================================
-   PALETA – svetlý režim
+   PALETA – svetlý režim (papier)
    =================================================== */
 .theme-light {
-    -app-bg: #f4f6f9;
-    -app-surface: #ffffff;
-    -app-surface-2: #e7edf5;
-    -app-surface-3: #d5dee9;
-    -app-card: #f8fafc;
-    -app-row-alt: #f7f9fc;
-    -app-border: #d7dee8;
-    -app-border-strong: #c6d0dc;
-    -app-shadow: rgba(15, 23, 42, 0.10);
-    -app-text: #1f2937;
-    -app-text-2: #334155;
-    -app-text-3: #475569;
-    -app-text-muted: #526174;
-    -app-text-faint: #8a96a6;
-    -app-accent: #0069c8;
-    -app-accent-hover: #0078e0;
-    -app-accent-pressed: #005aaa;
-    -app-accent-text: #0b5cad;
-    -app-accent-soft: rgba(0, 105, 200, 0.12);
-    -app-success: #2e7d32;
-    -app-success-strong: #43a047;
-    -app-success-soft: rgba(67, 160, 71, 0.14);
-    -app-warning: #e65100;
-    -app-warning-soft: rgba(255, 152, 0, 0.16);
-    -app-purple: #6d28d9;
-    -app-error: #b42318;
-    -app-error-soft: #fff1f0;
+    -app-bg: #f6f4ee;
+    -app-surface: #fffdf8;
+    -app-surface-2: #efebe1;
+    -app-surface-3: #e2dccd;
+    -app-card: #fffdf8;
+    -app-row-alt: #fffdf8;
+    -app-border: #e2dccd;
+    -app-border-strong: #8f8778;
+    -app-rule: #cfc8b8;
+    -app-shadow: rgba(29, 31, 36, 0.10);
+    -app-text: #1d1f24;
+    -app-text-2: #33363d;
+    -app-text-3: #4a4e57;
+    -app-text-muted: #5c606a;
+    -app-text-faint: #61656e;
+    -app-accent: #1f4e8c;
+    -app-accent-hover: #2a5fa5;
+    -app-accent-pressed: #183f72;
+    -app-accent-text: #1f4e8c;
+    -app-accent-soft: #e8ecf2;
+    -app-focus: #1f4e8c;
+    -app-success: #2f6b3a;
+    -app-success-strong: #2f6b3a;
+    -app-success-soft: #e6efe5;
+    -app-warning: #8a5a00;
+    -app-warning-soft: #f3ead8;
+    -app-purple: #1f4e8c;
+    -app-error: #a3261b;
+    -app-error-soft: #f7e6e2;
+    -app-lecture-bg: #e7ecf3;
+    -app-seminar-bg: #e6efe5;
+    -app-other-bg: #f3ead8;
+    -app-blue: #1f4e8c;   -app-blue-soft: #e3eaf4;
+    -app-green: #2f6b3a;  -app-green-soft: #e3efe3;
+    -app-teal: #1d6b6b;   -app-teal-soft: #e0eeee;
+    -app-ochre: #8a5a00;  -app-ochre-soft: #f3e8d2;
+    -app-red: #a3261b;    -app-red-soft: #f7e3df;
+    -app-plum: #6b3f8c;   -app-plum-soft: #efe6f4;
+    -app-page: #1f4e8c;   -app-page-soft: #e3eaf4;
 
-    -fx-base: #eef2f7;
-    -fx-background: #f4f6f9;
-    -fx-control-inner-background: #ffffff;
-    -fx-control-inner-background-alt: #f7f9fc;
-    -fx-accent: #0069c8;
-    -fx-focus-color: #0069c8;
-    -fx-faint-focus-color: rgba(0, 105, 200, 0.15);
+    -fx-base: #efebe1;
+    -fx-background: #f6f4ee;
+    -fx-control-inner-background: #fffdf8;
+    -fx-control-inner-background-alt: #fffdf8;
+    -fx-accent: #1f4e8c;
+    -fx-focus-color: #1f4e8c;
+    -fx-faint-focus-color: transparent;
 }
 
-/* ---- Base ---- */
+/* ---- Základ ---- */
 .root {
-    -fx-font-family: "Segoe UI", "Inter", "Roboto", "Arial", sans-serif;
+    -fx-font-family: "IBM Plex Sans";
     -fx-font-size: 13px;
 }
 
@@ -103,13 +136,118 @@
     -fx-background-color: -app-bg;
 }
 
-/* ===================================================
-   LOGIN SCREEN
-   =================================================== */
+.label {
+    -fx-text-fill: -app-text-2;
+}
 
+/* Typografické úrovne – používaj tieto namiesto vlastných veľkostí */
+.page-title {
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -app-text;
+}
+
+.group-title {
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 17px;
+    -fx-text-fill: -app-text;
+}
+
+.section-title {
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-font-size: 13px;
+    -fx-text-fill: -app-text-3;
+    -fx-padding: 8 0 0 0;
+}
+
+.status-label {
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 12px;
+}
+
+.field-label {
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 12px;
+}
+
+.empty-hint {
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 13px;
+    -fx-padding: 12 0 12 0;
+}
+
+/* ===================================================
+   TLAČIDLÁ – jedna hierarchia v celej aplikácii
+   primárne (plná modrá) · sekundárne (linka) · textové (horná lišta)
+   =================================================== */
+.button, .toggle-button {
+    -fx-background-color: -app-surface;
+    -fx-background-radius: 3px;
+    -fx-border-color: -app-border-strong;
+    -fx-border-radius: 3px;
+    -fx-border-width: 1px;
+    -fx-text-fill: -app-text;
+    -fx-font-size: 13px;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+
+.button:hover, .toggle-button:hover {
+    -fx-background-color: -app-surface-2;
+}
+
+.button:pressed, .toggle-button:pressed {
+    -fx-background-color: -app-surface-3;
+}
+
+.button:disabled, .toggle-button:disabled {
+    -fx-opacity: 0.55;
+}
+
+/* viditeľný fokus pre ovládanie klávesnicou (WCAG 2.4.7) */
+.button:focused, .toggle-button:focused {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 2px;
+    -fx-padding: 5 13 5 13;
+}
+
+.login-button, .primary-button {
+    -fx-background-color: -app-accent;
+    -fx-border-color: -app-accent;
+    -fx-text-fill: white;
+    -fx-font-family: "IBM Plex Sans SmBld";
+}
+
+.login-button:hover, .primary-button:hover {
+    -fx-background-color: -app-accent-hover;
+}
+
+.login-button:pressed, .primary-button:pressed {
+    -fx-background-color: -app-accent-pressed;
+}
+
+.login-button:focused, .primary-button:focused {
+    -fx-border-color: -app-text;
+}
+
+.login-button {
+    -fx-padding: 9 14 9 14;
+}
+
+.login-button:focused {
+    -fx-padding: 8 13 8 13;
+}
+
+.dialog-secondary-button, .secondary-button {
+    -fx-background-color: -app-surface;
+}
+
+/* ===================================================
+   PRIHLÁSENIE
+   =================================================== */
 .login-root {
-    -fx-background-color: linear-gradient(to bottom, -app-bg, -app-surface-2);
-    -fx-spacing: 0;
+    -fx-background-color: -app-bg;
 }
 
 .login-header {
@@ -117,90 +255,48 @@
 }
 
 .login-title {
-    -fx-font-size: 28px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -app-accent;
-    -fx-effect: dropshadow(gaussian, rgba(0,105,200,0.4), 8, 0, 0, 0);
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 30px;
+    -fx-text-fill: -app-text;
+}
+
+.login-subtitle {
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 13px;
 }
 
 .login-card {
     -fx-background-color: -app-surface;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-color: -app-border;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-border-color: -app-rule;
     -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, -app-shadow, 20, 0, 0, 4);
 }
 
 .login-card-title {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 17px;
     -fx-text-fill: -app-text;
-    -fx-padding: 0 0 4 0;
 }
 
-.field-label {
-    -fx-text-fill: -app-text-3;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.login-field {
-    -fx-background-color: -app-surface-2;
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
+.login-field, .text-field, .password-field {
+    -fx-background-color: -app-surface;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
     -fx-border-color: -app-border-strong;
     -fx-border-width: 1px;
     -fx-text-fill: -app-text;
     -fx-prompt-text-fill: -app-text-faint;
-    -fx-padding: 10 12 10 12;
+    -fx-highlight-fill: -app-accent;
+    -fx-highlight-text-fill: white;
+    -fx-padding: 7 10 7 10;
     -fx-font-size: 13px;
 }
 
-.login-field:focused {
-    -fx-border-color: -app-accent;
-    -fx-effect: dropshadow(gaussian, rgba(0,105,200,0.3), 6, 0, 0, 0);
-}
-
-.login-button {
-    -fx-background-color: -app-accent;
-    -fx-background-radius: 6px;
-    -fx-text-fill: white;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-padding: 11 0 11 0;
-    -fx-cursor: hand;
-}
-
-.login-button:hover {
-    -fx-background-color: -app-accent-hover;
-    -fx-effect: dropshadow(gaussian, rgba(0,105,200,0.4), 8, 0, 0, 0);
-}
-
-.login-button:pressed {
-    -fx-background-color: -app-accent-pressed;
-}
-
-.login-button:disabled {
-    -fx-background-color: -app-surface-3;
-    -fx-text-fill: -app-text-muted;
-}
-
-.dialog-secondary-button {
-    -fx-background-color: -app-surface-2;
-    -fx-background-radius: 6px;
-    -fx-border-color: -app-border-strong;
-    -fx-border-radius: 6px;
-    -fx-border-width: 1px;
-    -fx-text-fill: -app-text-2;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-padding: 11 14 11 14;
-    -fx-cursor: hand;
-}
-
-.dialog-secondary-button:hover {
-    -fx-background-color: -app-surface-3;
+.login-field:focused, .text-field:focused, .password-field:focused {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 2px;
+    -fx-padding: 6 9 6 9;
 }
 
 .error-label {
@@ -208,131 +304,94 @@
     -fx-font-size: 12px;
     -fx-wrap-text: true;
     -fx-background-color: -app-error-soft;
-    -fx-background-radius: 4px;
-    -fx-padding: 6 8 6 8;
+    -fx-background-radius: 3px;
+    -fx-padding: 8 10 8 10;
 }
 
 .info-label {
-    -fx-text-fill: -app-accent-text;
-    -fx-font-size: 12px;
-    -fx-background-color: -app-accent-soft;
-    -fx-background-radius: 4px;
-    -fx-padding: 6 8 6 8;
+    -fx-text-fill: -app-text-2;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
 }
 
 /* ===================================================
-   MAIN WINDOW
+   HLAVNÉ OKNO
    =================================================== */
-
 .main-root {
     -fx-background-color: -app-bg;
 }
 
-/* ---- Top Bar (modrá v oboch režimoch, text vždy biely) ---- */
+/* ---- Horná lišta: neutrálna, ako hlavička výkazu ---- */
 .top-bar {
-    -fx-background-color: -app-accent;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 6, 0, 0, 2);
+    -fx-background-color: -app-rule, -app-bg;
+    -fx-background-insets: 0, 0 0 1 0;
 }
 
 .top-name {
-    -fx-text-fill: white;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 17px;
 }
 
 .top-program {
-    -fx-text-fill: rgba(255,255,255,0.75);
-    -fx-font-size: 11px;
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 12px;
 }
 
 .top-sync-status {
-    -fx-text-fill: rgba(255,255,255,0.9);
-    -fx-font-size: 11px;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 12px;
 }
 
 .top-last-updated {
-    -fx-text-fill: rgba(255,255,255,0.7);
-    -fx-font-size: 10px;
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 11px;
 }
 
 .sync-progress {
-    -fx-progress-color: white;
+    -fx-progress-color: -app-accent-text;
 }
 
 .top-label {
-    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-text-fill: -app-text-muted;
     -fx-font-size: 12px;
 }
 
-.enrollment-combo {
-    -fx-background-color: rgba(255,255,255,0.15);
-    -fx-background-radius: 5px;
-    -fx-border-color: transparent;
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
-}
-
-.enrollment-combo > .list-cell {
-    -fx-text-fill: white;
+.refresh-button, .theme-toggle-button, .logout-button {
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -app-text-2;
+    -fx-padding: 6 10 6 10;
 }
 
-.enrollment-combo .arrow {
-    -fx-background-color: white;
+.refresh-button:hover, .theme-toggle-button:hover, .logout-button:hover {
+    -fx-background-color: -app-surface-2;
 }
 
-.refresh-button, .theme-toggle-button {
-    -fx-background-color: rgba(255,255,255,0.15);
-    -fx-background-radius: 5px;
-    -fx-border-color: rgba(255,255,255,0.25);
-    -fx-border-radius: 5px;
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
-    -fx-padding: 6 12 6 12;
-    -fx-cursor: hand;
+.refresh-button:focused, .theme-toggle-button:focused, .logout-button:focused {
+    -fx-border-color: -app-focus;
+    -fx-padding: 5 9 5 9;
 }
 
-.refresh-button:hover, .theme-toggle-button:hover {
-    -fx-background-color: rgba(255,255,255,0.25);
-}
-
-.logout-button {
-    -fx-background-color: rgba(255,100,100,0.2);
-    -fx-background-radius: 5px;
-    -fx-text-fill: #ffe4e4;
-    -fx-font-size: 12px;
-    -fx-padding: 6 12 6 12;
-    -fx-cursor: hand;
-    -fx-border-color: rgba(255,100,100,0.35);
-    -fx-border-radius: 5px;
-    -fx-border-width: 1px;
-}
-
-.logout-button:hover {
-    -fx-background-color: rgba(255,100,100,0.35);
-    -fx-text-fill: white;
-}
-
-/* ---- Tabs ---- */
+/* ---- Záložky: text a podčiarknutie, bez ikon ---- */
 .main-tabs {
     -fx-background-color: -app-bg;
-    -fx-tab-min-width: 120px;
+    -fx-tab-min-width: 0;
 }
 
 .main-tabs .tab-header-area {
-    -fx-padding: 0 0 0 8;
+    -fx-padding: 0 0 0 16;
 }
 
 .main-tabs .tab-header-background {
-    -fx-background-color: -app-surface;
-    -fx-border-color: transparent transparent -app-border transparent;
-    -fx-border-width: 1px;
+    -fx-background-color: -app-rule, -app-bg;
+    -fx-background-insets: 0, 0 0 1 0;
 }
 
 .main-tabs .tab {
     -fx-background-color: transparent;
-    -fx-background-radius: 6px 6px 0 0;
-    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 0;
+    -fx-padding: 9 14 9 14;
     -fx-cursor: hand;
 }
 
@@ -342,27 +401,34 @@
 }
 
 .main-tabs .tab:hover .tab-label {
-    -fx-text-fill: -app-text-2;
+    -fx-text-fill: -app-text;
 }
 
 .main-tabs .tab:selected {
-    -fx-background-color: -app-bg;
+    -fx-background-color: -app-accent-text, -app-bg;
+    -fx-background-insets: 0, 0 0 2 0;
 }
 
 .main-tabs .tab:selected .tab-label {
-    -fx-text-fill: -app-accent-text;
-    -fx-font-weight: bold;
+    -fx-text-fill: -app-text;
+    -fx-font-family: "IBM Plex Sans SmBld";
 }
 
-.main-tabs .tab:selected .focus-indicator {
+.main-tabs .tab .focus-indicator {
     -fx-border-color: transparent;
+}
+
+.main-tabs:focused .tab:selected .focus-indicator {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 1px;
+    -fx-border-insets: -3 -6 -3 -6;
 }
 
 .main-tabs .tab-content-area {
     -fx-background-color: -app-bg;
 }
 
-/* ---- Tab Content ---- */
+/* ---- Obsah záložiek ---- */
 .tab-content {
     -fx-background-color: -app-bg;
 }
@@ -373,127 +439,143 @@
     -fx-background: -app-bg;
 }
 
-/* ---- Subject Group ---- */
-.subject-group {
-    -fx-background-color: -app-surface;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-border-color: -app-border;
-    -fx-border-width: 1px;
-    -fx-padding: 12 14 12 14;
+/* Sekcia = linka nad nadpisom, žiadna karta so stínom */
+.subject-group, .section {
+    -fx-background-color: transparent;
+    -fx-border-color: -app-rule transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 14 0 0 0;
 }
 
-.group-title {
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -app-text;
-}
-
+/* počet kreditov pri nadpise skupiny */
 .credits-badge {
-    -fx-background-radius: 20px;
-    -fx-padding: 3 10 3 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 13px;
+    -fx-padding: 0;
 }
 
-.mandatory-badge {
-    -fx-background-color: -app-accent-soft;
-    -fx-text-fill: -app-accent-text;
-    -fx-border-color: rgba(0,105,200,0.4);
-    -fx-border-radius: 20px;
-    -fx-border-width: 1px;
+.mandatory-badge, .optional-badge, .elective-badge {
+    -fx-background-color: transparent;
 }
 
-.optional-badge {
-    -fx-background-color: -app-success-soft;
-    -fx-text-fill: -app-success;
-    -fx-border-color: rgba(102,187,106,0.4);
-    -fx-border-radius: 20px;
-    -fx-border-width: 1px;
-}
-
-.elective-badge {
-    -fx-background-color: -app-warning-soft;
-    -fx-text-fill: -app-warning;
-    -fx-border-color: rgba(255,167,38,0.4);
-    -fx-border-radius: 20px;
-    -fx-border-width: 1px;
-}
-
-/* ---- Tables ---- */
-.subject-table {
+/* ===================================================
+   TABUĽKY – hustejšie, linky ako vo výkaze
+   =================================================== */
+.subject-table, .table-view {
     -fx-background-color: -app-surface;
     -fx-control-inner-background: -app-surface;
-    -fx-control-inner-background-alt: -app-row-alt;
+    -fx-control-inner-background-alt: -app-surface;
     -fx-table-cell-border-color: transparent;
-    -fx-border-color: -app-border;
+    -fx-border-color: -app-rule;
     -fx-border-width: 1px;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-padding: 0;
 }
 
-.subject-table .column-header-background {
-    -fx-background-color: -app-surface-2;
-    -fx-background-radius: 6px 6px 0 0;
+.subject-table:focused, .table-view:focused {
+    -fx-border-color: -app-focus;
 }
 
-.subject-table .column-header, .subject-table .filler {
+.table-view .column-header-background {
+    -fx-background-color: -app-rule, -app-surface-2;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-background-radius: 3 3 0 0, 3 3 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
     -fx-background-color: transparent;
-    -fx-border-color: transparent -app-border-strong transparent transparent;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-color: transparent;
+    -fx-size: 30px;
 }
 
-.subject-table .column-header .label {
+.table-view .column-header .label {
+    -fx-font-family: "IBM Plex Sans SmBld";
     -fx-text-fill: -app-text-3;
-    -fx-font-weight: bold;
     -fx-font-size: 12px;
-    -fx-padding: 8 6 8 6;
+    -fx-alignment: center-left;
+    -fx-padding: 0 8 0 8;
 }
 
-.subject-table .table-row-cell {
+.table-view .column-header.numeric-column .label {
+    -fx-alignment: center-right;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: -app-border, -app-surface;
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+.table-view .table-row-cell:empty {
     -fx-background-color: -app-surface;
-    -fx-border-color: transparent transparent -app-border transparent;
-    -fx-border-width: 0 0 1 0;
 }
 
-.subject-table .table-row-cell:odd {
-    -fx-background-color: -app-row-alt;
+.table-view .table-row-cell:hover {
+    -fx-background-color: -app-border, -app-surface-2;
 }
 
-.subject-table .table-row-cell:hover {
-    -fx-background-color: -app-accent-soft;
+.table-view .table-row-cell:selected {
+    -fx-background-color: -app-border, -app-accent-soft;
 }
 
-.subject-table .table-row-cell:selected {
-    -fx-background-color: derive(-app-accent, 60%);
-}
-
-.theme-dark .subject-table .table-row-cell:selected {
-    -fx-background-color: rgba(0,105,200,0.35);
-}
-
-.subject-table .table-cell {
+.table-view .table-cell {
     -fx-text-fill: -app-text-2;
-    -fx-font-size: 12px;
-    -fx-padding: 7 6 7 6;
+    -fx-font-size: 13px;
+    -fx-padding: 0 8 0 8;
+    -fx-alignment: center-left;
     -fx-border-color: transparent;
 }
 
-.subject-table .table-row-cell:selected .table-cell {
-    -fx-text-fill: -app-text;
+.table-view .table-cell.numeric-column {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-alignment: center-right;
 }
 
-.subject-table .virtual-flow,
-.subject-table .clipped-container,
-.subject-table .sheet {
-    -fx-background-color: -app-surface;
+.table-view .table-cell.code-column {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 12px;
+    -fx-text-fill: -app-text-3;
 }
 
-.subject-table .placeholder .label {
+.table-view .table-cell.muted-cell {
     -fx-text-fill: -app-text-faint;
 }
 
-/* ---- Dialógy (detail predmetu, PVP predmety, oznámenia) ---- */
+.table-view .table-row-cell:selected .table-cell {
+    -fx-text-fill: -app-text;
+}
+
+.table-view .virtual-flow,
+.table-view .clipped-container,
+.table-view .sheet {
+    -fx-background-color: -app-surface;
+}
+
+.table-view .placeholder .label {
+    -fx-text-fill: -app-text-muted;
+}
+
+/* ---- Dialógy (oznámenia, detail predmetu, PVP predmety) ---- */
+.dialog-root {
+    -fx-background-color: -app-bg;
+}
+
+.dialog-title {
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 17px;
+    -fx-text-fill: -app-text;
+}
+
+.dialog-text {
+    -fx-text-fill: -app-text-2;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.dialog-text-error {
+    -fx-text-fill: -app-error;
+}
+
 .dialog-pane,
 .dialog-pane > .content,
 .dialog-pane > .button-bar,
@@ -506,28 +588,33 @@
     -fx-text-fill: -app-text-2;
 }
 
-.dialog-pane .button {
-    -fx-background-color: -app-surface-2;
-    -fx-border-color: -app-border-strong;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-    -fx-text-fill: -app-text-2;
+.subject-info-name {
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -app-text !important;
 }
 
-.dialog-pane .button:hover {
-    -fx-background-color: -app-surface-3;
+.subject-info-code {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-text-fill: -app-text-muted !important;
+    -fx-font-size: 12px;
 }
 
 .subject-info-heading {
-    -fx-text-fill: -app-accent-text !important;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 10 0 2 0;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-text !important;
+    -fx-font-size: 15px;
+    -fx-padding: 14 0 2 0;
+}
+
+.subject-info-key {
+    -fx-text-fill: -app-text-muted !important;
+    -fx-font-size: 12px;
 }
 
 .subject-info-text {
     -fx-text-fill: -app-text-2 !important;
-    -fx-line-spacing: 2px;
+    -fx-line-spacing: 3px;
 }
 
 .subject-info-scroll,
@@ -536,113 +623,63 @@
     -fx-background: -app-bg;
 }
 
-/* Súhrn kreditov v Plánovaní – zarovnaný vľavo */
+/* Súhrn kreditov v Plánovaní */
 .plan-credits {
     -fx-text-fill: -app-text-2;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-line-spacing: 2px;
 }
 
-/* ---- Status label ---- */
-.status-label {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 12px;
-    -fx-padding: 4 0 4 0;
-}
-
-/* ---- Credits Tab ---- */
+/* ===================================================
+   KREDITY – súhrn ako riadok čísel, nie dlaždice
+   =================================================== */
 .credit-card {
-    -fx-background-color: -app-surface;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-    -fx-border-color: -app-border;
-    -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, -app-shadow, 8, 0, 0, 2);
+    -fx-background-color: transparent;
+    -fx-border-color: -app-rule transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
 }
 
-.total-card {
-    -fx-border-color: rgba(0,105,200,0.5);
-}
-
-.mandatory-card {
-    -fx-border-color: rgba(100,181,246,0.5);
-}
-
-.optional-card {
-    -fx-border-color: rgba(129,199,132,0.5);
-}
-
-.elective-card {
-    -fx-border-color: rgba(255,167,38,0.5);
-}
-
-.avg-card {
-    -fx-border-color: rgba(167,139,250,0.5);
+.total-card, .mandatory-card, .optional-card, .elective-card, .avg-card {
+    -fx-border-color: transparent;
 }
 
 .credit-card-label {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-alignment: center;
+    -fx-font-size: 12px;
 }
 
 .credit-card-value {
-    -fx-text-fill: -app-accent-text;
-    -fx-font-size: 32px;
-    -fx-font-weight: bold;
-    -fx-text-alignment: center;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 30px;
 }
 
 .credit-card-value-large {
-    -fx-text-fill: -app-purple;
-    -fx-font-size: 36px;
-    -fx-font-weight: bold;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-accent-text;
+    -fx-font-size: 30px;
 }
 
-/* ---- Grafy a progress bary (štandardné prvky JavaFX) ---- */
-.chart-legend {
-    -fx-background-color: -app-surface;
-    -fx-background-radius: 6px;
+/* ---- Pruhy postupu ---- */
+.progress-bar {
+    -fx-pref-height: 8;
 }
-
-.chart-legend-item {
-    -fx-text-fill: -app-text-2;
-}
-
-.chart-pie-label {
-    -fx-fill: -app-text-2;
-}
-
-.chart-pie-label-line {
-    -fx-stroke: -app-text-muted;
-}
-
-.chart-pie {
-    -fx-border-color: -app-bg;
-}
-
-/* Farby koláča = farby kategórií (povinné / povinne voliteľné / výberové) */
-.default-color0.chart-pie { -fx-pie-color: -app-accent; }
-.default-color1.chart-pie { -fx-pie-color: -app-success-strong; }
-.default-color2.chart-pie { -fx-pie-color: -app-warning; }
-.default-color0.pie-legend-symbol { -fx-background-color: -app-accent; }
-.default-color1.pie-legend-symbol { -fx-background-color: -app-success-strong; }
-.default-color2.pie-legend-symbol { -fx-background-color: -app-warning; }
 
 .progress-bar > .track {
-    -fx-background-color: -app-surface-2;
-    -fx-background-radius: 6px;
-}
-
-.progress-bar > .bar {
-    -fx-background-color: -app-accent;
-    -fx-background-radius: 6px;
+    -fx-background-color: -app-surface-3;
+    -fx-background-radius: 2px;
     -fx-background-insets: 0;
 }
 
-/* ---- Schedule Tab – Visual Timetable Grid ---- */
+.progress-bar > .bar {
+    -fx-background-color: -app-accent-text;
+    -fx-background-radius: 2px;
+    -fx-background-insets: 0;
+    -fx-padding: 4;
+}
+
+/* ===================================================
+   ROZVRH
+   =================================================== */
 .schedule-container {
     -fx-background-color: -app-bg;
     -fx-padding: 0;
@@ -656,9 +693,7 @@
 
 .schedule-grid {
     -fx-background-color: -app-surface;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-border-color: -app-border;
+    -fx-border-color: -app-rule;
     -fx-border-width: 1px;
     -fx-padding: 0;
 }
@@ -666,86 +701,81 @@
 .schedule-header,
 .schedule-corner {
     -fx-background-color: -app-surface-2;
-    -fx-border-color: transparent -app-border-strong -app-border-strong transparent;
-    -fx-border-width: 0 1 1 0;
+    -fx-border-color: transparent transparent -app-rule transparent;
+    -fx-border-width: 0 0 1 0;
 }
 
 .schedule-header {
+    -fx-font-family: "IBM Plex Sans SmBld";
     -fx-text-fill: -app-text-2;
-    -fx-font-weight: bold;
     -fx-font-size: 13px;
     -fx-padding: 8 12 8 12;
     -fx-alignment: center;
 }
 
-.schedule-corner {
-    -fx-background-radius: 8 0 0 0;
-}
-
 .schedule-time-label {
+    -fx-font-family: "IBM Plex Mono";
     -fx-text-fill: -app-text-muted;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-border-color: transparent -app-border-strong transparent transparent;
+    -fx-border-color: transparent -app-rule transparent transparent;
     -fx-border-width: 0 1 0 0;
 }
 
 .schedule-cell {
-    -fx-border-color: transparent -app-border derive(-app-border, -8%) transparent;
-    -fx-border-width: 0 1 1 0;
+    -fx-border-color: transparent -app-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
     -fx-background-color: transparent;
 }
 
 .schedule-cell-hour-border {
-    -fx-border-color: transparent -app-border -app-border-strong transparent;
-    -fx-border-width: 0 1 1 0;
+    -fx-border-color: -app-border -app-border transparent transparent;
+    -fx-border-width: 1 1 0 0;
 }
 
+/* karta hodiny: nepriehľadná plocha + celý tenký rámik vo farbe typu */
 .schedule-entry-card {
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
-    -fx-border-width: 0 0 0 3px;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-border-width: 1px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, -app-shadow, 4, 0, 0, 1);
 }
 
 .schedule-entry-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0,105,200,0.4), 8, 0, 0, 2);
-    -fx-opacity: 0.95;
+    -fx-border-width: 2px;
 }
 
 .schedule-entry-lecture {
-    -fx-background-color: -app-accent-soft;
-    -fx-border-color: -app-accent;
+    -fx-background-color: -app-lecture-bg;
+    -fx-border-color: -app-accent-text;
 }
 
 .schedule-entry-seminar {
-    -fx-background-color: -app-success-soft;
-    -fx-border-color: -app-success-strong;
+    -fx-background-color: -app-seminar-bg;
+    -fx-border-color: -app-success;
 }
 
 .schedule-entry-other {
-    -fx-background-color: -app-warning-soft;
+    -fx-background-color: -app-other-bg;
     -fx-border-color: -app-warning;
 }
 
 .schedule-entry-name {
+    -fx-font-family: "IBM Plex Sans SmBld";
     -fx-text-fill: -app-text;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-size: 12px;
 }
 
 .schedule-entry-time {
-    -fx-text-fill: -app-text-3;
-    -fx-font-size: 10px;
+    -fx-font-family: "IBM Plex Mono";
+    -fx-text-fill: -app-text-2;
+    -fx-font-size: 11px;
 }
 
 .schedule-entry-detail {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 10px;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 11px;
 }
 
-/* Legend */
 .schedule-legend {
     -fx-padding: 0 0 4 0;
 }
@@ -755,51 +785,54 @@
     -fx-min-height: 12;
     -fx-max-width: 12;
     -fx-max-height: 12;
-    -fx-background-radius: 3px;
+    -fx-background-radius: 2px;
+    -fx-border-radius: 2px;
+    -fx-border-width: 1px;
 }
 
-.legend-lecture {
-    -fx-background-color: -app-accent;
-}
-
-.legend-seminar {
-    -fx-background-color: -app-success-strong;
-}
-
-.legend-other {
-    -fx-background-color: -app-warning;
-}
+.legend-lecture { -fx-background-color: -app-lecture-bg; -fx-border-color: -app-accent-text; }
+.legend-seminar { -fx-background-color: -app-seminar-bg; -fx-border-color: -app-success; }
+.legend-other   { -fx-background-color: -app-other-bg;   -fx-border-color: -app-warning; }
 
 .legend-text {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 12px;
 }
 
 .schedule-no-data {
-    -fx-text-fill: -app-text-faint;
-    -fx-font-size: 14px;
-    -fx-padding: 40 20 40 20;
-    -fx-alignment: center;
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 13px;
+    -fx-padding: 32 0 32 0;
 }
 
 .schedule-loading-label {
-    -fx-text-fill: -app-accent-text;
+    -fx-text-fill: -app-text-3;
     -fx-font-size: 13px;
-    -fx-padding: 20;
+    -fx-padding: 16 0 16 0;
 }
 
-/* ---- ScrollBar ---- */
+.schedule-header-today {
+    -fx-background-color: -app-accent-text, -app-surface-2;
+    -fx-background-insets: 0, 0 0 2 0;
+    -fx-text-fill: -app-text;
+}
+
+.schedule-now-line {
+    -fx-background-color: -app-error;
+}
+
+/* ---- Posuvníky ---- */
 .scroll-bar:vertical, .scroll-bar:horizontal {
     -fx-background-color: transparent;
 }
 
 .scroll-bar .thumb {
     -fx-background-color: -app-surface-3;
-    -fx-background-radius: 4px;
+    -fx-background-radius: 3px;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: derive(-app-surface-3, 15%);
+    -fx-background-color: -app-border-strong;
 }
 
 .scroll-bar .track {
@@ -812,38 +845,56 @@
 }
 
 .scroll-bar .increment-arrow, .scroll-bar .decrement-arrow {
-    -fx-background-color: -app-surface-3;
-    -fx-padding: 3;
+    -fx-background-color: transparent;
+    -fx-padding: 2;
 }
 
-/* ---- ComboBox (mimo hornej lišty) ---- */
+/* ---- ComboBox ---- */
 .combo-box {
-    -fx-background-color: -app-surface-2;
-    -fx-background-radius: 5px;
+    -fx-background-color: -app-surface;
+    -fx-background-radius: 3px;
     -fx-border-color: -app-border-strong;
-    -fx-border-radius: 5px;
+    -fx-border-radius: 3px;
     -fx-border-width: 1px;
+    -fx-padding: 0;
+}
+
+.combo-box:hover {
+    -fx-background-color: -app-surface-2;
+}
+
+.combo-box:focused {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 2px;
 }
 
 .combo-box > .list-cell {
     -fx-text-fill: -app-text;
     -fx-background-color: transparent;
-    -fx-padding: 4 8 4 8;
+    -fx-padding: 5 8 5 8;
+}
+
+.combo-box:focused > .list-cell {
+    -fx-padding: 4 7 4 7;
 }
 
 .combo-box .arrow {
     -fx-background-color: -app-text-3;
 }
 
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
 .combo-box-popup .list-view {
-    -fx-background-color: -app-surface-2;
+    -fx-background-color: -app-surface;
     -fx-border-color: -app-border-strong;
 }
 
 .combo-box-popup .list-view .list-cell {
-    -fx-background-color: -app-surface-2;
+    -fx-background-color: -app-surface;
     -fx-text-fill: -app-text;
-    -fx-padding: 4 8 4 8;
+    -fx-padding: 5 8 5 8;
 }
 
 .combo-box-popup .list-view .list-cell:hover,
@@ -852,165 +903,132 @@
     -fx-text-fill: -app-text;
 }
 
+.enrollment-combo > .list-cell {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 12px;
+}
+
 /* ---- Tooltip ---- */
 .tooltip {
-    -fx-background-color: -app-surface-2;
+    -fx-background-color: -app-surface;
     -fx-text-fill: -app-text;
     -fx-border-color: -app-border-strong;
-    -fx-border-radius: 4px;
-    -fx-background-radius: 4px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
     -fx-font-size: 12px;
+    -fx-effect: null;
 }
 
 /* ===================================================
-   NOVÉ PRVKY UI
+   ZNÁMKY – písmeno ako vo výkaze, farba len dopĺňa text
    =================================================== */
-
-/* ---- Známky ako farebné štítky (tabuľka Predmety) ---- */
 .grade-chip {
-    -fx-background-radius: 10px;
-    -fx-padding: 2 9 2 9;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-}
-.grade-a     { -fx-background-color: rgba(46,125,50,0.22);  -fx-text-fill: derive(#43a047, 20%); }
-.grade-b     { -fx-background-color: rgba(76,175,80,0.18);  -fx-text-fill: derive(#66bb6a, 10%); }
-.grade-c     { -fx-background-color: rgba(139,195,74,0.18); -fx-text-fill: derive(#9ccc65, 0%); }
-.grade-d     { -fx-background-color: rgba(255,193,7,0.18);  -fx-text-fill: derive(#ffb300, 0%); }
-.grade-e     { -fx-background-color: rgba(255,152,0,0.18);  -fx-text-fill: derive(#fb8c00, 0%); }
-.grade-fx    { -fx-background-color: rgba(229,57,53,0.18);  -fx-text-fill: derive(#e53935, 10%); }
-.grade-abs   { -fx-background-color: rgba(96,125,139,0.20); -fx-text-fill: -app-text-2; }
-.grade-other { -fx-background-color: -app-surface-2;        -fx-text-fill: -app-text-2; }
-.theme-light .grade-a { -fx-text-fill: #1b5e20; }
-.theme-light .grade-b { -fx-text-fill: #2e7d32; }
-.theme-light .grade-c { -fx-text-fill: #558b2f; }
-.theme-light .grade-d { -fx-text-fill: #8d6e00; }
-.theme-light .grade-e { -fx-text-fill: #b45309; }
-.theme-light .grade-fx { -fx-text-fill: #b71c1c; }
-
-/* ---- Nadpisy sekcií a prázdne stavy ---- */
-.section-title {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-padding: 8 0 0 2;
-}
-
-.empty-hint {
-    -fx-text-fill: -app-text-faint;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-family: "IBM Plex Sans SmBld";
     -fx-font-size: 13px;
-    -fx-padding: 18;
 }
 
-/* ---- Karty skúšok ---- */
+.grade-a, .grade-b   { -fx-text-fill: -app-success; }
+.grade-c, .grade-d, .grade-e { -fx-text-fill: -app-text; }
+.grade-fx    { -fx-text-fill: -app-error; }
+.grade-abs   { -fx-text-fill: -app-text-3; }
+.grade-other { -fx-text-fill: -app-text-2; }
+
+/* ===================================================
+   SKÚŠKY
+   =================================================== */
 .exam-card {
-    -fx-background-color: -app-surface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -app-border;
-    -fx-border-radius: 10px;
-    -fx-padding: 12 16 12 12;
-    -fx-effect: dropshadow(gaussian, -app-shadow, 6, 0, 0, 1);
+    -fx-background-color: -app-rule, -app-bg;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 12 0 12 0;
 }
 
-.exam-card-soon {
-    -fx-border-color: -app-warning;
-    -fx-border-width: 1 1 1 4;
+.exam-card-soon .exam-countdown {
+    -fx-text-fill: -app-warning;
 }
 
-.exam-card-past {
-    -fx-opacity: 0.6;
+.exam-card-past .label {
+    -fx-text-fill: -app-text-muted;
 }
 
 .exam-date {
-    -fx-background-color: -app-accent-soft;
-    -fx-background-radius: 8px;
-    -fx-min-width: 64;
-    -fx-pref-width: 64;
-    -fx-padding: 6 4 6 4;
+    -fx-min-width: 72;
+    -fx-pref-width: 72;
+    -fx-alignment: center-left;
 }
 
 .exam-date-day {
-    -fx-text-fill: -app-accent-text;
-    -fx-font-size: 22px;
-    -fx-font-weight: bold;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 30px;
 }
 
 .exam-date-month {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 12px;
 }
 
 .exam-name {
+    -fx-font-family: "IBM Plex Sans SmBld";
     -fx-text-fill: -app-text;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
+    -fx-font-size: 15px;
 }
 
 .exam-detail {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 12px;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 13px;
 }
 
 .exam-status {
-    -fx-background-radius: 10px;
-    -fx-padding: 2 10 2 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 0;
 }
-.exam-status-registered { -fx-background-color: -app-success-soft; -fx-text-fill: -app-success; }
-.exam-status-cancelled  { -fx-background-color: -app-error-soft;   -fx-text-fill: -app-error; }
-.exam-status-other      { -fx-background-color: -app-surface-2;    -fx-text-fill: -app-text-2; }
+
+.exam-status-registered { -fx-text-fill: -app-success; }
+.exam-status-cancelled  { -fx-text-fill: -app-error; }
+.exam-status-other      { -fx-text-fill: -app-text-3; }
 
 .exam-countdown {
-    -fx-text-fill: -app-text-2;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 13px;
 }
 
 /* ---- Kredity podľa kategórie ---- */
 .category-name {
-    -fx-text-fill: -app-text-2;
+    -fx-text-fill: -app-text;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
 }
 
 .category-value {
     -fx-text-fill: -app-text;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
 }
 
 .category-hint {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .category-done {
     -fx-text-fill: -app-success;
-    -fx-font-weight: bold;
 }
 
 .category-bar {
-    -fx-pref-height: 12;
+    -fx-pref-height: 8;
 }
-.category-mandatory > .bar { -fx-background-color: -app-accent; }
-.category-optional > .bar  { -fx-background-color: -app-success-strong; }
-.category-elective > .bar  { -fx-background-color: -app-warning; }
 
 /* ---- Priemer po ročníkoch ---- */
 .year-row {
-    -fx-background-color: -app-card;
-    -fx-background-radius: 8px;
-    -fx-border-color: -app-border;
-    -fx-border-radius: 8px;
-    -fx-padding: 10 14 10 14;
+    -fx-background-color: -app-border, -app-bg;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 8 0 8 0;
 }
 
 .year-row-title {
     -fx-text-fill: -app-text;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
 }
 
 .year-row-credits {
@@ -1019,318 +1037,94 @@
 }
 
 .year-row-average {
-    -fx-text-fill: -app-purple;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-min-width: 64;
+    -fx-text-fill: -app-text;
+    -fx-font-size: 13px;
+    -fx-min-width: 72;
     -fx-alignment: center-right;
 }
 
 .year-row-empty {
-    -fx-text-fill: -app-text-faint;
+    -fx-text-fill: -app-text-muted;
     -fx-font-size: 12px;
-    -fx-min-width: 64;
+    -fx-min-width: 72;
     -fx-alignment: center-right;
 }
 
-/* ---- Malé tlačidlo detailu v tabuľkách Plánovania ---- */
+/* ---- Odkaz na detail predmetu v tabuľkách ---- */
 .table-info-button {
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
     -fx-text-fill: -app-accent-text;
-    -fx-font-size: 15px;
-    -fx-padding: 0 6 0 6;
-    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-padding: 2 6 2 6;
+    -fx-underline: true;
 }
 
 .table-info-button:hover {
     -fx-background-color: -app-accent-soft;
-    -fx-background-radius: 12px;
 }
 
-/* ---- Rozvrh: dnešný deň a aktuálny čas ---- */
-.schedule-header-today {
-    -fx-background-color: -app-accent-soft;
-    -fx-text-fill: -app-accent-text;
-    -fx-border-color: transparent -app-border-strong -app-accent transparent;
-    -fx-border-width: 0 1 2 0;
-}
-
-.schedule-now-line {
-    -fx-background-color: #e53935;
+.table-info-button:focused {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 1px;
+    -fx-padding: 1 5 1 5;
 }
 
 /* ===================================================
-   MÔJ POKROK – hodnosť, XP, achievementy, časová os
+   MÔJ POKROK – tichší: jedna hlavná sekcia, zvyšok ako zoznam
    =================================================== */
-
 .rank-card {
-    -fx-border-color: rgba(167,139,250,0.55);
-}
-
-.rank-badge {
-    -fx-background-color: -app-accent-soft;
-    -fx-background-radius: 14px;
-    -fx-min-width: 92;
-    -fx-pref-width: 92;
-    -fx-padding: 10 6 10 6;
-    -fx-spacing: 2;
-}
-
-.rank-icon {
-    -fx-font-size: 36px;
-}
-
-.rank-number {
-    -fx-text-fill: -app-accent-text;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.rank-name {
-    -fx-text-fill: -app-purple;
-    -fx-font-size: 28px;
-    -fx-font-weight: bold;
-}
-
-.rank-xp {
-    -fx-text-fill: -app-text-2;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-}
-
-.rank-bar {
-    -fx-pref-height: 14;
-}
-
-.rank-bar > .bar {
-    -fx-background-color: linear-gradient(to right, -app-accent, -app-purple);
-}
-
-/* ---- dlaždice so štatistikami ---- */
-.stat-tile {
-    -fx-padding: 14 16 14 16;
-}
-
-.stat-icon {
-    -fx-font-size: 20px;
-}
-
-.stat-value {
-    -fx-text-fill: -app-text;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-}
-
-.stat-caption {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
-}
-
-/* ---- najbližšie k splneniu ---- */
-.closest-title {
-    -fx-text-fill: -app-text;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
-
-.closest-value {
-    -fx-text-fill: -app-text-2;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.closest-bar {
-    -fx-pref-height: 10;
-}
-
-.closest-bar > .bar {
-    -fx-background-color: -app-purple;
-}
-
-/* ---- filter kategórií ---- */
-.filter-chip {
-    -fx-background-color: -app-surface-2;
-    -fx-background-radius: 14px;
-    -fx-border-color: -app-border-strong;
-    -fx-border-radius: 14px;
-    -fx-text-fill: -app-text-2;
-    -fx-font-size: 12px;
-    -fx-padding: 4 12 4 12;
-    -fx-cursor: hand;
-}
-
-.filter-chip:hover {
-    -fx-background-color: -app-surface-3;
-}
-
-.filter-chip:selected {
-    -fx-background-color: -app-accent;
-    -fx-border-color: -app-accent;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-}
-
-/* ---- karta achievementu ---- */
-.achievement-card {
-    -fx-background-color: -app-card;
-    -fx-background-radius: 10px;
-    -fx-border-color: -app-border-strong;
-    -fx-border-radius: 10px;
-    -fx-padding: 12;
-    -fx-min-height: 150;
-}
-
-.achievement-card:hover {
-    -fx-border-color: -app-accent-text;
-}
-
-.achievement-maxed {
-    -fx-border-color: rgba(255,193,7,0.7);
-    -fx-background-color: linear-gradient(to bottom, rgba(255,193,7,0.10), -app-card);
-}
-
-.achievement-card-new {
-    -fx-border-color: -app-purple;
-    -fx-border-width: 2px;
-    -fx-effect: dropshadow(gaussian, rgba(167,139,250,0.45), 10, 0, 0, 0);
-}
-
-.achievement-locked {
-    -fx-opacity: 0.55;
-}
-
-.achievement-icon {
-    -fx-font-size: 26px;
-}
-
-.achievement-medal {
-    -fx-font-size: 20px;
-}
-
-.achievement-new {
-    -fx-background-color: -app-purple;
-    -fx-background-radius: 8px;
-    -fx-text-fill: white;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
-    -fx-padding: 1 6 1 6;
-}
-
-.achievement-title {
-    -fx-text-fill: -app-text;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
-
-.achievement-text {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
-}
-
-.achievement-bar {
-    -fx-pref-height: 6;
-}
-
-.achievement-bar > .bar {
-    -fx-background-color: -app-success-strong;
-}
-
-.achievement-date {
-    -fx-text-fill: -app-text-faint;
-    -fx-font-size: 10px;
-}
-
-/* ---- časová os ---- */
-.timeline-item {
-    -fx-min-width: 110;
-}
-
-.timeline-dot {
-    -fx-font-size: 20px;
-}
-
-.timeline-done    { -fx-text-fill: -app-success-strong; }
-.timeline-partial { -fx-text-fill: -app-warning; }
-.timeline-future  { -fx-text-fill: -app-text-faint; }
-
-.timeline-label {
-    -fx-text-fill: -app-text;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.timeline-detail {
-    -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
-}
-
-.timeline-line-box {
-    -fx-padding: 12 0 0 0;
-}
-
-.timeline-line {
-    -fx-background-color: -app-border-strong;
-    -fx-background-radius: 2px;
-}
-
-.timeline-line-done {
-    -fx-background-color: -app-success-strong;
-}
-
-/* ---- Môj pokrok v2: panel hodnosti ---- */
-.rank-card {
-    -fx-background-color: linear-gradient(to right, rgba(167,139,250,0.16), -app-surface 55%);
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 
 .rank-ring-track {
     -fx-fill: transparent;
-    -fx-stroke: -app-surface-2;
-    -fx-stroke-width: 10;
+    -fx-stroke: -app-surface-3;
+    -fx-stroke-width: 6;
 }
 
 .rank-ring-arc {
     -fx-fill: transparent;
-    -fx-stroke: -app-purple;
-    -fx-stroke-width: 10;
-    -fx-stroke-line-cap: round;
+    -fx-stroke: -app-accent-text;
+    -fx-stroke-width: 6;
+    -fx-stroke-line-cap: butt;
 }
 
 .rank-ring-icon {
-    -fx-font-size: 44px;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 30px;
 }
 
 .rank-ring-percent {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
 }
 
 .rank-title {
-    -fx-text-fill: -app-purple;
-    -fx-font-size: 40px;
-    -fx-font-weight: bold;
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 30px;
 }
 
 .rank-subtitle {
     -fx-text-fill: -app-text-muted;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
 }
 
 .rank-xp {
     -fx-text-fill: -app-text;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-size: 13px;
 }
 
 .rank-xp-next {
-    -fx-text-fill: -app-text-faint;
+    -fx-text-fill: -app-text-muted;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
 }
 
 .rank-bar {
-    -fx-pref-height: 16;
+    -fx-pref-height: 8;
 }
 
 .rank-hint {
@@ -1339,195 +1133,488 @@
 }
 
 .next-card {
-    -fx-background-color: -app-card;
-    -fx-background-radius: 12px;
-    -fx-border-color: -app-border-strong;
-    -fx-border-radius: 12px;
-    -fx-padding: 12 16 12 16;
+    -fx-background-color: transparent;
+    -fx-border-color: -app-rule;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-padding: 10 14 10 14;
 }
 
 .next-caption {
-    -fx-text-fill: -app-text-faint;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 12px;
 }
 
 .next-name {
+    -fx-font-family: "Source Serif 4 Semibold";
     -fx-text-fill: -app-text;
     -fx-font-size: 17px;
-    -fx-font-weight: bold;
 }
 
 .next-missing {
-    -fx-text-fill: -app-purple;
+    -fx-text-fill: -app-text-3;
     -fx-font-size: 12px;
-    -fx-font-weight: bold;
 }
 
-/* rebríček hodností */
+/* rebríček hodností: čísla v krúžkoch */
 .rank-ladder {
     -fx-padding: 4 0 0 0;
 }
 
 .ladder-step {
-    -fx-font-size: 18px;
-    -fx-min-width: 40;
-    -fx-min-height: 40;
-    -fx-max-width: 40;
-    -fx-max-height: 40;
+    -fx-font-size: 12px;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
     -fx-alignment: center;
-    -fx-background-radius: 20px;
-    -fx-border-radius: 20px;
-    -fx-border-width: 2px;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
 }
 
 .ladder-done {
     -fx-background-color: -app-accent-soft;
     -fx-border-color: -app-accent-text;
+    -fx-text-fill: -app-accent-text;
 }
 
 .ladder-current {
-    -fx-font-size: 24px;
-    -fx-min-width: 52;
-    -fx-min-height: 52;
-    -fx-max-width: 52;
-    -fx-max-height: 52;
-    -fx-background-radius: 26px;
-    -fx-border-radius: 26px;
-    -fx-background-color: rgba(167,139,250,0.25);
-    -fx-border-color: -app-purple;
-    -fx-border-width: 3px;
-    -fx-effect: dropshadow(gaussian, rgba(167,139,250,0.55), 12, 0, 0, 0);
+    -fx-background-color: -app-accent;
+    -fx-border-color: -app-accent;
+    -fx-text-fill: white;
 }
 
 .ladder-future {
-    -fx-background-color: -app-surface-2;
+    -fx-background-color: transparent;
     -fx-border-color: -app-border-strong;
-    -fx-opacity: 0.45;
+    -fx-text-fill: -app-text-muted;
 }
 
 .ladder-caption {
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-size: 12px;
 }
 
-.ladder-caption-done, .ladder-caption-future { -fx-text-fill: -app-text-faint; }
-.ladder-caption-current { -fx-text-fill: -app-purple; }
+.ladder-caption-done, .ladder-caption-future { -fx-text-fill: -app-text-muted; }
+.ladder-caption-current { -fx-text-fill: -app-text; -fx-font-family: "IBM Plex Sans SmBld"; }
 
 .ladder-line-box {
-    -fx-padding: 19 0 0 0;
+    -fx-padding: 13 0 0 0;
 }
 
-.ladder-line { -fx-background-radius: 2px; }
+.ladder-line { -fx-background-radius: 0; }
 .ladder-line-done { -fx-background-color: -app-accent-text; }
-.ladder-line-future { -fx-background-color: -app-border-strong; }
+.ladder-line-future { -fx-background-color: -app-rule; }
 
-/* ---- Môj pokrok v2: dlaždice ---- */
+/* ---- štatistiky: neutrálne bloky bez farebných okrajov ---- */
 .stat-tile {
-    -fx-padding: 14 16 14 16;
-    -fx-border-width: 1 1 1 5;
+    -fx-padding: 14 0 0 0;
 }
-
-.tile-blue   { -fx-border-color: -app-border -app-border -app-border -app-accent; }
-.tile-purple { -fx-border-color: -app-border -app-border -app-border -app-purple; }
-.tile-green  { -fx-border-color: -app-border -app-border -app-border -app-success-strong; }
-.tile-orange { -fx-border-color: -app-border -app-border -app-border -app-warning; }
-
-.tile-highlight {
-    -fx-background-color: linear-gradient(to right, -app-warning-soft, -app-surface);
-}
-
-.icon-circle {
-    -fx-background-radius: 14px;
-}
-
-.tile-blue .icon-circle   { -fx-background-color: -app-accent-soft; }
-.tile-purple .icon-circle { -fx-background-color: rgba(167,139,250,0.22); }
-.tile-green .icon-circle  { -fx-background-color: -app-success-soft; }
-.tile-orange .icon-circle { -fx-background-color: -app-warning-soft; }
-
-.tile-blue .svg-icon   { -fx-fill: -app-accent-text; }
-.tile-purple .svg-icon { -fx-fill: -app-purple; }
-.tile-green .svg-icon  { -fx-fill: -app-success; }
-.tile-orange .svg-icon { -fx-fill: -app-warning; }
 
 .tile-heading {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-size: 12px;
 }
 
 .tile-value {
+    -fx-font-family: "Source Serif 4 Semibold";
     -fx-text-fill: -app-text;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
+    -fx-font-size: 22px;
 }
 
 .tile-value-medium {
+    -fx-font-family: "Source Serif 4 Semibold";
     -fx-text-fill: -app-text;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-size: 17px;
 }
 
 .tile-value-small {
-    -fx-text-fill: -app-success;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 13px;
 }
 
 .tile-caption {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .tile-bar-green {
-    -fx-pref-height: 10;
+    -fx-pref-height: 8;
 }
 
-.tile-bar-green > .bar {
-    -fx-background-color: -app-success-strong;
+.tile-highlight .tile-heading {
+    -fx-text-fill: -app-accent-text;
 }
 
-.latest-icon {
-    -fx-font-size: 34px;
-}
-
-/* mini prstenec v dlaždici achievementov */
 .mini-ring-track {
     -fx-fill: transparent;
-    -fx-stroke: -app-surface-2;
-    -fx-stroke-width: 7;
+    -fx-stroke: -app-surface-3;
+    -fx-stroke-width: 5;
 }
 
 .mini-ring-arc {
     -fx-fill: transparent;
-    -fx-stroke: -app-accent;
-    -fx-stroke-width: 7;
-    -fx-stroke-line-cap: round;
+    -fx-stroke: -app-accent-text;
+    -fx-stroke-width: 5;
+    -fx-stroke-line-cap: butt;
 }
 
 .mini-ring-text {
     -fx-text-fill: -app-text-2;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
 }
 
-/* stĺpcový graf známok – rovnaké farby ako štítky známok v Predmetoch */
-.grade-column { -fx-background-radius: 4 4 1 1; }
-.grade-column-a   { -fx-background-color: #2e7d32; }
-.grade-column-b   { -fx-background-color: #43a047; }
-.grade-column-c   { -fx-background-color: #9ccc65; }
-.grade-column-d   { -fx-background-color: #ffb300; }
-.grade-column-e   { -fx-background-color: #fb8c00; }
-.grade-column-abs { -fx-background-color: #78909c; }
+/* stĺpcový graf známok – jedna farba, rozlíšené písmenom pod stĺpcom */
+.grade-column { -fx-background-radius: 2 2 0 0; -fx-background-color: -app-accent-text; }
+.grade-column-abs { -fx-background-color: -app-border-strong; }
 
 .grade-column-label {
     -fx-text-fill: -app-text-muted;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
 }
 
 .grade-column-count {
-    -fx-text-fill: -app-text-2;
-    -fx-font-size: 10px;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 11px;
+}
+
+/* ---- najbližšie k splneniu ---- */
+.closest-title {
+    -fx-text-fill: -app-text;
+    -fx-font-size: 13px;
+}
+
+.closest-value {
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 12px;
+}
+
+.closest-bar {
+    -fx-pref-height: 8;
+}
+
+/* ---- filter kategórií ---- */
+.filter-chip {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 13px;
+    -fx-padding: 4 10 4 10;
+}
+
+.filter-chip:hover {
+    -fx-background-color: -app-surface-2;
+}
+
+.filter-chip:selected {
+    -fx-background-color: -app-accent-soft;
+    -fx-border-color: -app-accent-text;
+    -fx-text-fill: -app-text;
+}
+
+.filter-chip:focused {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 2px;
+    -fx-padding: 3 9 3 9;
+}
+
+/* ---- úspechy ako hustý zoznam ---- */
+.achievement-card {
+    -fx-background-color: -app-border, -app-bg;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 8 0 8 0;
+}
+
+.achievement-maxed .achievement-title {
+    -fx-text-fill: -app-text;
+}
+
+.achievement-card-new .achievement-title {
+    -fx-text-fill: -app-accent-text;
+}
+
+.achievement-locked .achievement-title {
+    -fx-text-fill: -app-text-muted;
+}
+
+.achievement-locked .achievement-bar > .bar {
+    -fx-background-color: -app-border-strong;
+}
+
+.achievement-medal {
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 12px;
+}
+
+.achievement-new {
+    -fx-text-fill: -app-accent-text;
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-font-size: 11px;
+    -fx-padding: 0;
+}
+
+.achievement-title {
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 13px;
+}
+
+.achievement-text {
+    -fx-text-fill: -app-text-3;
+    -fx-font-size: 12px;
+}
+
+.achievement-bar {
+    -fx-pref-height: 4;
+}
+
+.achievement-date {
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 11px;
+}
+
+/* ---- časová os semestrov ---- */
+.timeline-item {
+    -fx-min-width: 110;
+}
+
+.timeline-dot {
+    -fx-min-width: 12;
+    -fx-min-height: 12;
+    -fx-max-width: 12;
+    -fx-max-height: 12;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+}
+
+.timeline-done    { -fx-background-color: -app-accent-text; -fx-border-color: -app-accent-text; }
+.timeline-partial { -fx-background-color: -app-accent-soft; -fx-border-color: -app-accent-text; }
+.timeline-future  { -fx-background-color: transparent; -fx-border-color: -app-border-strong; }
+
+.timeline-label {
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-text-fill: -app-text;
+    -fx-font-size: 13px;
+}
+
+.timeline-detail {
+    -fx-text-fill: -app-text-muted;
+    -fx-font-size: 12px;
+}
+
+.timeline-line-box {
+    -fx-padding: 5 0 0 0;
+}
+
+.timeline-line {
+    -fx-background-color: -app-rule;
+}
+
+.timeline-line-done {
+    -fx-background-color: -app-accent-text;
+}
+
+
+/* ===================================================
+   FARBY – záložka, kategória predmetu, známka
+   Farba záložky sa nastaví triedou page-* na koreni záložky (FXML)
+   a dedí sa ako -app-page do nadpisov, pruhov a zvýraznení.
+   =================================================== */
+.page-subjects { -app-page: -app-blue;  -app-page-soft: -app-blue-soft; }
+.page-plan     { -app-page: -app-teal;  -app-page-soft: -app-teal-soft; }
+.page-exams    { -app-page: -app-red;   -app-page-soft: -app-red-soft; }
+.page-credits  { -app-page: -app-green; -app-page-soft: -app-green-soft; }
+.page-progress { -app-page: -app-plum;  -app-page-soft: -app-plum-soft; }
+.page-schedule { -app-page: -app-ochre; -app-page-soft: -app-ochre-soft; }
+
+.page-title { -fx-text-fill: -app-page; }
+.progress-bar > .bar { -fx-background-color: -app-page; }
+
+/* podčiarknutie vybranej záložky v jej farbe */
+.main-tabs .tab-subjects:selected { -fx-background-color: -app-blue, -app-bg; }
+.main-tabs .tab-plan:selected     { -fx-background-color: -app-teal, -app-bg; }
+.main-tabs .tab-exams:selected    { -fx-background-color: -app-red, -app-bg; }
+.main-tabs .tab-credits:selected  { -fx-background-color: -app-green, -app-bg; }
+.main-tabs .tab-progress:selected { -fx-background-color: -app-plum, -app-bg; }
+.main-tabs .tab-schedule:selected { -fx-background-color: -app-ochre, -app-bg; }
+
+/* kategórie predmetov: povinné modrá, povinne voliteľné tyrkysová, výberové okrová */
+.cat-mandatory { -app-cat: -app-blue;  -app-cat-soft: -app-blue-soft; }
+.cat-optional  { -app-cat: -app-teal;  -app-cat-soft: -app-teal-soft; }
+.cat-elective  { -app-cat: -app-ochre; -app-cat-soft: -app-ochre-soft; }
+
+.cat-mandatory .group-title, .cat-optional .group-title, .cat-elective .group-title {
+    -fx-text-fill: -app-cat;
+}
+
+.cat-mandatory .credits-badge, .cat-optional .credits-badge, .cat-elective .credits-badge {
+    -fx-background-color: -app-cat-soft;
+    -fx-background-radius: 3px;
+    -fx-text-fill: -app-cat;
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-font-size: 12px;
+    -fx-padding: 2 8 2 8;
+}
+
+.cat-mandatory .table-view .column-header-background,
+.cat-optional .table-view .column-header-background,
+.cat-elective .table-view .column-header-background {
+    -fx-background-color: -app-rule, -app-cat-soft;
+}
+
+.cat-mandatory .table-view .column-header .label,
+.cat-optional .table-view .column-header .label,
+.cat-elective .table-view .column-header .label {
+    -fx-text-fill: -app-cat;
+}
+
+/* čísla na záložke Kredity vo farbe kategórie */
+.mandatory-card .credit-card-value { -fx-text-fill: -app-blue; }
+.optional-card .credit-card-value  { -fx-text-fill: -app-teal; }
+.elective-card .credit-card-value  { -fx-text-fill: -app-ochre; }
+.total-card .credit-card-value     { -fx-text-fill: -app-text; }
+.credit-card-value-large           { -fx-text-fill: -app-page; }
+.category-mandatory > .bar { -fx-background-color: -app-blue; }
+.category-optional > .bar  { -fx-background-color: -app-teal; }
+.category-elective > .bar  { -fx-background-color: -app-ochre; }
+
+/* známky ako farebné štítky: písmeno + farba */
+.grade-chip {
+    -fx-background-radius: 3px;
+    -fx-padding: 1 8 1 8;
+    -fx-font-size: 12px;
+}
+.grade-a, .grade-b { -fx-text-fill: -app-green; -fx-background-color: -app-green-soft; }
+.grade-c           { -fx-text-fill: -app-teal;  -fx-background-color: -app-teal-soft; }
+.grade-d, .grade-e { -fx-text-fill: -app-ochre; -fx-background-color: -app-ochre-soft; }
+.grade-fx          { -fx-text-fill: -app-red;   -fx-background-color: -app-red-soft; }
+.grade-abs         { -fx-text-fill: -app-plum;  -fx-background-color: -app-plum-soft; }
+.grade-other       { -fx-text-fill: -app-text-2; -fx-background-color: -app-surface-2; }
+
+/* graf známok v Pokroku – rovnaké farby ako štítky */
+.grade-column-a, .grade-column-b { -fx-background-color: -app-green; }
+.grade-column-c   { -fx-background-color: -app-teal; }
+.grade-column-d, .grade-column-e { -fx-background-color: -app-ochre; }
+.grade-column-abs { -fx-background-color: -app-plum; }
+
+/* Skúšky */
+.exam-date-day { -fx-text-fill: -app-page; }
+.exam-status {
+    -fx-background-radius: 3px;
+    -fx-padding: 1 8 1 8;
+}
+.exam-status-registered { -fx-background-color: -app-green-soft; -fx-text-fill: -app-green; }
+.exam-status-cancelled  { -fx-background-color: -app-red-soft;   -fx-text-fill: -app-red; }
+.exam-status-other      { -fx-background-color: -app-surface-2;  -fx-text-fill: -app-text-3; }
+
+/* Rozvrh */
+.schedule-header-today { -fx-background-color: -app-page, -app-page-soft; }
+.schedule-entry-lecture { -fx-background-color: -app-blue-soft;  -fx-border-color: -app-blue; }
+.schedule-entry-seminar { -fx-background-color: -app-green-soft; -fx-border-color: -app-green; }
+.schedule-entry-other   { -fx-background-color: -app-ochre-soft; -fx-border-color: -app-ochre; }
+.legend-lecture { -fx-background-color: -app-blue;  -fx-border-color: -app-blue; }
+.legend-seminar { -fx-background-color: -app-green; -fx-border-color: -app-green; }
+.legend-other   { -fx-background-color: -app-ochre; -fx-border-color: -app-ochre; }
+
+/* Pokrok: hodnosť vo farbe záložky, úspechy vo farbe svojej kategórie */
+.rank-title { -fx-text-fill: -app-page; }
+.rank-ring-arc, .mini-ring-arc { -fx-stroke: -app-page; }
+.ladder-done { -fx-background-color: -app-page-soft; -fx-border-color: -app-page; -fx-text-fill: -app-page; }
+.ladder-current { -fx-background-color: -app-page; -fx-border-color: -app-page; -fx-text-fill: -app-bg; }
+.ladder-line-done { -fx-background-color: -app-page; }
+.timeline-done    { -fx-background-color: -app-page; -fx-border-color: -app-page; }
+.timeline-partial { -fx-background-color: -app-page-soft; -fx-border-color: -app-page; }
+.timeline-line-done { -fx-background-color: -app-page; }
+.next-card { -fx-background-color: -app-page-soft; -fx-border-color: transparent; }
+.filter-chip:selected { -fx-background-color: -app-page-soft; -fx-border-color: -app-page; }
+
+.ach-study      { -app-cat: -app-blue;  -app-cat-soft: -app-blue-soft; }
+.ach-grades     { -app-cat: -app-green; -app-cat-soft: -app-green-soft; }
+.ach-exams      { -app-cat: -app-red;   -app-cat-soft: -app-red-soft; }
+.ach-directions { -app-cat: -app-teal;  -app-cat-soft: -app-teal-soft; }
+.ach-study .achievement-bar > .bar, .ach-grades .achievement-bar > .bar,
+.ach-exams .achievement-bar > .bar, .ach-directions .achievement-bar > .bar {
+    -fx-background-color: -app-cat;
+}
+.achievement-locked .achievement-bar > .bar { -fx-background-color: -app-border-strong; }
+
+/* ---- úspechy ako kartičky v mriežke, po skupinách ---- */
+.achievement-group-title {
+    -fx-font-family: "Source Serif 4 Semibold";
+    -fx-font-size: 15px;
+    -fx-text-fill: -app-cat;
+}
+
+.achievement-card {
+    -fx-background-color: -app-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-border-color: -app-rule;
+    -fx-border-radius: 4px;
+    -fx-border-width: 1px;
+    -fx-padding: 10 12 10 12;
+}
+
+.achievement-card:hover {
+    -fx-border-color: -app-cat;
+}
+
+.achievement-card:focused {
+    -fx-border-color: -app-focus;
+    -fx-border-width: 2px;
+    -fx-padding: 9 11 9 11;
+}
+
+.achievement-card.achievement-unlocked {
+    -fx-background-color: -app-cat-soft;
+    -fx-border-color: -app-cat;
+}
+
+.achievement-card-new {
+    -fx-border-width: 2px;
+    -fx-padding: 9 11 9 11;
+}
+
+.achievement-maxed .achievement-title {
+    -fx-text-fill: -app-cat;
+}
+
+.achievement-locked .achievement-title {
+    -fx-text-fill: -app-text-3;
+}
+
+.ach-status {
+    -fx-font-family: "IBM Plex Sans SmBld";
+    -fx-font-size: 11px;
+    -fx-padding: 1 6 1 6;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-border-width: 1px;
+}
+
+.ach-status-done {
+    -fx-background-color: -app-cat;
+    -fx-border-color: -app-cat;
+    -fx-text-fill: -app-bg;
+}
+
+.ach-status-tier {
+    -fx-background-color: -app-surface;
+    -fx-border-color: -app-cat;
+    -fx-text-fill: -app-cat;
+}
+
+.ach-status-locked {
+    -fx-background-color: -app-surface-2;
+    -fx-border-color: -app-rule;
+    -fx-text-fill: -app-text-muted;
+}
+
+.achievement-card .achievement-bar {
+    -fx-pref-height: 6;
+}
+
+.achievement-card .achievement-date {
+    -fx-text-fill: -app-text-muted;
 }

@@ -1,10 +1,14 @@
 package sk.ukf.aisviewer.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import sk.ukf.aisviewer.model.Subject;
 import sk.ukf.aisviewer.model.StudentInfo;
 import sk.ukf.aisviewer.service.LocalCacheService;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +61,19 @@ class ExportControllerTest {
     private static Subject subject(String name, String code, String credits,
                                    String semester, String gradeType, String category) {
         return new Subject(name, code, credits, semester, gradeType, "A", "Učiteľ", category);
+    }
+
+    @Test
+    void writesCsvWithBomAndReplacesOldFileWithoutLeavingTempFiles(@TempDir Path dir) throws Exception {
+        Path target = dir.resolve("prehlad.csv");
+        Files.writeString(target, "stary obsah", StandardCharsets.UTF_8);
+
+        ExportController.writeAtomically(target, "a;b\n");
+
+        assertEquals("\uFEFFa;b\n", Files.readString(target, StandardCharsets.UTF_8));
+        try (var files = Files.list(dir)) {
+            assertEquals(List.of(target), files.toList(), "dočasný súbor nesmie zostať");
+        }
     }
 
     private static int occurrences(String text, String value) {

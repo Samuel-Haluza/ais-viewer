@@ -52,7 +52,7 @@ public class ScheduleController {
     }
 
     public void showUnavailable() {
-        scheduleStatusLabel.setText("Dáta sa nepodarilo načítať.");
+        scheduleStatusLabel.setText("Údaje sa nepodarilo načítať z AIS.");
         scheduleStatusLabel.setVisible(true);
     }
 
@@ -72,7 +72,7 @@ public class ScheduleController {
         scheduleContainer.getChildren().clear();
 
         if (entries == null || entries.isEmpty()) {
-            Label noData = new Label("Rozvrh nie je dostupný alebo sa nepodarilo načítať údaje.");
+            Label noData = new Label("Rozvrh pre tento semester zatiaľ nie je v AIS, alebo sa ho nepodarilo načítať.");
             noData.getStyleClass().add("schedule-no-data");
             scheduleContainer.getChildren().add(noData);
             return;
@@ -104,8 +104,10 @@ public class ScheduleController {
 
         for (int d = 0; d < numDays; d++) {
             ColumnConstraints dayCol = new ColumnConstraints();
+            // rovnaká šírka všetkých dní: pevný základ, zvyšok sa rozdelí rovnomerne
             dayCol.setHgrow(Priority.ALWAYS);
             dayCol.setMinWidth(120);
+            dayCol.setPrefWidth(120);
             dayCol.setFillWidth(true);
             grid.getColumnConstraints().add(dayCol);
         }
@@ -128,7 +130,7 @@ public class ScheduleController {
         LocalDateTime now = LocalDateTime.now();
         int todayIndex = now.getDayOfWeek().getValue() - 1; // pondelok = 0
         for (int d = 0; d < numDays; d++) {
-            Label dayLabel = new Label(d == todayIndex ? DAY_NAMES[d] + "  •  dnes" : DAY_NAMES[d]);
+            Label dayLabel = new Label(d == todayIndex ? DAY_NAMES[d] + ", dnes" : DAY_NAMES[d]);
             dayLabel.getStyleClass().add("schedule-header");
             if (d == todayIndex) dayLabel.getStyleClass().add("schedule-header-today");
             dayLabel.setMaxWidth(Double.MAX_VALUE);
@@ -233,17 +235,21 @@ public class ScheduleController {
     private VBox createScheduleCard(ScheduleEntry entry) {
         VBox card = new VBox(2);
         card.getStyleClass().add("schedule-entry-card");
-        card.setPadding(new Insets(4, 6, 4, 6));
+        card.setPadding(new Insets(4, 8, 4, 8));
         card.setAlignment(Pos.TOP_LEFT);
 
-        // Determine type for coloring
+        // typ hodiny: farba rámika + slovo v texte (nie iba farba, WCAG 1.4.1)
         String type = entry.getType() != null ? entry.getType().toUpperCase() : "";
+        String typeName;
         if (type.startsWith("P") || type.contains("PR")) {
             card.getStyleClass().add("schedule-entry-lecture");
+            typeName = "prednáška";
         } else if (type.startsWith("C") || type.startsWith("S") || type.contains("CV") || type.contains("SE")) {
             card.getStyleClass().add("schedule-entry-seminar");
+            typeName = type.startsWith("S") || type.contains("SE") ? "seminár" : "cvičenie";
         } else {
             card.getStyleClass().add("schedule-entry-other");
+            typeName = null;
         }
 
         // Subject name
@@ -254,17 +260,18 @@ public class ScheduleController {
         card.getChildren().add(nameLabel);
 
         // Time
-        Label timeLabel = new Label(entry.getTimeFrom() + " – " + entry.getTimeTo());
+        Label timeLabel = new Label(entry.getTimeFrom() + "–" + entry.getTimeTo()
+                + (typeName == null ? "" : "  " + typeName));
         timeLabel.getStyleClass().add("schedule-entry-time");
         card.getChildren().add(timeLabel);
 
         // Room + Teacher
         StringBuilder detail = new StringBuilder();
         if (entry.getRoom() != null && !entry.getRoom().isBlank()) {
-            detail.append("📍 ").append(entry.getRoom());
+            detail.append(entry.getRoom());
         }
         if (entry.getTeacher() != null && !entry.getTeacher().isBlank()) {
-            if (detail.length() > 0) detail.append("  •  ");
+            if (detail.length() > 0) detail.append(", ");
             detail.append(entry.getTeacher());
         }
         if (detail.length() > 0) {
@@ -277,7 +284,7 @@ public class ScheduleController {
         // Tooltip with full info
         StringBuilder tooltipText = new StringBuilder();
         tooltipText.append(entry.getSubjectName());
-        tooltipText.append("\n").append(entry.getDay()).append(" ").append(entry.getTimeFrom()).append(" – ").append(entry.getTimeTo());
+        tooltipText.append("\n").append(entry.getDay()).append(" ").append(entry.getTimeFrom()).append("–").append(entry.getTimeTo());
         if (entry.getRoom() != null && !entry.getRoom().isBlank())
             tooltipText.append("\nMiestnosť: ").append(entry.getRoom());
         if (entry.getTeacher() != null && !entry.getTeacher().isBlank())

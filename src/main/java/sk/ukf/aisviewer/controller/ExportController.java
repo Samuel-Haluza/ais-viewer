@@ -12,7 +12,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,13 +47,51 @@ public class ExportController {
         if (file == null) {
             return;
         }
-        try (BufferedWriter writer = Files.newBufferedWriter(
-                file.toPath(), StandardCharsets.UTF_8)) {
-            writer.write('\uFEFF');
-            writer.write(createCsv());
-            UiDialogs.showExportSuccess(window(), "CSV export bol úspešne vytvorený.");
-        } catch (IOException | RuntimeException e) {
-            UiDialogs.showExportError(window(), "CSV export sa nepodarilo vytvoriť.");
+        // obsah sa pripraví ešte pred zápisom – chyba v údajoch tak nepoškodí existujúci súbor
+        String csv;
+        try {
+            csv = createCsv();
+        } catch (RuntimeException e) {
+            UiDialogs.showExportDataError(window(),
+                    "Študijný prehľad sa nepodarilo pripraviť z uložených údajov. "
+                            + "Skús obnoviť údaje z AIS a export zopakovať.");
+            return;
+        }
+        try {
+            writeAtomically(file.toPath(), csv);
+        } catch (IOException e) {
+            // dialóg až po zatvorení súboru; chyba povie, čo sa stalo a čo skúsiť
+            boolean retry = UiDialogs.showExportError(window(),
+                    "Súbor " + file.getName() + " sa nepodarilo uložiť. Ak je otvorený "
+                            + "v Exceli, zavri ho. Prípadne vyber iný priečinok.");
+            if (retry) {
+                exportCsv(owner);
+            }
+            return;
+        }
+        UiDialogs.showExportSuccess(window(), "Súbor " + file.getName() + " je uložený v priečinku "
+                + (file.getParent() == null ? "" : file.getParent()) + ".");
+    }
+
+    /**
+     * Zapíše CSV najprv do dočasného súboru v tom istom priečinku a až potom ho presunie na cieľ.
+     * Pri chybe tak ostane pôvodný súbor nedotknutý a nevznikne prázdny ani neúplný súbor.
+     */
+    static void writeAtomically(Path target, String csv) throws IOException {
+        Path directory = target.toAbsolutePath().getParent();
+        Path temp = Files.createTempFile(directory, ".ais-export-", ".tmp");
+        try {
+            try (BufferedWriter writer = Files.newBufferedWriter(temp, StandardCharsets.UTF_8)) {
+                writer.write('\uFEFF');
+                writer.write(csv);
+            }
+            try {
+                Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temp);
         }
     }
 

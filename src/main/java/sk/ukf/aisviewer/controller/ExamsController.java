@@ -22,8 +22,8 @@ import java.util.Locale;
 public class ExamsController {
 
     private static final DateTimeFormatter AIS_DATE = DateTimeFormatter.ofPattern("d.M.uuuu");
-    private static final String[] MONTHS = {"jan", "feb", "mar", "apr", "máj", "jún",
-            "júl", "aug", "sep", "okt", "nov", "dec"};
+    private static final String[] MONTHS = {"január", "február", "marec", "apríl", "máj", "jún",
+            "júl", "august", "september", "október", "november", "december"};
     private static final String[] DAYS = {"pondelok", "utorok", "streda", "štvrtok", "piatok", "sobota", "nedeľa"};
 
     @FXML private Label examsStatusLabel;
@@ -61,11 +61,16 @@ public class ExamsController {
         upcomingTitle.setText("Nadchádzajúce (" + upcoming.size() + ")");
         pastTitle.setText("Minulé termíny (" + past.size() + ")");
         show(upcomingTitle, true);
-        show(pastTitle, !past.isEmpty());
+        show(pastTitle, true);
+        if (past.isEmpty()) {
+            Label none = new Label("Tu sa zobrazia termíny, ktoré už prebehli.");
+            none.getStyleClass().add("empty-hint");
+            pastBox.getChildren().add(none);
+        }
         if (upcoming.isEmpty()) {
             Label none = new Label(exams.isEmpty()
-                    ? "Žiadne skúškové termíny neboli nájdené."
-                    : "Žiadny nadchádzajúci termín – všetky skúšky sú už za tebou.");
+                    ? "V AIS zatiaľ nemáš žiadne skúškové termíny."
+                    : "Žiadny nadchádzajúci termín. Všetky skúšky sú už za tebou.");
             none.getStyleClass().add("empty-hint");
             upcomingBox.getChildren().add(none);
         }
@@ -83,7 +88,7 @@ public class ExamsController {
     }
 
     public void showUnavailable() {
-        examsStatusLabel.setText("Dáta sa nepodarilo načítať.");
+        examsStatusLabel.setText("Údaje sa nepodarilo načítať z AIS.");
         show(examsStatusLabel, true);
     }
 
@@ -96,7 +101,7 @@ public class ExamsController {
         Label month = new Label(date == null ? "" : MONTHS[date.getMonthValue() - 1] + " " + date.getYear());
         month.getStyleClass().add("exam-date-month");
         VBox dateBox = new VBox(0, day, month);
-        dateBox.setAlignment(Pos.CENTER);
+        dateBox.setAlignment(Pos.CENTER_LEFT);
         dateBox.getStyleClass().add("exam-date");
 
         Label name = new Label(exam.getSubjectName());
@@ -105,7 +110,7 @@ public class ExamsController {
         StringBuilder detail = new StringBuilder();
         if (date != null) detail.append(DAYS[date.getDayOfWeek().getValue() - 1]);
         append(detail, exam.getTime());
-        append(detail, exam.getRoom() == null || exam.getRoom().isBlank() ? null : "📍 " + exam.getRoom());
+        append(detail, exam.getRoom() == null || exam.getRoom().isBlank() ? null : "miestnosť " + exam.getRoom());
         append(detail, exam.getType());
         Label details = new Label(detail.toString());
         details.getStyleClass().add("exam-detail");
@@ -159,7 +164,7 @@ public class ExamsController {
 
     private static void append(StringBuilder text, String part) {
         if (part == null || part.isBlank()) return;
-        if (text.length() > 0) text.append("  •  ");
+        if (text.length() > 0) text.append(", ");
         text.append(part);
     }
 

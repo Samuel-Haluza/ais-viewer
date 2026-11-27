@@ -22,8 +22,8 @@
 
     <!-- Top Bar -->
     <top>
-        <HBox fx:id="topBar" alignment="CENTER_LEFT" spacing="10" styleClass="top-bar">
-            <padding><Insets bottom="10" left="16" right="16" top="10" /></padding>
+        <HBox fx:id="topBar" alignment="CENTER_LEFT" spacing="8" styleClass="top-bar">
+            <padding><Insets bottom="12" left="24" right="16" top="12" /></padding>
 
             <VBox spacing="2" HBox.hgrow="ALWAYS">
                 <Label fx:id="studentNameLabel" styleClass="top-name" text="Načítavam..." />
@@ -41,10 +41,10 @@
             <Label fx:id="enrollmentLabel" styleClass="top-label" text="Zápisný list:" />
             <ComboBox fx:id="enrollmentListCombo" prefWidth="180" styleClass="enrollment-combo" />
 
-            <Button fx:id="exportButton" onAction="#handleExport" styleClass="refresh-button" text="⬇ Export CSV" />
-            <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="refresh-button" text="⟳ Obnoviť údaje" />
+            <Button fx:id="exportButton" onAction="#handleExport" styleClass="refresh-button" text="Export CSV" />
+            <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="refresh-button" text="Obnoviť údaje" />
             <Button fx:id="themeToggleButton" onAction="#handleThemeToggle"
-                    styleClass="theme-toggle-button" text="☀ Svetlý režim" />
+                    styleClass="theme-toggle-button" text="Svetlý režim" />
             <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="logout-button" text="Odhlásiť" />
         </HBox>
     </top>
@@ -54,31 +54,31 @@
         <TabPane styleClass="main-tabs" tabClosingPolicy="UNAVAILABLE">
 
             <!-- Tab 1: Predmety -->
-            <Tab text="📚  Predmety">
+            <Tab styleClass="tab-subjects" text="Predmety">
                 <fx:include fx:id="subjects" source="subjects-tab.fxml"/>
             </Tab>
 
-            <Tab text="🗺  Plánovanie">
+            <Tab styleClass="tab-plan" text="Plánovanie">
                 <fx:include fx:id="studyPlan" source="study-plan.fxml"/>
             </Tab>
 
             <!-- Tab 2: Skúšky -->
-            <Tab text="📝  Skúšky">
+            <Tab styleClass="tab-exams" text="Skúšky">
                 <fx:include fx:id="exams" source="exams-tab.fxml"/>
             </Tab>
 
             <!-- Tab 3: Kredity / Prehľady -->
-            <Tab text="📊  Kredity">
+            <Tab styleClass="tab-credits" text="Kredity">
                 <fx:include fx:id="credits" source="credits-tab.fxml"/>
             </Tab>
 
             <!-- Môj pokrok: hodnosť, XP, achievementy -->
-            <Tab text="🏆  Môj pokrok">
+            <Tab styleClass="tab-progress" text="Môj pokrok">
                 <fx:include fx:id="progress" source="progress-tab.fxml"/>
             </Tab>
 
             <!-- Tab 5: Rozvrh -->
-            <Tab text="🗓  Rozvrh">
+            <Tab styleClass="tab-schedule" text="Rozvrh">
                 <fx:include fx:id="schedule" source="schedule-tab.fxml"/>
             </Tab>
 

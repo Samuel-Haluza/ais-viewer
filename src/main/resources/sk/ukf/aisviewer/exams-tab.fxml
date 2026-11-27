@@ -18,16 +18,16 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.image.ImageView?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.ExamsController" fitToWidth="true" styleClass="tab-scroll">
-    <VBox spacing="12" styleClass="tab-content">
-        <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
-        <Label styleClass="group-title" text="Skúškové termíny" />
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.ExamsController" fitToWidth="true" styleClass="tab-scroll, page-exams">
+    <VBox spacing="8" styleClass="tab-content">
+        <padding><Insets bottom="24" left="24" right="24" top="20" /></padding>
+        <Label styleClass="page-title" text="Skúškové termíny" />
         <Label fx:id="examsStatusLabel" styleClass="status-label" text="" visible="false" managed="false" />
 
-        <Label fx:id="upcomingTitle" styleClass="section-title" text="Nadchádzajúce" />
-        <VBox fx:id="upcomingBox" spacing="8" />
+        <Label fx:id="upcomingTitle" styleClass="group-title" text="Nadchádzajúce" />
+        <VBox fx:id="upcomingBox" spacing="0" />
 
-        <Label fx:id="pastTitle" styleClass="section-title" text="Minulé termíny" />
-        <VBox fx:id="pastBox" spacing="8" />
+        <Label fx:id="pastTitle" style="-fx-padding: 16 0 0 0;" styleClass="group-title" text="Minulé termíny" />
+        <VBox fx:id="pastBox" spacing="0" />
     </VBox>
 </ScrollPane>

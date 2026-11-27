@@ -20,6 +20,7 @@ public class LoginController {
     @FXML
     public void initialize() {
         statusLabel.setVisible(false);
+        statusLabel.setManaged(false);
         passwordField.setOnAction(event -> handleLogin());
         usernameField.setOnAction(event -> passwordField.requestFocus());
     }
@@ -30,7 +31,7 @@ public class LoginController {
         String password = passwordField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            showError("Zadajte meno a heslo.");
+            showError("Zadaj používateľské meno aj heslo.");
             return;
         }
 
@@ -46,7 +47,7 @@ public class LoginController {
         loginButton.setDisable(true);
         usernameField.setDisable(true);
         passwordField.setDisable(true);
-        showInfo("Prihlasovanie (spúšťam prehliadač)...");
+        showInfo("Prihlasujem sa do AIS. Môže to trvať pol minúty.");
 
         Thread loginThread = new Thread(() -> {
             try {
@@ -60,17 +61,17 @@ public class LoginController {
                             MainController.setRuntimePassword(password);
                             App.showMainScreen();
                         } catch (Exception e) {
-                            showError("Chyba pri otváraní hlavného okna: " + e.getMessage());
+                            showError("Hlavné okno sa nepodarilo otvoriť: " + e.getMessage());
                             enableControls();
                         }
                     } else {
-                        showError("Nesprávne používateľské meno alebo heslo.");
+                        showError("AIS neprijal meno alebo heslo. Skontroluj ich a skús znova.");
                         enableControls();
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    showError("Nepodarilo sa pripojiť k AIS. Skúste to znova.");
+                    showError("K AIS sa nepodarilo pripojiť. Skontroluj internet a skús znova.");
                     enableControls();
                 });
             }
@@ -84,6 +85,7 @@ public class LoginController {
         statusLabel.getStyleClass().removeAll("info-label");
         statusLabel.getStyleClass().add("error-label");
         statusLabel.setVisible(true);
+        statusLabel.setManaged(true);
     }
 
     private void showInfo(String message) {
@@ -91,6 +93,7 @@ public class LoginController {
         statusLabel.getStyleClass().removeAll("error-label");
         statusLabel.getStyleClass().add("info-label");
         statusLabel.setVisible(true);
+        statusLabel.setManaged(true);
     }
 
     private void enableControls() {

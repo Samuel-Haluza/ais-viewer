@@ -14,22 +14,25 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.image.ImageView?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.SubjectsController" fitToWidth="true" styleClass="tab-scroll">
-    <VBox spacing="16" styleClass="tab-content">
-        <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.SubjectsController" fitToWidth="true" styleClass="tab-scroll, page-subjects">
+    <VBox spacing="24" styleClass="tab-content">
+        <padding><Insets bottom="24" left="24" right="24" top="20" /></padding>
 
-        <HBox alignment="CENTER_LEFT" spacing="10">
-            <Label styleClass="field-label" text="Semester:" />
-            <ComboBox fx:id="semesterFilterCombo" prefWidth="180" />
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label styleClass="page-title" text="Predmety" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label styleClass="field-label" text="Semester" />
+            <ComboBox fx:id="semesterFilterCombo" accessibleText="Filter podľa semestra" prefWidth="170" />
         </HBox>
 
         <!-- Povinné predmety -->
-        <VBox fx:id="mandatoryGroup" spacing="6" styleClass="subject-group">
-            <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox fx:id="mandatoryGroup" spacing="8" styleClass="subject-group, cat-mandatory">
+            <HBox alignment="BASELINE_LEFT" spacing="12">
                 <Label styleClass="group-title" text="Povinné predmety" />
                 <Label fx:id="mandatoryCreditsLabel" styleClass="credits-badge, mandatory-badge" text="Kredity: 0" />
             </HBox>
@@ -39,8 +42,8 @@
         </VBox>
 
         <!-- Povinne voliteľné predmety -->
-        <VBox fx:id="optionalGroup" spacing="6" styleClass="subject-group">
-            <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox fx:id="optionalGroup" spacing="8" styleClass="subject-group, cat-optional">
+            <HBox alignment="BASELINE_LEFT" spacing="12">
                 <Label styleClass="group-title" text="Povinne voliteľné predmety" />
                 <Label fx:id="optionalCreditsLabel" styleClass="credits-badge, optional-badge" text="Kredity: 0" />
             </HBox>
@@ -50,8 +53,8 @@
         </VBox>
 
         <!-- Výberové predmety -->
-        <VBox fx:id="electiveGroup" spacing="6" styleClass="subject-group">
-            <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox fx:id="electiveGroup" spacing="8" styleClass="subject-group, cat-elective">
+            <HBox alignment="BASELINE_LEFT" spacing="12">
                 <Label styleClass="group-title" text="Výberové predmety" />
                 <Label fx:id="electiveCreditsLabel" styleClass="credits-badge, elective-badge" text="Kredity: 0" />
             </HBox>

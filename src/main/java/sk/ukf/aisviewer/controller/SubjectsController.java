@@ -55,7 +55,7 @@ public class SubjectsController {
 
     public void showUnavailable() {
         for (TableView<Subject> table : List.of(mandatoryTable, optionalTable, electiveTable)) {
-            table.setPlaceholder(new Label("Dáta sa nepodarilo načítať."));
+            table.setPlaceholder(new Label("Údaje sa nepodarilo načítať z AIS. Skús ich obnoviť."));
         }
     }
 
@@ -66,8 +66,8 @@ public class SubjectsController {
         nameCol.setPrefWidth(320);
 
         TableColumn<Subject, String> abbrCol = textColumn("Skratka", 75, Subject::getAbbreviation);
-        TableColumn<Subject, String> creditsCol = textColumn("Kredity", 60,
-                subject -> subject.getCreditsValue() > 0 ? String.valueOf(subject.getCreditsValue()) : "-");
+        TableColumn<Subject, String> creditsCol = textColumn("Kr.", 60,
+                subject -> subject.getCreditsValue() > 0 ? String.valueOf(subject.getCreditsValue()) : "");
         TableColumn<Subject, String> semCol = textColumn("Sem.", 50, Subject::getSemester);
         TableColumn<Subject, String> typeCol = textColumn("Typ", 90, subject -> gradeTypeName(subject.getGradeType()));
 
@@ -81,9 +81,13 @@ public class SubjectsController {
         teacherCol.setCellFactory(TableUi.textWithTooltip());
         teacherCol.setPrefWidth(230);
 
+        TableUi.code(abbrCol);
+        TableUi.numeric(creditsCol);
+        TableUi.hideWhenEmpty(gradeCol);
+        TableUi.hideWhenEmpty(teacherCol);
         table.getColumns().setAll(List.of(nameCol, abbrCol, creditsCol, semCol, typeCol, gradeCol, teacherCol));
-        TableUi.columnWeights(table, 0.30, 0.08, 0.06, 0.05, 0.11, 0.18, 0.22);
-        table.setPlaceholder(new Label("Žiadne predmety"));
+        TableUi.columnWeights(table, 0.36, 0.09, 0.06, 0.06, 0.12, 0.14, 0.17);
+        table.setPlaceholder(new Label("V tomto semestri tu nemáš žiadne predmety."));
         TableUi.fitHeightToRows(table);
     }
 
@@ -125,9 +129,9 @@ public class SubjectsController {
         optionalTable.setItems(FXCollections.observableArrayList(optional));
         electiveTable.setItems(FXCollections.observableArrayList(elective));
 
-        mandatoryCreditsLabel.setText("Kredity: " + sumCredits(mandatory));
-        optionalCreditsLabel.setText("Kredity: " + sumCredits(optional));
-        electiveCreditsLabel.setText("Kredity: " + sumCredits(elective));
+        mandatoryCreditsLabel.setText(sumCredits(mandatory) + " kr.");
+        optionalCreditsLabel.setText(sumCredits(optional) + " kr.");
+        electiveCreditsLabel.setText(sumCredits(elective) + " kr.");
 
         // Prázdne skupiny (napr. výberové predmety) sa skryjú – povinné ostanú vždy viditeľné.
         boolean anySubjects = !filteredSubjects.isEmpty();

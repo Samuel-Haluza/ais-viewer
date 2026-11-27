@@ -1,5 +1,6 @@
 package sk.ukf.aisviewer.controller;
 
+import sk.ukf.aisviewer.App;
 import sk.ukf.aisviewer.AppLog;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +30,8 @@ public class StudyPlanController {
     @FXML private TableView<PlannedSubject> plannedTable;
     @FXML private Label statusLabel;
     @FXML private Label creditsLabel;
+    @FXML private Button addRecommendationButton;
+    @FXML private Button removePlannedButton;
 
     private final StudyPlanCatalogService catalogService = new StudyPlanCatalogService();
     private final UserStudyPlanService userPlanService = new UserStudyPlanService();
@@ -59,10 +62,35 @@ public class StudyPlanController {
             }
         });
         configureTables();
+        addRecommendationButton.disableProperty().bind(
+                recommendationTable.getSelectionModel().selectedItemProperty().isNull());
+        hintWhenDisabled(addRecommendationButton, "Najprv vyber predmet v tabuľke");
+        removePlannedButton.disableProperty().bind(
+                plannedTable.getSelectionModel().selectedItemProperty().isNull());
         primaryDirectionCombo.setPromptText("Vyber hlavný smer");
         primaryDirectionCombo.setOnAction(event -> directionsChanged());
         secondaryDirectionCombo.setOnAction(event -> directionsChanged());
         plan = userPlanService.load();
+    }
+
+    /**
+     * JavaFX neukáže tooltip na zakázanom tlačidle (nedostáva udalosti myši). Tlačidlo sa preto
+     * obalí do priehľadného StackPane a nápoveda sa ukáže na obale – len kým je tlačidlo zakázané.
+     */
+    private static void hintWhenDisabled(Button button, String hint) {
+        if (!(button.getParent() instanceof javafx.scene.layout.Pane parent)) return;
+        int index = parent.getChildren().indexOf(button);
+        javafx.scene.layout.StackPane wrapper = new javafx.scene.layout.StackPane();
+        wrapper.setPickOnBounds(true);
+        parent.getChildren().set(index, wrapper);
+        wrapper.getChildren().add(button);
+        Tooltip tooltip = new Tooltip(hint);
+        Runnable update = () -> {
+            if (button.isDisabled()) Tooltip.install(wrapper, tooltip);
+            else Tooltip.uninstall(wrapper, tooltip);
+        };
+        button.disabledProperty().addListener((obs, was, now) -> update.run());
+        update.run();
     }
 
     public void update(StudentInfo studentInfo, List<Subject> currentSubjects,
@@ -128,6 +156,8 @@ public class StudyPlanController {
                     .toList()));
         });
         Button add = new Button("Pridať do plánu");
+        add.getStyleClass().add("primary-button");
+        add.disableProperty().bind(table.getSelectionModel().selectedItemProperty().isNull());
         add.setOnAction(event -> {
             Recommendation selected = table.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -135,13 +165,21 @@ public class StudyPlanController {
                 table.getItems().remove(selected);
             }
         });
+        search.setAccessibleText("Hľadať predmet");
+        VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
         VBox content = new VBox(8, search, table, add);
-        content.setPrefSize(700, 450);
+        content.setPadding(new javafx.geometry.Insets(16, 16, 0, 16));
+        // dialóg na monitore hlavného okna a veľkosť podľa neho (nie podľa hlavnej obrazovky)
+        javafx.stage.Window owner = App.activeWindow();
+        double screenHeight = App.screenBounds(owner).getHeight();
+        content.setPrefSize(760, Math.max(280, Math.min(480, screenHeight - 160)));
         Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Všetky PVP predmety");
+        dialog.initOwner(owner);
+        dialog.setTitle("Všetky povinne voliteľné predmety");
         ThemeManager.getInstance().applyTheme(dialog.getDialogPane());
         dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(
+                new ButtonType("Zavrieť", ButtonBar.ButtonData.CANCEL_CLOSE));
         dialog.showAndWait();
     }
 
@@ -183,10 +221,10 @@ public class StudyPlanController {
         plannedTable.setItems(FXCollections.observableArrayList(planned));
         int plannedCredits = creditsService.plannedCredits(catalog, plan, completedSubjects);
         int acquired = creditsService.acquiredTotalCredits(completedSubjects);
-        creditsLabel.setText("Získané kredity: " + acquired + " / " + catalog.getRequiredTotalCredits()
-                + "\nNaplánované: " + plannedCredits
-                + "\nPo splnení plánu: " + (acquired + plannedCredits)
-                + " / " + catalog.getRequiredTotalCredits());
+        int required = catalog.getRequiredTotalCredits();
+        creditsLabel.setText("Získané " + acquired + " z " + required + " kr.    Naplánované "
+                + plannedCredits + " kr.    Po splnení plánu " + (acquired + plannedCredits)
+                + " z " + required + " kr.");
         statusLabel.setText("");
     }
 
@@ -257,7 +295,9 @@ public class StudyPlanController {
         TableColumn<PlannedSubject, String> code = new TableColumn<>("Kód");
         code.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getSubjectCode()));
-        TableColumn<PlannedSubject, String> credits = new TableColumn<>("Kredity");
+        TableColumn<PlannedSubject, String> credits = new TableColumn<>("Kr.");
+        TableUi.numeric(credits);
+        TableUi.code(code);
         credits.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 catalogService.findByCode(catalog, data.getValue().getSubjectCode())
                         .map(subjectItem -> String.valueOf(subjectItem.getCredits()))
@@ -270,7 +310,7 @@ public class StudyPlanController {
                 semesterText(data.getValue().getPlannedSemester())));
         TableColumn<PlannedSubject, Void> info = plannedInfoColumn();
         plannedTable.getColumns().setAll(subject, code, credits, year, semester, info);
-        // Predmet | Kredity | Kedy | ⓘ   …   podiely zo šírky tabuľky
+        // Predmet | Kr. | Kedy | Detail   …   podiely zo šírky tabuľky
         TableUi.columnWeights(mandatoryTable, 0.50, 0.10, 0.32, 0.08);
         TableUi.columnWeights(recommendationTable, 0.40, 0.08, 0.22, 0.22, 0.08);
         TableUi.columnWeights(plannedTable, 0.38, 0.14, 0.10, 0.12, 0.18, 0.08);
@@ -308,9 +348,10 @@ public class StudyPlanController {
         TableColumn<Recommendation, String> subject = new TableColumn<>("Predmet");
         subject.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getSubject().getName()));
-        TableColumn<Recommendation, String> credits = new TableColumn<>("Kredity");
+        TableColumn<Recommendation, String> credits = new TableColumn<>("Kr.");
         credits.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 String.valueOf(data.getValue().getSubject().getCredits())));
+        TableUi.numeric(credits);
         TableColumn<Recommendation, String> semester = semesterColumn();
         mandatoryTable.getColumns().setAll(subject, credits, semester, infoColumn());
     }
@@ -319,9 +360,10 @@ public class StudyPlanController {
         TableColumn<Recommendation, String> subject = new TableColumn<>("Predmet");
         subject.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getSubject().getName() + " (" + data.getValue().getSubject().getCode() + ")"));
-        TableColumn<Recommendation, String> credits = new TableColumn<>("Kredity");
+        TableColumn<Recommendation, String> credits = new TableColumn<>("Kr.");
         credits.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 String.valueOf(data.getValue().getSubject().getCredits())));
+        TableUi.numeric(credits);
         TableColumn<Recommendation, String> semester = semesterColumn();
         TableColumn<Recommendation, String> reason = new TableColumn<>("Prečo odporúčame");
         reason.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
@@ -344,11 +386,14 @@ public class StudyPlanController {
         TableColumn<Recommendation, String> code = new TableColumn<>("Kód");
         code.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getSubject().getCode()));
-        TableColumn<Recommendation, String> credits = new TableColumn<>("Kredity");
+        TableColumn<Recommendation, String> credits = new TableColumn<>("Kr.");
         credits.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 String.valueOf(data.getValue().getSubject().getCredits())));
+        TableUi.numeric(credits);
+        TableUi.code(code);
         TableColumn<Recommendation, String> semester = semesterColumn();
         table.getColumns().setAll(subject, code, credits, semester, infoColumn());
+        TableUi.columnWeights(table, 0.42, 0.16, 0.07, 0.24, 0.11);
     }
 
     /** Ročník 0 v katalógu = záverečná práca / štátnice (nemá pevný ročník). */
@@ -357,12 +402,12 @@ public class StudyPlanController {
     }
 
     private TableColumn<Recommendation, Void> infoColumn() {
-        TableColumn<Recommendation, Void> column = new TableColumn<>("ⓘ");
+        TableColumn<Recommendation, Void> column = new TableColumn<>("");
         column.setCellFactory(table -> new TableCell<>() {
-            private final Button button = new Button("ⓘ");
+            private final Button button = new Button("Detail");
             {
                 button.getStyleClass().add("table-info-button");
-                button.setTooltip(new Tooltip("Detail predmetu (alebo dvojklik na riadok)"));
+                button.setTooltip(new Tooltip("Informačný list predmetu (alebo dvojklik na riadok)"));
                 button.setOnAction(event -> {
                     Recommendation recommendation = getTableView().getItems().get(getIndex());
                     openSubjectInfo(recommendation.getSubject());
@@ -379,12 +424,12 @@ public class StudyPlanController {
     }
 
     private TableColumn<PlannedSubject, Void> plannedInfoColumn() {
-        TableColumn<PlannedSubject, Void> column = new TableColumn<>("ⓘ");
+        TableColumn<PlannedSubject, Void> column = new TableColumn<>("");
         column.setCellFactory(table -> new TableCell<>() {
-            private final Button button = new Button("ⓘ");
+            private final Button button = new Button("Detail");
             {
                 button.getStyleClass().add("table-info-button");
-                button.setTooltip(new Tooltip("Detail predmetu (alebo dvojklik na riadok)"));
+                button.setTooltip(new Tooltip("Informačný list predmetu (alebo dvojklik na riadok)"));
                 button.setOnAction(event -> {
                     PlannedSubject planned = getTableView().getItems().get(getIndex());
                     catalogService.findByCode(catalog, planned.getSubjectCode())
@@ -407,9 +452,9 @@ public class StudyPlanController {
 
     private String semesterText(Semester semester) {
         return switch (semester) {
-            case WINTER -> "Zimný";
-            case SUMMER -> "Letný";
-            case BOTH -> "Zimný alebo letný";
+            case WINTER -> "zimný";
+            case SUMMER -> "letný";
+            case BOTH -> "zimný alebo letný";
         };
     }
 
@@ -422,7 +467,7 @@ public class StudyPlanController {
                 .reduce((left, right) -> left + ", " + right)
                 .orElse("");
         return (status == PrerequisiteStatus.SATISFIED ? "Splnené" : "Nesplnené")
-                + (names.isBlank() ? "" : " – " + names);
+                + (names.isBlank() ? "" : ": " + names);
     }
 
     private String prerequisiteName(String code) {

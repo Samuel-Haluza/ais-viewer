@@ -1,5 +1,6 @@
 package sk.ukf.aisviewer.controller;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,81 +18,94 @@ import java.util.Optional;
 import sk.ukf.aisviewer.service.GradeChanges;
 import sk.ukf.aisviewer.service.ThemeManager;
 
+/**
+ * Jednoduché modálne okná aplikácie. Okno sa prispôsobí obsahu (žiadna pevná výška),
+ * tlačidlá sú vpravo: sekundárne (Zrušiť) vľavo od primárneho.
+ */
 final class UiDialogs {
+
+    private static final double TEXT_WIDTH = 380;
+    /** Najviac toľko riadkov v okne s novými hodnoteniami, aby sa zmestilo aj pri zväčšení 150 %. */
+    static final int MAX_GRADE_CHANGES = 10;
 
     private UiDialogs() {
     }
 
     static boolean showFirstLoginNotice(Window owner) {
         return showNotice(owner, "Prvé načítanie údajov",
-                "Prvé načítanie údajov môže chvíľu trvať.\n"
-                        + "Aplikácia sa teraz prihlási do AIS a načíta vaše údaje.\n"
-                        + "Počas načítavania aplikáciu nezatvárajte.",
-                "OK", null);
+                "Aplikácia sa prihlási do AIS a načíta tvoje predmety, skúšky a rozvrh "
+                        + "zo všetkých ročníkov. Prvé načítanie trvá zvyčajne 1 až 2 minúty.\n\n"
+                        + "Počas načítavania aplikáciu nezatváraj.",
+                "Pokračovať", "Zrušiť", false);
     }
 
     static boolean showRefreshNotice(Window owner) {
-        return showNotice(owner, "Obnovenie údajov",
-                "Obnovenie údajov môže chvíľu trvať.\n"
-                        + "Aplikácia sa pripojí k AIS a znovu načíta aktuálne údaje.\n\n"
-                        + "Z bezpečnostných dôvodov nebude heslo uložené do cache.\n"
-                        + "Ak ste aplikáciu po poslednom prihlásení reštartovali,\n"
-                        + "bude potrebné heslo zadať znova.",
-                "OK / Pokračovať", "Zrušiť");
+        return showNotice(owner, "Obnoviť údaje z AIS",
+                "Aplikácia sa znova pripojí k AIS a načíta aktuálne údaje. Môže to chvíľu trvať.\n\n"
+                        + "Heslo sa neukladá na disk, takže po reštarte aplikácie "
+                        + "ho treba zadať znova.",
+                "Obnoviť", "Zrušiť", false);
     }
 
     /** Po obnovení údajov: zoznam nových alebo zmenených hodnotení. */
     static void showGradeChanges(Window owner, List<GradeChanges.Change> changes) {
         StringBuilder text = new StringBuilder();
-        for (GradeChanges.Change change : changes) {
-            text.append(change.isNew() ? "🆕 " : "✏ ").append(change.subjectName()).append(":  ")
-                    .append(change.newGrade());
-            if (!change.isNew()) text.append("   (predtým ").append(change.oldGrade()).append(")");
+        // okno nemá posuvník – pri veľa zmenách by tlačidlo Zavrieť skončilo mimo obrazovky
+        int shown = Math.min(changes.size(), MAX_GRADE_CHANGES);
+        for (GradeChanges.Change change : changes.subList(0, shown)) {
+            text.append(change.subjectName()).append(": ").append(change.newGrade());
+            text.append(change.isNew() ? "  (nové)" : "  (predtým " + change.oldGrade() + ")");
             text.append(System.lineSeparator());
         }
+        if (changes.size() > shown) {
+            text.append("…a ďalšie ").append(changes.size() - shown)
+                    .append(". Všetky známky nájdeš v záložke Predmety.");
+        }
         showNotice(owner, changes.size() == 1 ? "Nové hodnotenie" : "Nové hodnotenia (" + changes.size() + ")",
-                text.toString().trim(), "Super", null);
+                text.toString().trim(), "Zavrieť", null, false);
     }
 
     static void showInvalidPassword(Window owner) {
         showNotice(owner, "Prihlásenie sa nepodarilo",
-                "Zadané heslo nie je správne.\n"
-                        + "Skontrolujte heslo a skúste to znova.",
-                "OK", null);
-    }
-
-    static void showExportPlaceholder(Window owner, String message) {
-        showNotice(owner, "Exporty", message, "OK", null);
+                "AIS heslo neprijal. Skontroluj ho a skús to znova.",
+                "Zadať znova", null, true);
     }
 
     static void showExportSuccess(Window owner, String message) {
-        showNotice(owner, "Exporty", message, "OK", null);
+        showNotice(owner, "Export je hotový", message, "Zavrieť", null, false);
     }
 
-    static void showExportError(Window owner, String message) {
-        showNotice(owner, "Exporty", message, "OK", null);
+    /** @return true, ak chce používateľ export skúsiť znova */
+    static boolean showExportError(Window owner, String message) {
+        return showNotice(owner, "Export sa nepodaril", message, "Skúsiť znova", "Zavrieť", true);
+    }
+
+    /** Chyba pri príprave údajov – opakovanie by nepomohlo, preto len Zavrieť. */
+    static void showExportDataError(Window owner, String message) {
+        showNotice(owner, "Export sa nepodaril", message, "Zavrieť", null, true);
     }
 
     static Optional<String> showPasswordPrompt(Window owner) {
-        Stage stage = createStage(owner, "Obnovenie údajov");
-        VBox card = createCard("Obnovenie údajov");
-        Label explanation = new Label(
-                "Na pripojenie do AIS je potrebné zadať heslo.\n"
-                        + "Heslo sa uloží iba do pamäte počas tejto relácie\n"
-                        + "a nebude zapísané do cache.");
-        explanation.getStyleClass().add("info-label");
-        explanation.setWrapText(true);
+        Stage stage = createStage(owner, "Heslo do AIS");
+        VBox root = createRoot("Heslo do AIS");
+        Label explanation = textLabel(
+                "Na obnovenie údajov potrebuje aplikácia tvoje heslo do AIS. "
+                        + "Ostane len v pamäti, kým je aplikácia otvorená, na disk sa neukladá.", false);
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Heslo do AIS");
+        passwordField.setAccessibleText("Heslo do AIS");
         passwordField.getStyleClass().add("login-field");
 
-        Button continueButton = styledButton("Obnoviť", "login-button");
-        Button cancelButton = styledButton("Zrušiť", "dialog-secondary-button");
-        HBox buttons = new HBox(10, cancelButton, continueButton);
-        buttons.setAlignment(Pos.CENTER_RIGHT);
-        card.getChildren().addAll(explanation, passwordField, buttons);
-        stage.setScene(styledScene(card, 430, 300));
+        Button continueButton = styledButton("Obnoviť", "primary-button");
+        continueButton.setDefaultButton(true);
+        // rovnaká podmienka ako v akcii nižšie – heslo len z medzier tlačidlo nepovolí
+        continueButton.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> passwordField.getText() == null || passwordField.getText().isBlank(),
+                passwordField.textProperty()));
+        Button cancelButton = styledButton("Zrušiť", "secondary-button");
+        cancelButton.setCancelButton(true);
+        root.getChildren().addAll(explanation, passwordField, buttonRow(cancelButton, continueButton));
+        stage.setScene(styledScene(root));
 
         final String[] result = {null};
         continueButton.setOnAction(event -> {
@@ -107,29 +121,29 @@ final class UiDialogs {
     }
 
     private static boolean showNotice(Window owner, String title, String message,
-                                      String confirmText, String cancelText) {
+                                      String confirmText, String cancelText, boolean error) {
         Stage stage = createStage(owner, title);
-        VBox card = createCard(title);
-        Label messageLabel = new Label(message);
-        messageLabel.getStyleClass().add("info-label");
-        messageLabel.setWrapText(true);
+        VBox root = createRoot(title);
+        Label messageLabel = textLabel(message, error);
 
-        Button confirmButton = styledButton(confirmText, "login-button");
-        HBox buttons = new HBox(confirmButton);
-        buttons.setAlignment(Pos.CENTER_RIGHT);
+        Button confirmButton = styledButton(confirmText, "primary-button");
+        confirmButton.setDefaultButton(true);
+        HBox buttons = buttonRow(confirmButton);
         if (cancelText != null) {
-            Button cancelButton = styledButton(cancelText, "dialog-secondary-button");
+            Button cancelButton = styledButton(cancelText, "secondary-button");
+            cancelButton.setCancelButton(true);
             cancelButton.setOnAction(event -> stage.close());
             buttons.getChildren().add(0, cancelButton);
         }
 
-        card.getChildren().addAll(messageLabel, buttons);
-        stage.setScene(styledScene(card, cancelText == null ? 430 : 500, 285));
+        root.getChildren().addAll(messageLabel, buttons);
+        stage.setScene(styledScene(root));
         final boolean[] confirmed = {false};
         confirmButton.setOnAction(event -> {
             confirmed[0] = true;
             stage.close();
         });
+        stage.setOnShown(event -> confirmButton.requestFocus());
         stage.showAndWait();
         return confirmed[0];
     }
@@ -143,26 +157,44 @@ final class UiDialogs {
         return stage;
     }
 
-    private static VBox createCard(String title) {
-        VBox card = new VBox(16);
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(24, 28, 26, 28));
-        card.getStyleClass().addAll("login-root", "login-card");
+    private static VBox createRoot(String title) {
+        VBox root = new VBox(12);
+        root.setAlignment(Pos.TOP_LEFT);
+        root.setPadding(new Insets(20, 24, 20, 24));
+        root.getStyleClass().add("dialog-root");
         Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("login-card-title");
-        card.getChildren().add(titleLabel);
-        return card;
+        titleLabel.getStyleClass().add("dialog-title");
+        root.getChildren().add(titleLabel);
+        return root;
+    }
+
+    private static Label textLabel(String text, boolean error) {
+        Label label = new Label(text);
+        label.getStyleClass().add("dialog-text");
+        if (error) label.getStyleClass().add("dialog-text-error");
+        label.setWrapText(true);
+        label.setPrefWidth(TEXT_WIDTH);
+        label.setMinHeight(Label.USE_PREF_SIZE);
+        return label;
+    }
+
+    private static HBox buttonRow(Button... buttons) {
+        HBox row = new HBox(8, buttons);
+        row.setAlignment(Pos.CENTER_RIGHT);
+        row.setPadding(new Insets(8, 0, 0, 0));
+        return row;
     }
 
     private static Button styledButton(String text, String styleClass) {
         Button button = new Button(text);
         button.getStyleClass().add(styleClass);
-        button.setMinWidth(100);
+        button.setMinWidth(Button.USE_PREF_SIZE);
         return button;
     }
 
-    private static Scene styledScene(VBox root, double width, double height) {
-        Scene scene = new Scene(root, width, height);
+    /** Scéna bez pevnej veľkosti – okno sa prispôsobí obsahu. */
+    private static Scene styledScene(VBox root) {
+        Scene scene = new Scene(root);
         String stylesheet = UiDialogs.class.getResource("/sk/ukf/aisviewer/styles.css")
                 .toExternalForm();
         scene.getStylesheets().add(stylesheet);

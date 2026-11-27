@@ -48,8 +48,11 @@ public class MainController {
     @FXML private Button exportButton;
     @FXML private Button logoutButton;
 
-    /** Pod touto šírkou okna sa tlačidlá v hornej lište zmenia len na ikony (texty ostanú v tooltipoch). */
+    /** Pod touto šírkou sa skryje popis „Zápisný list“ a čas poslednej aktualizácie (ostane v tooltipe). */
     private static final double COMPACT_WIDTH = 1180;
+    /** Pod touto šírkou sa texty tlačidiel skrátia – nikdy však nezostanú len symboly. */
+    private static final double NARROW_WIDTH = 960;
+    private boolean narrowTopBar;
     private boolean compactTopBar;
     /** Text „Naposledy aktualizované…“ – v kompaktnom režime sa ukáže len v tooltipe tlačidla Obnoviť. */
     private String lastUpdatedText = "";
@@ -115,8 +118,9 @@ public class MainController {
             return;
         }
         boolean dark = ThemeManager.getInstance().getCurrentTheme() == AppTheme.DARK;
-        String full = dark ? "☀ Svetlý režim" : "🌙 Tmavý režim";
-        themeToggleButton.setText(compactTopBar ? full.substring(0, full.indexOf(' ')) : full);
+        themeToggleButton.setText(narrowTopBar ? (dark ? "Svetlý" : "Tmavý")
+                : dark ? "Svetlý režim" : "Tmavý režim");
+        themeToggleButton.setAccessibleText(dark ? "Prepnúť na svetlý režim" : "Prepnúť na tmavý režim");
         themeToggleButton.setTooltip(new Tooltip(dark ? "Prepnúť na svetlý režim" : "Prepnúť na tmavý režim"));
     }
 
@@ -124,7 +128,11 @@ public class MainController {
 
     /** Tooltipy a prepínanie medzi plnou a kompaktnou lištou podľa šírky okna. */
     private void setupTopBar() {
-        exportButton.setTooltip(new Tooltip("Exportovať študijný prehľad do CSV"));
+        exportButton.setTooltip(new Tooltip("Uložiť študijný prehľad ako CSV (otvoríš v Exceli)"));
+        exportButton.setAccessibleText("Export študijného prehľadu do CSV");
+        refreshButton.setAccessibleText("Obnoviť údaje z AIS");
+        logoutButton.setAccessibleText("Odhlásiť sa");
+        enrollmentListCombo.setAccessibleText("Zápisný list");
         logoutButton.setTooltip(new Tooltip("Odhlásiť sa z aplikácie"));
         enrollmentListCombo.setTooltip(new Tooltip("Zápisný list (ročník), ktorého údaje sa zobrazujú"));
         studentNameLabel.setMinWidth(Region.USE_PREF_SIZE); // meno sa nikdy neoreže
@@ -135,10 +143,11 @@ public class MainController {
 
     private void applyTopBarLayout(double width) {
         compactTopBar = width > 0 && width < COMPACT_WIDTH;
+        narrowTopBar = width > 0 && width < NARROW_WIDTH;
         enrollmentLabel.setVisible(!compactTopBar);
         enrollmentLabel.setManaged(!compactTopBar);
-        exportButton.setText(compactTopBar ? "⬇" : "⬇ Export CSV");
-        refreshButton.setText(compactTopBar ? "⟳" : "⟳ Obnoviť údaje");
+        exportButton.setText(narrowTopBar ? "Export" : "Export CSV");
+        refreshButton.setText(narrowTopBar ? "Obnoviť" : "Obnoviť údaje");
         enrollmentListCombo.setPrefWidth(width > 0 && width < 900 ? 150 : 180);
         dataStatusLabel.setMaxWidth(compactTopBar ? 170 : 260);
         updateThemeToggleText();
@@ -321,7 +330,7 @@ public class MainController {
                     showSyncStatus("Údaje boli aktualizované.", false);
                 }
                 if (!gradeChanges.isEmpty()) {
-                    showSyncStatus("🎉 Nové hodnotenia: " + gradeChanges.size(), false);
+                    showSyncStatus("Nové hodnotenia: " + gradeChanges.size(), false);
                     UiDialogs.showGradeChanges(refreshButton.getScene().getWindow(), List.copyOf(gradeChanges));
                 }
             });
@@ -550,13 +559,13 @@ public class MainController {
     private void synchronizeAfterPasswordPrompt() {
         if (studentInfo == null || studentInfo.getIdo() == null
                 || studentInfo.getIdo().isBlank()) {
-            showSyncStatus("AIS ID nie je dostupné v cache.", false);
+            showSyncStatus("V uložených údajoch chýba AIS ID. Odhlás sa a prihlás znova.", false);
             return;
         }
 
         UiDialogs.showPasswordPrompt(refreshButton.getScene().getWindow()).ifPresent(password -> {
             if (password.isBlank()) {
-                showSyncStatus("Heslo nesmie byť prázdne.", false);
+                showSyncStatus("Zadaj heslo do AIS.", false);
                 return;
             }
             refreshWithCredentials(studentInfo.getIdo(), password);
@@ -572,7 +581,7 @@ public class MainController {
                 if (!client.login(aisId, password)) {
                     Platform.runLater(() -> {
                         refreshButton.setDisable(false);
-                        showSyncStatus("Nesprávne heslo alebo AIS ID.", false);
+                        showSyncStatus("AIS neprijal heslo.", false);
                         UiDialogs.showInvalidPassword(refreshButton.getScene().getWindow());
                         synchronizeAfterPasswordPrompt();
                     });

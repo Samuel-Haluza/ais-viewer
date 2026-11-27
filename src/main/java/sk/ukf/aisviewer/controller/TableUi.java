@@ -14,9 +14,10 @@ import java.util.Locale;
 /** Spoločné úpravy tabuliek: výška podľa počtu riadkov, farebná známka, tooltip pri orezanom texte. */
 final class TableUi {
 
-    static final double ROW_HEIGHT = 34;
-    private static final double HEADER_HEIGHT = 36;
-    private static final double EMPTY_HEIGHT = 90;
+    static final double ROW_HEIGHT = 30;
+    private static final double HEADER_HEIGHT = 31;
+    private static final double EMPTY_HEIGHT = 80;
+    private static final String WEIGHT_KEY = "ais.columnWeight";
 
     private TableUi() {
     }
@@ -52,11 +53,67 @@ final class TableUi {
         for (int i = 0; i < weights.length && i < table.getColumns().size(); i++) {
             TableColumn<?, ?> column = table.getColumns().get(i);
             column.setResizable(false);
-            column.prefWidthProperty().bind(table.widthProperty().subtract(12).multiply(weights[i]));
+            column.getProperties().put(WEIGHT_KEY, weights[i]);
+            column.visibleProperty().addListener((obs, was, now) -> bindWidths(table));
+        }
+        bindWidths(table);
+    }
+
+    /** Skryté stĺpce sa nerátajú – ich miesto si rozdelia viditeľné stĺpce podľa váh. */
+    private static void bindWidths(TableView<?> table) {
+        double sum = table.getColumns().stream()
+                .filter(TableColumn::isVisible)
+                .mapToDouble(column -> weight(column))
+                .sum();
+        if (sum <= 0) return;
+        for (TableColumn<?, ?> column : table.getColumns()) {
+            // stĺpec bez váhy si ponechá vlastnú šírku (inak by dostal šírku 0 a zmizol)
+            if (!column.getProperties().containsKey(WEIGHT_KEY)) continue;
+            column.prefWidthProperty().unbind();
+            if (column.isVisible()) {
+                column.prefWidthProperty().bind(table.widthProperty().subtract(14).multiply(weight(column) / sum));
+            }
         }
     }
 
-    /** Bunka so známkou ako farebný štítok: A zelená … E žltá, FX červená, ABS sivozelená. */
+    private static double weight(TableColumn<?, ?> column) {
+        Object value = column.getProperties().get(WEIGHT_KEY);
+        return value instanceof Double weight ? weight : 0;
+    }
+
+    /** Čísla zarovnané doprava písmom s rovnako širokými číslicami (aj v hlavičke). */
+    static void numeric(TableColumn<?, ?> column) {
+        column.getStyleClass().add("numeric-column");
+    }
+
+    /** Kódy predmetov a skratky neproporcionálnym písmom. */
+    static void code(TableColumn<?, ?> column) {
+        column.getStyleClass().add("code-column");
+    }
+
+    /** Stĺpec sa zobrazí, len ak má aspoň jeden riadok skutočnú hodnotu (nie prázdnu ani „-“). */
+    static <S> void hideWhenEmpty(TableColumn<S, String> column) {
+        Runnable update = () -> {
+            TableView<S> table = column.getTableView();
+            if (table == null || table.getItems() == null) return;
+            boolean hasValue = table.getItems().stream().anyMatch(item -> {
+                Object value = column.getCellObservableValue(item) == null
+                        ? null : column.getCellObservableValue(item).getValue();
+                return value != null && !value.toString().isBlank() && !"-".equals(value.toString().trim());
+            });
+            column.setVisible(hasValue || table.getItems().isEmpty());
+        };
+        column.tableViewProperty().addListener((obs, oldTable, table) -> {
+            if (table == null) return;
+            table.itemsProperty().addListener((o, oldItems, items) -> {
+                update.run();
+                if (items != null) items.addListener((ListChangeListener<S>) change -> update.run());
+            });
+            update.run();
+        });
+    }
+
+    /** Bunka so známkou: písmeno ako vo výkaze, farba len dopĺňa text (A, B zelená, FX červená). */
     static Callback<TableColumn<Subject, String>, TableCell<Subject, String>> gradeCell() {
         return column -> new TableCell<>() {
             private final Label chip = new Label();
@@ -84,8 +141,11 @@ final class TableUi {
             @Override
             protected void updateItem(String value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(empty ? null : value);
-                setTooltip(empty || value == null || value.isBlank() ? null : new Tooltip(value));
+                boolean blank = value == null || value.isBlank() || "-".equals(value.trim());
+                setText(empty ? null : blank ? "—" : value);
+                getStyleClass().remove("muted-cell");
+                if (!empty && blank) getStyleClass().add("muted-cell");
+                setTooltip(empty || blank ? null : new Tooltip(value));
             }
         };
     }

@@ -182,7 +182,7 @@ public final class ProgressService {
     private void studyAchievements(List<Achievement> out, List<EnrollmentInput> inputs, List<Done> done,
                                    int credits, int required, StudyPlanCatalog catalog) {
         out.add(single("first-step", Category.STUDY, "👣", "Prvý krok", "Splň svoj prvý predmet",
-                !done.isEmpty(), done.isEmpty() ? 0 : 1, done.isEmpty() ? "0 / 1" : "✓",
+                !done.isEmpty(), done.isEmpty() ? 0 : 1, done.isEmpty() ? "0 / 1" : "splnené",
                 done.stream().map(Done::date).filter(Objects::nonNull).min(Comparator.naturalOrder()).orElse(null)));
 
         boolean master = required < 180;
@@ -235,7 +235,7 @@ public final class ProgressService {
         }
         return single(id, Category.STUDY, icon, title, "Získaj " + threshold + " kreditov",
                 credits >= threshold, (double) credits / threshold,
-                credits >= threshold ? "✓ " + threshold + " kr." : credits + " / " + threshold + " kr.",
+                credits >= threshold ? threshold + " kr. splnené" : credits + " / " + threshold + " kr.",
                 credits >= threshold ? reachedOn : null);
     }
 
@@ -280,7 +280,7 @@ public final class ProgressService {
             if (letters.size() >= 3 && letters.stream().noneMatch("E"::equals)) noE = (e + 1) + ". ročník";
         }
         out.add(single("no-e", Category.GRADES, "🛡", "Bez E-čka", "Celý ročník bez známky E",
-                noE != null, noE != null ? 1 : 0, noE != null ? "✓ " + noE : "zatiaľ nie", null));
+                noE != null, noE != null ? 1 : 0, noE != null ? "splnené, " + noE : "zatiaľ nie", null));
 
         double average = weightedAverage(done.stream().map(Done::subject).toList());
         out.add(single("honors", Category.GRADES, "🏆", "Vyznamenanie", "Celkový vážený priemer do 1,50",
@@ -319,9 +319,9 @@ public final class ProgressService {
         String persistent = done.stream()
                 .filter(d -> terms.getOrDefault(key(d.subject().getName()), 0) >= 3)
                 .map(d -> d.subject().getName()).findFirst().orElse(null);
-        out.add(single("never-give-up", Category.EXAMS, "💪", "Nevzdal som to",
+        out.add(single("never-give-up", Category.EXAMS, "💪", "Nevzdávam sa",
                 "Predmet úspešne ukončený až na 3. termín", persistent != null, persistent != null ? 1 : 0,
-                persistent != null ? "✓ " + persistent : "zatiaľ nie", null));
+                persistent != null ? "splnené, " + persistent : "zatiaľ nie", null));
 
         List<LocalDate> examDates = new ArrayList<>();
         List<Exam> pastExams = new ArrayList<>();
@@ -476,7 +476,7 @@ public final class ProgressService {
         int achieved = 0;
         while (achieved < tiers.length && value >= tiers[achieved]) achieved++;
         double progress = achieved >= tiers.length ? 1.0 : clamp((double) value / tiers[achieved]);
-        String text = achieved >= tiers.length ? value + " ✓ všetky stupne"
+        String text = achieved >= tiers.length ? value + ", všetky stupne"
                 : value + " / " + tiers[achieved];
         LocalDate date = achieved > 0 && tiers[achieved - 1] - 1 < sortedDates.size()
                 ? sortedDates.get(tiers[achieved - 1] - 1) : null;

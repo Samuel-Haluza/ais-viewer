@@ -5,34 +5,49 @@
 <ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sk.ukf.aisviewer.controller.StudyPlanController"
-            styleClass="tab-scroll">
-    <VBox spacing="12" styleClass="tab-content">
-        <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
-        <Label styleClass="group-title" text="Plánovanie štúdia"/>
-        <HBox spacing="10">
-            <Label text="Hlavný smer"/>
-            <ComboBox fx:id="primaryDirectionCombo" prefWidth="240"/>
-            <Label text="Vedľajší smer"/>
-            <ComboBox fx:id="secondaryDirectionCombo" prefWidth="240"/>
-        </HBox>
-        <Label fx:id="statusLabel" styleClass="status-label"/>
-        <Label fx:id="creditsLabel" styleClass="plan-credits" wrapText="true"/>
-        <Label styleClass="group-title" text="Povinné predmety"/>
-        <TableView fx:id="mandatoryTable" styleClass="subject-table">
-            <placeholder><Label text="Všetky povinné predmety máš splnené alebo naplánované"/></placeholder>
-        </TableView>
-        <Label styleClass="group-title" text="Odporúčané predmety"/>
-        <TableView fx:id="recommendationTable" styleClass="subject-table">
-            <placeholder><Label text="Vyber hlavný smer – zobrazia sa odporúčané predmety"/></placeholder>
-        </TableView>
-        <HBox spacing="8">
-            <Button onAction="#addSelectedRecommendation" text="Pridať do plánu"/>
-            <Button onAction="#showAllPvp" text="Zobraziť všetky PVP predmety"/>
-        </HBox>
-        <Label styleClass="group-title" text="Môj plán"/>
-        <TableView fx:id="plannedTable" styleClass="subject-table">
-            <placeholder><Label text="Zatiaľ nemáš naplánovaný žiadny predmet"/></placeholder>
-        </TableView>
-        <Button onAction="#removeSelectedPlanned" text="Odstrániť vybraný predmet"/>
+            styleClass="tab-scroll, page-plan">
+    <VBox spacing="24" styleClass="tab-content">
+        <padding><Insets bottom="24" left="24" right="24" top="20"/></padding>
+
+        <VBox spacing="12">
+            <Label styleClass="page-title" text="Plánovanie štúdia"/>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label styleClass="field-label" text="Hlavný smer"/>
+                <ComboBox fx:id="primaryDirectionCombo" accessibleText="Hlavný smer" prefWidth="240"/>
+                <Region minWidth="16"/>
+                <Label styleClass="field-label" text="Vedľajší smer"/>
+                <ComboBox fx:id="secondaryDirectionCombo" accessibleText="Vedľajší smer" prefWidth="240"/>
+            </HBox>
+            <Label fx:id="statusLabel" styleClass="status-label" wrapText="true"/>
+            <Label fx:id="creditsLabel" styleClass="plan-credits" wrapText="true"/>
+        </VBox>
+
+        <VBox spacing="8" styleClass="section">
+            <Label styleClass="group-title" text="Povinné predmety, ktoré ti chýbajú"/>
+            <TableView fx:id="mandatoryTable" styleClass="subject-table">
+                <placeholder><Label text="Všetky povinné predmety máš splnené alebo naplánované."/></placeholder>
+            </TableView>
+        </VBox>
+
+        <VBox spacing="8" styleClass="section">
+            <Label styleClass="group-title" text="Odporúčané predmety"/>
+            <TableView fx:id="recommendationTable" styleClass="subject-table">
+                <placeholder><Label text="Vyber hlavný smer a zobrazia sa odporúčané predmety."/></placeholder>
+            </TableView>
+            <HBox spacing="8">
+                <Button fx:id="addRecommendationButton" onAction="#addSelectedRecommendation" styleClass="primary-button" text="Pridať do plánu"/>
+                <Button onAction="#showAllPvp" text="Všetky povinne voliteľné predmety"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="8" styleClass="section">
+            <Label styleClass="group-title" text="Môj plán"/>
+            <TableView fx:id="plannedTable" styleClass="subject-table">
+                <placeholder><Label text="Zatiaľ nemáš naplánovaný žiadny predmet."/></placeholder>
+            </TableView>
+            <HBox>
+                <Button fx:id="removePlannedButton" onAction="#removeSelectedPlanned" text="Odstrániť z plánu"/>
+            </HBox>
+        </VBox>
     </VBox>
 </ScrollPane>

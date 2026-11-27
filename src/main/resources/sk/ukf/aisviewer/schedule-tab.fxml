@@ -18,23 +18,23 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.image.ImageView?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.ScheduleController" spacing="12" styleClass="tab-content">
-    <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
-    <HBox alignment="CENTER_LEFT" spacing="16">
-        <Label styleClass="group-title" text="Rozvrh" />
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.ScheduleController" spacing="12" styleClass="tab-content, page-schedule">
+    <padding><Insets bottom="24" left="24" right="24" top="20" /></padding>
+    <HBox alignment="BASELINE_LEFT" spacing="16">
+        <Label styleClass="page-title" text="Rozvrh" />
         <Label fx:id="scheduleStatusLabel" styleClass="status-label" text="" visible="false" />
     </HBox>
     <!-- Legend -->
     <HBox alignment="CENTER_LEFT" spacing="16" styleClass="schedule-legend">
-        <HBox alignment="CENTER_LEFT" spacing="4">
+        <HBox alignment="CENTER_LEFT" spacing="6">
             <Label styleClass="legend-dot, legend-lecture" />
             <Label styleClass="legend-text" text="Prednáška" />
         </HBox>
-        <HBox alignment="CENTER_LEFT" spacing="4">
+        <HBox alignment="CENTER_LEFT" spacing="6">
             <Label styleClass="legend-dot, legend-seminar" />
-            <Label styleClass="legend-text" text="Cvičenie / Seminár" />
+            <Label styleClass="legend-text" text="Cvičenie, seminár" />
         </HBox>
-        <HBox alignment="CENTER_LEFT" spacing="4">
+        <HBox alignment="CENTER_LEFT" spacing="6">
             <Label styleClass="legend-dot, legend-other" />
             <Label styleClass="legend-text" text="Ostatné" />
         </HBox>

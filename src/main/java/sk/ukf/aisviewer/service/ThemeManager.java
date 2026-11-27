@@ -56,8 +56,33 @@ public final class ThemeManager {
         if (scene == null) {
             return;
         }
-        scenes.put(scene, Boolean.TRUE);
+        boolean firstTime = scenes.put(scene, Boolean.TRUE) == null;
         applyRootTheme(scene.getRoot());
+        if (firstTime) {
+            // listener len raz na scénu – setTheme volá applyTheme pri každom prepnutí témy
+            addAppIcon(scene.getWindow());
+            scene.windowProperty().addListener((observable, oldWindow, window) -> addAppIcon(window));
+        }
+    }
+
+    /**
+     * Logo aplikácie v titulku každého okna (hlavné okno, prihlásenie, oznámenia, detail predmetu…).
+     * Všetky okná prechádzajú cez applyTheme, takže ho dostanú aj nové dialógy bez ďalšieho kódu.
+     */
+    private static javafx.scene.image.Image appIcon;
+
+    private static void addAppIcon(javafx.stage.Window window) {
+        if (!(window instanceof javafx.stage.Stage stage) || !stage.getIcons().isEmpty()) {
+            return;
+        }
+        if (appIcon == null) {
+            URL url = ThemeManager.class.getResource("/sk/ukf/aisviewer/ais-icon.png");
+            if (url == null) {
+                return;
+            }
+            appIcon = new javafx.scene.image.Image(url.toExternalForm());
+        }
+        stage.getIcons().add(appIcon);
     }
 
     public void applyTheme(DialogPane dialogPane) {
@@ -66,6 +91,10 @@ public final class ThemeManager {
         }
         applyRootTheme(dialogPane);
         addBaseStylesheet(dialogPane.getStylesheets());
+        // Dialog má scénu (a okno) hneď od vytvorenia – listener nižšie by sa už nespustil
+        if (dialogPane.getScene() != null) {
+            applyTheme(dialogPane.getScene());
+        }
         dialogPane.sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene != null) {
                 applyTheme(newScene);
@@ -78,9 +107,33 @@ public final class ThemeManager {
      * ako paleta premenných v styles.css, takže sa nič iné meniť nemusí.
      */
     private void applyRootTheme(Parent root) {
+        loadFontsOnce();
         root.getStyleClass().removeAll("theme-dark", "theme-light");
         root.getStyleClass().add(currentTheme == AppTheme.DARK
                 ? "theme-dark" : "theme-light");
+    }
+
+    /**
+     * Písma aplikácie (licencia OFL, súbory v resources/fonts). JavaFX načíta polotučné rezy
+     * ako samostatné rodiny: "IBM Plex Sans SmBld" a "Source Serif 4 Semibold" (pozri styles.css).
+     * Ak sa súbor nenájde, CSS použije záložné systémové písmo.
+     */
+    private static final String[] FONT_FILES = {
+            "IBMPlexSans-Regular.ttf", "IBMPlexSans-SemiBold.ttf", "IBMPlexSans-Bold.ttf",
+            "IBMPlexMono-Regular.ttf", "SourceSerif4-Regular.ttf", "SourceSerif4-Semibold.ttf"};
+    private static boolean fontsLoaded;
+
+    private static synchronized void loadFontsOnce() {
+        if (fontsLoaded) {
+            return;
+        }
+        fontsLoaded = true;
+        for (String file : FONT_FILES) {
+            URL url = ThemeManager.class.getResource("/sk/ukf/aisviewer/fonts/" + file);
+            if (url != null) {
+                javafx.scene.text.Font.loadFont(url.toExternalForm(), 13);
+            }
+        }
     }
 
     private void addBaseStylesheet(java.util.List<String> stylesheets) {

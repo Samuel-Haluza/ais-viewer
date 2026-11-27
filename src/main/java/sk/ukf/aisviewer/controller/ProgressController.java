@@ -36,12 +36,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
-/** Záložka „Môj pokrok“ – hodnosť, XP, achievementy a časová os semestrov. */
+/** Záložka „Môj pokrok“ – hodnosť, XP, úspechy a časová os semestrov. */
 public class ProgressController {
 
-    /** Len emoji, ktoré JavaFX na Windows vie vykresliť (novšie, napr. 🧩 🧮 🧭, sa zobrazia ako štvorček). */
-    private static final String[] RANK_ICONS = {"🌱", "🌿", "🔍", "🗺", "🔬", "💡",
-            "🚀", "🎯", "🏆", "🛡", "👑", "🎓"};
+    /** Stupne úspechov ako rímske číslice (namiesto emoji medailí). */
+    private static final String[] TIERS = {"I", "II", "III"};
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d. M. uuuu");
     /** XP za jeden 6-kreditový predmet so známkou A – na vysvetlenie, koľko chýba. */
     private static final int XP_FOR_A = 180;
@@ -51,7 +50,7 @@ public class ProgressController {
     @FXML private VBox closestBox;
     @FXML private Label achievementCountLabel;
     @FXML private HBox filterBox;
-    @FXML private FlowPane achievementsPane;
+    @FXML private VBox achievementsPane;
     @FXML private HBox timelineBox;
 
     private final ProgressService progressService = new ProgressService();
@@ -109,14 +108,14 @@ public class ProgressController {
         List<ProgressService.Rank> ranks = ProgressService.ranks(requiredCredits > 0 ? requiredCredits : 180);
 
         // prstenec
-        double ringSize = 132;
+        double ringSize = 104;
         double radius = ringSize / 2 - 8;
         Circle track = new Circle(radius);
         track.getStyleClass().add("rank-ring-track");
         Arc arc = new Arc(0, 0, radius, radius, 90, -360 * report.rankProgress());
         arc.setType(ArcType.OPEN);
         arc.getStyleClass().add("rank-ring-arc");
-        Label icon = new Label(RANK_ICONS[Math.min(rank.index(), RANK_ICONS.length - 1)]);
+        Label icon = new Label(String.valueOf(rank.number()));
         icon.getStyleClass().add("rank-ring-icon");
         Label percent = new Label(Math.round(report.rankProgress() * 100) + " %");
         percent.getStyleClass().add("rank-ring-percent");
@@ -129,7 +128,7 @@ public class ProgressController {
         ring.setMaxSize(ringSize, ringSize);
 
         // názov a XP
-        Label name = new Label(rank.name().toUpperCase());
+        Label name = new Label(rank.name());
         name.getStyleClass().add("rank-title");
         Label number = new Label("Hodnosť " + rank.number() + " z " + ranks.size());
         number.getStyleClass().add("rank-subtitle");
@@ -144,9 +143,9 @@ public class ProgressController {
         HBox xpRow = new HBox(10, xpNow, bar, xpNext);
         xpRow.setAlignment(Pos.CENTER_LEFT);
         Label hint = new Label(report.nextRank() == null
-                ? "Najvyššia hodnosť – gratulujeme k ukončeniu štúdia! 🎉"
-                : "≈ " + subjectsForA(report.xpToNext()) + " za A (6 kr.)   ·   "
-                        + "XP za kredit: A 30 · B 25 · C 20 · D 15 · E 10 · ABS 15");
+                ? "Najvyššia hodnosť. Gratulujeme k ukončeniu štúdia."
+                : "Do ďalšej hodnosti ti chýbajú približne " + subjectsForA(report.xpToNext())
+                        + " za A (6 kr.). XP za kredit: A 30, B 25, C 20, D 15, E 10, ABS 15.");
         hint.getStyleClass().add("rank-hint");
         hint.setWrapText(true);
         VBox info = new VBox(6, name, number, xpRow, hint);
@@ -159,9 +158,9 @@ public class ProgressController {
         // karta „Ďalej“
         if (report.nextRank() != null) {
             ProgressService.Rank next = report.nextRank();
-            Label caption = new Label("ĎALEJ");
+            Label caption = new Label("Ďalšia hodnosť");
             caption.getStyleClass().add("next-caption");
-            Label nextName = new Label(RANK_ICONS[Math.min(next.index(), RANK_ICONS.length - 1)] + "  " + next.name());
+            Label nextName = new Label(next.name());
             nextName.getStyleClass().add("next-name");
             Label missing = new Label("chýba " + formatXp(report.xpToNext()));
             missing.getStyleClass().add("next-missing");
@@ -184,9 +183,9 @@ public class ProgressController {
             ProgressService.Rank rank = ranks.get(i);
             String state = rank.index() < current.index() ? "done"
                     : rank.index() == current.index() ? "current" : "future";
-            Label step = new Label(RANK_ICONS[Math.min(i, RANK_ICONS.length - 1)]);
+            Label step = new Label(String.valueOf(rank.number()));
             step.getStyleClass().addAll("ladder-step", "ladder-" + state);
-            Tooltip.install(step, new Tooltip(rank.number() + ". " + rank.name() + " – od " + formatXp(rank.minXp())));
+            Tooltip.install(step, new Tooltip(rank.number() + ". " + rank.name() + ", od " + formatXp(rank.minXp())));
             boolean labeled = i == 0 || i == ranks.size() - 1 || "current".equals(state);
             Label caption = new Label(labeled ? rank.name() : " ");
             caption.getStyleClass().addAll("ladder-caption", "ladder-caption-" + state);
@@ -247,19 +246,20 @@ public class ProgressController {
         ring.setMaxSize(size, size);
         Label value = new Label(unlocked + " / " + total);
         value.getStyleClass().add("tile-value");
-        Label medals = new Label("🥇 " + report.tierCount(3) + "   🥈 " + report.tierCount(2)
-                + "   🥉 " + report.tierCount(1) + "   ✓ " + report.singlesUnlocked());
+        Label medals = new Label("stupeň III: " + report.tierCount(3) + ", II: " + report.tierCount(2)
+                + ", I: " + report.tierCount(1) + ", jednorazové: " + report.singlesUnlocked());
+        medals.setWrapText(true);
         medals.getStyleClass().add("tile-caption");
         VBox text = new VBox(2, value, medals);
         text.setAlignment(Pos.CENTER_LEFT);
         HBox body = new HBox(12, ring, text);
         body.setAlignment(Pos.CENTER_LEFT);
-        return tile("tile-blue", Icons.TROPHY, "ACHIEVEMENTY", body);
+        return tile("Úspechy", body);
     }
 
     private VBox gradesTile(ProgressService.Report report) {
         Label value = new Label(report.average() > 0
-                ? "⌀ " + String.format("%.2f", report.average()) : "bez známok");
+                ? "Ø " + String.format("%.2f", report.average()) : "bez známok");
         value.getStyleClass().add("tile-value");
         var counts = report.gradeCounts();
         int max = counts.values().stream().mapToInt(Integer::intValue).max().orElse(1);
@@ -285,7 +285,7 @@ public class ProgressController {
         // priemer nad grafom – vedľa seba by sa v užšom okne orezal
         value.setMinWidth(Region.USE_PREF_SIZE);
         VBox body = new VBox(6, value, chart);
-        return tile("tile-purple", Icons.STAR, "ZNÁMKY", body);
+        return tile("Známky", body);
     }
 
     private VBox firstTryTile(ProgressService.Report report) {
@@ -303,35 +303,34 @@ public class ProgressController {
         bar.getStyleClass().add("tile-bar-green");
         int retakes = total - first;
         Label caption = new Label(total == 0 ? "zatiaľ žiadne skúšky"
-                : retakes == 0 ? "všetko na prvý termín 💪"
+                : retakes == 0 ? "všetko na prvý termín"
                 : retakes + (retakes == 1 ? " predmet išiel" : retakes < 5 ? " predmety išli" : " predmetov išlo")
                         + " na opravný termín");
         caption.getStyleClass().add("tile-caption");
         VBox body = new VBox(6, top, bar, caption);
-        return tile("tile-green", Icons.TARGET, "NA 1. TERMÍN", body);
+        return tile("Na prvý termín", body);
     }
 
     /** Keď pribudli nové achievementy, ukáže ich; inak naposledy získaný achievement. */
     private VBox latestTile(ProgressService.Report report, List<Achievement> fresh) {
         if (!fresh.isEmpty()) {
-            Label value = new Label("🆕 Nové: " + fresh.size());
+            Label value = new Label("Nové: " + fresh.size());
             value.getStyleClass().add("tile-value");
-            Label names = new Label(fresh.stream().map(a -> a.icon() + " " + a.title())
+            Label names = new Label(fresh.stream().map(Achievement::title)
                     .limit(3).reduce((a, b) -> a + "\n" + b).orElse(""));
             names.getStyleClass().add("tile-caption");
-            VBox tile = tile("tile-orange", Icons.SPARKLE, "NOVÉ OD MINULA", new VBox(4, value, names));
+            VBox tile = tile("Nové od minula", new VBox(4, value, names));
             tile.getStyleClass().add("tile-highlight");
             return tile;
         }
         var latest = report.latestAchievement();
         if (latest.isEmpty()) {
-            Label none = new Label("Zatiaľ nič – prvý úspech ťa čaká 🙂");
+            Label none = new Label("Zatiaľ žiadny. Prvý príde s prvou známkou.");
             none.getStyleClass().add("tile-caption");
-            return tile("tile-orange", Icons.SPARKLE, "POSLEDNÝ ÚSPECH", new VBox(none));
+            none.setWrapText(true);
+            return tile("Posledný úspech", new VBox(none));
         }
         Achievement achievement = latest.get();
-        Label icon = new Label(achievement.icon());
-        icon.getStyleClass().add("latest-icon");
         Label title = new Label(achievement.title());
         title.getStyleClass().add("tile-value-medium");
         title.setWrapText(true);
@@ -339,19 +338,15 @@ public class ProgressController {
         date.getStyleClass().add("tile-caption");
         VBox text = new VBox(2, title, date);
         text.setAlignment(Pos.CENTER_LEFT);
-        HBox body = new HBox(10, icon, text);
-        body.setAlignment(Pos.CENTER_LEFT);
-        return tile("tile-orange", Icons.SPARKLE, "POSLEDNÝ ÚSPECH", body);
+        return tile("Posledný úspech", text);
     }
 
-    /** Spoločný vzhľad dlaždice: farebný ľavý okraj, ikona v krúžku, nadpis a obsah. */
-    private VBox tile(String colorClass, String iconPath, String heading, javafx.scene.Node body) {
+    /** Spoločný vzhľad bloku so štatistikou: malý nadpis a obsah, bez rámika a ikon. */
+    private VBox tile(String heading, javafx.scene.Node body) {
         Label title = new Label(heading);
         title.getStyleClass().add("tile-heading");
-        HBox header = new HBox(8, Icons.circle(iconPath, 28), title);
-        header.setAlignment(Pos.CENTER_LEFT);
-        VBox tile = new VBox(10, header, body);
-        tile.getStyleClass().addAll("credit-card", "stat-tile", colorClass);
+        VBox tile = new VBox(8, title, body);
+        tile.getStyleClass().add("stat-tile");
         // rovnaká šírka všetkých dlaždíc: základ 0, zvyšok sa rozdelí rovnomerne
         tile.setPrefWidth(0);
         tile.setMinWidth(0);
@@ -370,13 +365,13 @@ public class ProgressController {
                 .toList();
         closestBox.getChildren().clear();
         if (closest.isEmpty()) {
-            Label none = new Label("Všetko, čo sa dalo, máš splnené. 🎉");
+            Label none = new Label("Všetko, čo sa dalo, máš splnené.");
             none.getStyleClass().add("empty-hint");
             closestBox.getChildren().add(none);
             return;
         }
         for (Achievement achievement : closest) {
-            Label title = new Label(achievement.icon() + "  " + achievement.title() + tierSuffix(achievement));
+            Label title = new Label(achievement.title() + tierSuffix(achievement));
             title.getStyleClass().add("closest-title");
             Label value = new Label(achievement.progressText());
             value.getStyleClass().add("closest-value");
@@ -402,76 +397,117 @@ public class ProgressController {
         showAchievements();
     }
 
+    /**
+     * Úspechy ako kartičky v mriežke, rozdelené do skupín (Štúdium, Známky, Skúšky, Smery).
+     * Každá skupina má vlastný nadpis, počet získaných a svoju farbu – v 28 úspechoch sa tak
+     * dá rýchlo zorientovať. V skupine sú nové prvé, potom získané, potom zamknuté.
+     */
     private void showAchievements() {
         ProgressService.Category category = filter.getSelectedToggle() == null ? null
                 : (ProgressService.Category) filter.getSelectedToggle().getUserData();
         List<Achievement> visible = achievements.stream()
                 .filter(a -> category == null || a.category() == category)
                 .sorted(Comparator.comparing((Achievement a) -> !lastNewKeys.contains(a.key()))
-                        .thenComparing(a -> !a.unlocked()))
+                        .thenComparing(a -> !a.unlocked())
+                        .thenComparing(a -> -a.progress()))
                 .toList();
         long unlocked = visible.stream().filter(Achievement::unlocked).count();
-        achievementCountLabel.setText(unlocked + " z " + visible.size() + " získaných");
-        achievementsPane.getChildren().setAll(visible.stream()
-                .map(a -> achievementCard(a, lastNewKeys.contains(a.key()))).toList());
+        achievementCountLabel.setText("získané " + unlocked + " z " + visible.size());
+
+        List<javafx.scene.Node> sections = new ArrayList<>();
+        for (ProgressService.Category group : ProgressService.Category.values()) {
+            List<Achievement> items = visible.stream().filter(a -> a.category() == group).toList();
+            if (!items.isEmpty()) {
+                sections.add(achievementGroup(group.label(), "ach-" + group.name().toLowerCase(java.util.Locale.ROOT), items));
+            }
+        }
+        List<Achievement> other = visible.stream().filter(a -> a.category() == null).toList();
+        if (!other.isEmpty()) {
+            sections.add(achievementGroup("Ostatné", "ach-study", other));
+        }
+        achievementsPane.getChildren().setAll(sections);
     }
 
+    private VBox achievementGroup(String name, String colorClass, List<Achievement> items) {
+        Label heading = new Label(name);
+        heading.getStyleClass().add("achievement-group-title");
+        long done = items.stream().filter(Achievement::unlocked).count();
+        Label count = new Label(done + " z " + items.size());
+        count.getStyleClass().add("status-label");
+        HBox head = new HBox(10, heading, count);
+        head.setAlignment(Pos.BASELINE_LEFT);
+        FlowPane grid = new FlowPane(12, 12);
+        grid.getChildren().setAll(items.stream()
+                .map(a -> achievementCard(a, lastNewKeys.contains(a.key()))).toList());
+        VBox section = new VBox(10, head, grid);
+        section.getStyleClass().addAll("achievement-group", colorClass);
+        return section;
+    }
+
+    /** Jeden úspech ako hranatá kartička: stav, názov, postup, pruh a dátum získania. */
     private VBox achievementCard(Achievement achievement, boolean isNew) {
-        Label medal = new Label(medal(achievement));
-        medal.getStyleClass().add("achievement-medal");
-        Label icon = new Label(achievement.icon());
-        icon.getStyleClass().add("achievement-icon");
+        Label status = new Label(medal(achievement));
+        status.getStyleClass().addAll("ach-status", !achievement.unlocked() ? "ach-status-locked"
+                : achievement.tierCount() > 1 && !achievement.maxed() ? "ach-status-tier" : "ach-status-done");
+        status.setMinWidth(Region.USE_PREF_SIZE);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox top = new HBox(6, icon, spacer, medal);
+        HBox top = new HBox(6, status, spacer);
         top.setAlignment(Pos.CENTER_LEFT);
         if (isNew) {
-            Label badge = new Label("NOVÉ");
+            Label badge = new Label("nové");
             badge.getStyleClass().add("achievement-new");
-            top.getChildren().add(1, badge);
+            top.getChildren().add(badge);
         }
 
         Label title = new Label(achievement.title());
         title.getStyleClass().add("achievement-title");
         title.setWrapText(true);
+        title.setMinHeight(Region.USE_PREF_SIZE);
         Label text = new Label(achievement.progressText());
         text.getStyleClass().add("achievement-text");
         text.setWrapText(true);
+        Region grow = new Region();
+        VBox.setVgrow(grow, Priority.ALWAYS);
         ProgressBar bar = new ProgressBar(achievement.progress());
         bar.setMaxWidth(Double.MAX_VALUE);
         bar.getStyleClass().add("achievement-bar");
-        Label date = new Label(achievement.achievedOn() == null ? " "
-                : "získané " + DATE.format(achievement.achievedOn()));
+        // niektoré splnené úspechy nemajú v údajoch dátum – nesmú vyzerať ako nezískané
+        Label date = new Label(achievement.achievedOn() != null
+                ? "získané " + DATE.format(achievement.achievedOn())
+                : achievement.unlocked() ? "získané" : "zatiaľ nezískané");
         date.getStyleClass().add("achievement-date");
 
-        VBox card = new VBox(6, top, title, text, bar, date);
+        VBox card = new VBox(6, top, title, text, grow, bar, date);
         card.getStyleClass().add("achievement-card");
-        if (!achievement.unlocked()) card.getStyleClass().add("achievement-locked");
+        if (achievement.unlocked()) card.getStyleClass().add("achievement-unlocked");
+        else card.getStyleClass().add("achievement-locked");
         if (achievement.maxed()) card.getStyleClass().add("achievement-maxed");
         if (isNew) card.getStyleClass().add("achievement-card-new");
-        card.setPrefWidth(178);
-        card.setMinWidth(178);
+        card.setPrefSize(184, 156);
+        card.setMinSize(184, 156);
+        card.setMaxSize(184, 156);
+        card.setFocusTraversable(true);
+        card.setAccessibleText(achievement.title() + ", " + medal(achievement) + ", " + achievement.progressText());
         Tooltip.install(card, new Tooltip(achievement.title() + "\n" + achievement.description()
                 + "\n\n" + achievement.progressText()));
         return card;
     }
 
+    /** Stupeň textom: „II / III“, pri jednorazových „splnené“ alebo „zamknuté“. */
     private static String medal(Achievement achievement) {
         if (achievement.tierCount() > 1) {
-            return switch (achievement.achievedTier()) {
-                case 0 -> "🔒";
-                case 1 -> "🥉";
-                case 2 -> "🥈";
-                default -> "🥇";
-            };
+            return achievement.achievedTier() == 0 ? "zamknuté"
+                    : TIERS[Math.min(achievement.achievedTier(), TIERS.length) - 1]
+                    + " / " + TIERS[Math.min(achievement.tierCount(), TIERS.length) - 1];
         }
-        return achievement.unlocked() ? "✅" : "🔒";
+        return achievement.unlocked() ? "splnené" : "zamknuté";
     }
 
+    /** Ďalší stupeň, na ktorý sa práve pracuje. */
     private static String tierSuffix(Achievement achievement) {
         if (achievement.tierCount() <= 1) return "";
-        String[] next = {"🥉", "🥈", "🥇"};
-        return "  → " + next[Math.min(achievement.achievedTier(), 2)];
+        return ", stupeň " + TIERS[Math.min(achievement.achievedTier(), TIERS.length - 1)];
     }
 
     private ToggleButton filterButton(String text, ProgressService.Category category) {
@@ -491,16 +527,12 @@ public class ProgressController {
             ProgressService.SemesterStat semester = semesters.get(i);
             String state = semester.total() > 0 && semester.completed() >= semester.total() ? "done"
                     : semester.completed() > 0 ? "partial" : "future";
-            Label dot = new Label(switch (state) {
-                case "done" -> "●";
-                case "partial" -> "◐";
-                default -> "○";
-            });
+            Region dot = new Region();
             dot.getStyleClass().addAll("timeline-dot", "timeline-" + state);
             Label label = new Label(semester.label());
             label.getStyleClass().add("timeline-label");
             Label credits = new Label("future".equals(state) ? semester.total() + " predmetov"
-                    : semester.credits() + " kr.  ·  ⌀ " + semester.average());
+                    : semester.credits() + " kr., Ø " + semester.average());
             credits.getStyleClass().add("timeline-detail");
             Label count = new Label(semester.completed() + " / " + semester.total() + " splnených");
             count.getStyleClass().add("timeline-detail");

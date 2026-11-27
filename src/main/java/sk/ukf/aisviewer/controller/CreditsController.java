@@ -64,11 +64,11 @@ public class CreditsController {
 
         double progress = (double) total / requiredCredits;
         int remaining = Math.max(0, requiredCredits - total);
-        graduationCreditsLabel.setText(total + " / " + requiredCredits + " kreditov");
+        graduationCreditsLabel.setText(total + " / " + requiredCredits + " kr.");
         graduationProgressBar.setProgress(Math.min(1.0, progress));
         graduationProgressLabel.setText(String.format("%.0f %%", Math.min(100, progress * 100)));
-        graduationRemainingLabel.setText(remaining == 0 ? "🎓 Kredity na ukončenie štúdia máš splnené"
-                : "Zostáva " + remaining + " kreditov");
+        graduationRemainingLabel.setText(remaining == 0 ? "Kredity potrebné na ukončenie štúdia máš splnené."
+                : "Zostáva " + remaining + " kr. do " + requiredCredits + " kr.");
 
         StudyPlanCatalog catalog = loadCatalog(studentInfo);
         categoryBox.getChildren().setAll(
@@ -80,8 +80,9 @@ public class CreditsController {
 
         avgGradeLabel.setText(calculateWeightedAverage(completedSubjects));
         String yearAverage = calculateWeightedAverage(subjects);
-        yearAvgGradeLabel.setText(yearAverage);
-        yearAvgHintLabel.setText("-".equals(yearAverage) ? "Zatiaľ bez známok" : "Podľa vybraného ročníka");
+        yearAvgGradeLabel.setText("-".equals(yearAverage) ? "—" : yearAverage);
+        yearAvgHintLabel.setText("-".equals(yearAverage)
+                ? "Vážený priemer, vybraný ročník (zatiaľ bez známok)" : "Vážený priemer, vybraný ročník");
         averageGrade = calculateWeightedAverage(completedSubjects);
 
         fillYearAverages(studentInfo);
@@ -111,8 +112,8 @@ public class CreditsController {
         bar.getStyleClass().addAll("category-bar", styleClass);
 
         Label hint = new Label(required <= 0
-                ? "Nepovinné – kredity sa rátajú do celkového súčtu"
-                : acquired >= required ? "✓ Splnené" : "Chýba " + (required - acquired) + " kr.");
+                ? "Nepovinné. Kredity sa rátajú do celkového súčtu."
+                : acquired >= required ? "Splnené" : "Chýba " + (required - acquired) + " kr.");
         hint.getStyleClass().add("category-hint");
         if (required > 0 && acquired >= required) hint.getStyleClass().add("category-done");
         return new VBox(4, header, bar, hint);
@@ -133,7 +134,7 @@ public class CreditsController {
             if (data == null || data.getSubjects() == null) continue;
             String enrollmentName = nameOf(id, ids, names, studentInfo);
             int studyYear = EnrollmentName.studyYear(EnrollmentName.programCode(enrollmentName));
-            String title = (studyYear > 0 ? studyYear + ". ročník" : "Ročník") + "  ·  "
+            String title = (studyYear > 0 ? studyYear + ". ročník" : "Ročník") + ", "
                     + EnrollmentName.academicYear(enrollmentName);
             int credits = data.getSubjects().stream()
                     .filter(SubjectCompletionService::isCompleted)
@@ -144,7 +145,7 @@ public class CreditsController {
             titleLabel.getStyleClass().add("year-row-title");
             Label creditsLabel = new Label(credits + " kr.");
             creditsLabel.getStyleClass().add("year-row-credits");
-            Label averageLabel = new Label("-".equals(average) ? "bez známok" : "⌀ " + average);
+            Label averageLabel = new Label("-".equals(average) ? "bez známok" : "Ø " + average);
             averageLabel.getStyleClass().add("-".equals(average) ? "year-row-empty" : "year-row-average");
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);

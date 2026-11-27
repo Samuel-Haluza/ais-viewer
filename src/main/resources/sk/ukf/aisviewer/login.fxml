@@ -7,38 +7,32 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="600" prefWidth="600" spacing="0" styleClass="login-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.LoginController">
+<VBox alignment="CENTER" prefHeight="600" prefWidth="600" spacing="24" styleClass="login-root" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.aisviewer.controller.LoginController">
+    <padding><Insets bottom="32" left="32" right="32" top="32" /></padding>
 
-    <!-- Header -->
-    <VBox alignment="CENTER" spacing="8" styleClass="login-header">
-        <padding><Insets bottom="20" top="30" /></padding>
+    <VBox alignment="CENTER_LEFT" maxWidth="380" spacing="4" styleClass="login-header">
         <Label styleClass="login-title" text="AIS Viewer" />
+        <Label styleClass="login-subtitle" text="Prehľad štúdia z AIS2, UKF Nitra" />
     </VBox>
 
-    <!-- Login Card -->
-    <VBox alignment="CENTER_LEFT" maxWidth="600" maxHeight="600" spacing="16" styleClass="login-card">
-        <padding><Insets bottom="28" left="32" right="32" top="24" /></padding>
+    <VBox alignment="CENTER_LEFT" maxWidth="380" spacing="16" styleClass="login-card">
+        <padding><Insets bottom="24" left="24" right="24" top="20" /></padding>
 
-        <Label styleClass="login-card-title" text="Prihlásiť sa" />
+        <Label styleClass="login-card-title" text="Prihlásenie" />
 
         <VBox spacing="6">
             <Label styleClass="field-label" text="Používateľské meno" />
-            <TextField fx:id="usernameField" promptText="login@ukf.sk alebo login" styleClass="login-field" />
+            <TextField fx:id="usernameField" accessibleText="Používateľské meno" promptText="login alebo login@ukf.sk" styleClass="login-field" />
         </VBox>
 
         <VBox spacing="6">
-            <Label styleClass="field-label" text="Heslo" />
-            <PasswordField fx:id="passwordField" promptText="Zadajte heslo" styleClass="login-field" />
+            <Label styleClass="field-label" text="Heslo do AIS" />
+            <PasswordField fx:id="passwordField" accessibleText="Heslo do AIS" styleClass="login-field" />
         </VBox>
 
         <Button fx:id="loginButton" defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-button" text="Prihlásiť sa" />
 
-        <Label fx:id="statusLabel" maxWidth="256" styleClass="error-label" visible="false" wrapText="true" />
-    </VBox>
-
-    <!-- Footer -->
-    <VBox alignment="CENTER" prefHeight="17.0" prefWidth="159.0" spacing="4">
-        <padding><Insets bottom="10" top="20" /></padding>
+        <Label fx:id="statusLabel" managed="false" maxWidth="Infinity" styleClass="error-label" visible="false" wrapText="true" />
     </VBox>
 
 </VBox>
